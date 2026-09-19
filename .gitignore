@@ -43,3 +43,7 @@ public/desktop.ini
 desktop.ini*
 preview.html
 svg_to_lottie.py
+collection.lottie
+public/lottie/*-black.json
+public/lottie/*-white.json
+*-white.json
