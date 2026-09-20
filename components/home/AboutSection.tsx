@@ -5,12 +5,7 @@ import { siteConfig } from "@/lib/config";
 
 export default function AboutSection() {
   return (
-    <SectionShell
-      id="about"
-      label="SEC.02 // BRIEFING"
-      image="/img/bg-about.jpg"
-      imageAlt="Overhead view of an engineer's drafting desk with blueprints and calipers"
-    >
+    <SectionShell id="about" label="SEC.02 // BRIEFING">
       <div className="grid gap-10 md:grid-cols-12 md:gap-14">
         <div className="md:col-span-7">
           <SplitText

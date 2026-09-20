@@ -34,12 +34,7 @@ const SHOWCASE = [
 
 export default function ShowcaseSection() {
   return (
-    <SectionShell
-      id="showcase"
-      label="SEC.03 // INDEX"
-      image="/img/bg-content.jpg"
-      imageAlt="Electronics and robotics laboratory workbench"
-    >
+    <SectionShell id="showcase" label="SEC.03 // INDEX">
       <SplitText
         tag="h2"
         text="EXPLORE THE ARCHIVE"

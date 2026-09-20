@@ -1,25 +1,52 @@
 @import "tailwindcss";
 
+/* Class-based dark mode: `.dark` on <html> flips every token below */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* ------------------------------------------------------------------ */
 /* PM-Web_V2 — Swiss Industrial Print design system                    */
-/* Substrate: matte documentation paper. Ink: carbon. Accent: hazard.  */
+/* Light: matte documentation paper / carbon ink.                      */
+/* Dark:  deactivated CRT substrate / white phosphor ink.              */
+/* Accent (both): aviation hazard red.                                 */
 /* ------------------------------------------------------------------ */
 
-@theme {
+:root {
+  --pm-paper: #f2f1ec;
+  --pm-card: #fbfaf6;
+  --pm-ink: #121210;
+  --pm-ink-soft: #5a584f;
+  --pm-hazard: #e61919;
+  --pm-muted: rgb(18 18 16 / 0.05);
+  --pm-border: rgb(18 18 16 / 0.17);
+  color-scheme: light;
+}
+
+.dark {
+  --pm-paper: #0d0d0c;
+  --pm-card: #171715;
+  --pm-ink: #ecebe4;
+  --pm-ink-soft: #a3a196;
+  --pm-hazard: #ff2a2a;
+  --pm-muted: rgb(236 235 228 / 0.06);
+  --pm-border: rgb(236 235 228 / 0.18);
+  color-scheme: dark;
+}
+
+@theme inline {
   /* Substrate palette */
-  --color-paper: #f2f1ec;
-  --color-card: #fbfaf6;
-  --color-ink: #121210;
-  --color-ink-soft: #5a584f;
-  --color-hazard: #e61919;
+  --color-paper: var(--pm-paper);
+  --color-card: var(--pm-card);
+  --color-ink: var(--pm-ink);
+  --color-ink-soft: var(--pm-ink-soft);
+  --color-hazard: var(--pm-hazard);
 
   /* shadcn-style aliases used by the footer block */
-  --color-background: #f2f1ec;
-  --color-foreground: #121210;
-  --color-muted: #1212100d;
-  --color-muted-foreground: #5a584f;
-  --color-primary: #e61919;
-  --color-border: #1212102b;
+  --color-background: var(--pm-paper);
+  --color-foreground: var(--pm-ink);
+  --color-muted: var(--pm-muted);
+  --color-muted-foreground: var(--pm-ink-soft);
+  --color-primary: var(--pm-hazard);
+  --color-border: var(--pm-border);
 
   /* Type system — every face registered through next/font in lib/fonts.ts */
   --font-display: var(--font-mozilla-headline);
@@ -72,33 +99,20 @@ html {
 }
 
 body {
-  background: var(--color-paper);
-  color: var(--color-ink);
+  background: var(--pm-paper);
+  color: var(--pm-ink);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
 }
 
 ::selection {
-  background: var(--color-hazard);
-  color: var(--color-paper);
+  background: var(--pm-hazard);
+  color: var(--pm-paper);
 }
 
 .snap-section {
   scroll-snap-align: start;
   scroll-snap-stop: always;
-}
-
-/* Backgrounds that stay pinned while sections scroll past them */
-.fixed-bg {
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-}
-
-@media (max-width: 767px) {
-  .fixed-bg {
-    background-attachment: scroll;
-  }
 }
 
 /* Legacy font hooks used by the adapted footer block */
@@ -110,22 +124,31 @@ body {
   font-family: var(--font-body);
 }
 
-/* Paper wash laid over pinned photo backgrounds so ink stays legible
-   while the photograph still reads like a printed plate */
+/* Substrate wash laid over the pinned photo backdrops so ink stays
+   legible while the photograph still reads like a printed plate.
+   Tracks the theme because it is mixed from the paper token. */
 .paper-wash {
   background:
     linear-gradient(
       180deg,
-      rgba(242, 241, 236, 0.86) 0%,
-      rgba(242, 241, 236, 0.6) 45%,
-      rgba(242, 241, 236, 0.82) 100%
+      color-mix(in srgb, var(--pm-paper) 86%, transparent) 0%,
+      color-mix(in srgb, var(--pm-paper) 60%, transparent) 45%,
+      color-mix(in srgb, var(--pm-paper) 82%, transparent) 100%
     );
 }
 
 /* Fine crosshair grid printed over the hero substrate */
 .blueprint-grid {
   background-image:
-    linear-gradient(to right, rgba(18, 18, 16, 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(18, 18, 16, 0.05) 1px, transparent 1px);
+    linear-gradient(
+      to right,
+      color-mix(in srgb, var(--pm-ink) 6%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--pm-ink) 6%, transparent) 1px,
+      transparent 1px
+    );
   background-size: 56px 56px;
 }

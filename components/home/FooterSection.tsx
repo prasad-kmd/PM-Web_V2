@@ -14,6 +14,7 @@ import {
   Rss,
 } from "lucide-react";
 import { siteConfig } from "@/lib/config";
+import ThemeToggle from "@/components/home/ThemeToggle";
 
 const EXPLORE_LINKS = [
   { name: "Portfolio", href: "/portfolio" },
@@ -165,15 +166,18 @@ export default function FooterSection() {
             </p>
           </div>
 
-          <Link
-            href="/status"
-            className="flex items-center gap-4 rounded-full border border-border/50 bg-muted/30 px-4 py-2 backdrop-blur-sm transition-colors hover:bg-muted/50"
-          >
-            <div className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
-            <span className="google-sans text-[10px] font-medium uppercase tracking-tighter text-muted-foreground">
-              Systems Operational
-            </span>
-          </Link>
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            <ThemeToggle />
+            <Link
+              href="/status"
+              className="flex items-center gap-4 rounded-full border border-border/50 bg-muted/30 px-4 py-2 backdrop-blur-sm transition-colors hover:bg-muted/50"
+            >
+              <div className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
+              <span className="google-sans text-[10px] font-medium uppercase tracking-tighter text-muted-foreground">
+                Systems Operational
+              </span>
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

@@ -27,12 +27,7 @@ const TOOLGROUPS = [
 
 export default function ToolsSection() {
   return (
-    <SectionShell
-      id="tools"
-      label="SEC.04 // TOOLCHAIN"
-      image="/img/bg-tools.jpg"
-      imageAlt="CNC machining workshop cutting a metal part"
-    >
+    <SectionShell id="tools" label="SEC.04 // TOOLCHAIN">
       <div className="flex flex-wrap items-end justify-between gap-6">
         <SplitText
           tag="h2"

@@ -86,7 +86,7 @@ export default function HeroSection() {
               <ShinyText
                 text={siteConfig.role.toUpperCase()}
                 speed={3}
-                color="#5a584f"
+                color="var(--pm-ink-soft)"
                 className="font-mono text-xs tracking-[0.3em]"
               />
               <p className="mt-4 font-body text-sm leading-relaxed text-ink-soft md:text-[15px]">
@@ -138,7 +138,7 @@ export default function HeroSection() {
           fontSize={13}
           fontWeight={500}
           letterSpacing={3}
-          color="#121210"
+          color="var(--pm-ink)"
           bandColor="transparent"
           pauseOnHover
         />

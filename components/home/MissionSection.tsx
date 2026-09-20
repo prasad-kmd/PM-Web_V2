@@ -22,12 +22,7 @@ const TARGETS = [
 
 export default function MissionSection() {
   return (
-    <SectionShell
-      id="mission"
-      label="SEC.05 // DIRECTIVE"
-      image="/img/bg-mission.jpg"
-      imageAlt="Automated factory floor with rows of robotic arms"
-    >
+    <SectionShell id="mission" label="SEC.05 // DIRECTIVE">
       <div className="grid gap-10 md:grid-cols-12 md:gap-14">
         <div className="md:col-span-7">
           <SplitText
