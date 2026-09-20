@@ -108,11 +108,11 @@ const nextConfig = {
   async headers() {
     const cspHeader = `
       default-src 'self';
-      script-src 'self' 'unsafe-eval' 'unsafe-inline' https://gist.github.com https://challenges.cloudflare.com https://turnstile.cloudflare.com https://va.vercel-scripts.com https://*.posthog.com;
+      script-src 'self' 'unsafe-eval' 'wasm-unsafe-eval' 'unsafe-inline' blob: https://gist.github.com https://challenges.cloudflare.com https://turnstile.cloudflare.com https://va.vercel-scripts.com https://*.posthog.com;
       style-src 'self' 'unsafe-inline' https://challenges.cloudflare.com;
       img-src 'self' blob: data: https://prasadm.vercel.app https://*.notion.so https://*.amazonaws.com https://i.pravatar.cc https://placehold.co https://images.unsplash.com https://*.unsplash.com https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://avatar.vercel.sh https://*.githubusercontent.com https://*.googleusercontent.com https://challenges.cloudflare.com https://*.posthog.com https://image.tmdb.org https://ghchart.rshah.org/409ba5/prasad-kmd;
       font-src 'self' data:;
-      connect-src 'self' data: https://api.notion.com https://api.telegram.org https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://*.googleusercontent.com https://*.githubusercontent.com https://*.amazonaws.com https://i.pravatar.cc https://placehold.co https://images.unsplash.com https://*.unsplash.com https://challenges.cloudflare.com https://turnstile.cloudflare.com https://vitals.vercel-analytics.com https://api.vercel.com https://*.posthog.com http://localhost:3000 https://localhost:3000 ws://localhost:3000 wss://localhost:3000 https://cheapshark.com https://openlibrary.org https://api.codetabs.com https://export.arxiv.org;
+      connect-src 'self' blob: data: https://api.notion.com https://api.telegram.org https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://*.googleusercontent.com https://*.githubusercontent.com https://*.amazonaws.com https://i.pravatar.cc https://placehold.co https://images.unsplash.com https://*.unsplash.com https://challenges.cloudflare.com https://turnstile.cloudflare.com https://vitals.vercel-analytics.com https://api.vercel.com https://*.posthog.com http://localhost:3000 https://localhost:3000 ws://localhost:3000 wss://localhost:3000 https://cheapshark.com https://openlibrary.org https://api.codetabs.com https://export.arxiv.org;
       frame-src 'self' https://www.youtube.com https://challenges.cloudflare.com https://turnstile.cloudflare.com;
       worker-src 'self' blob: https://challenges.cloudflare.com;
       ${process.env.NODE_ENV === "production" ? "upgrade-insecure-requests;" : ""}

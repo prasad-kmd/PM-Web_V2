@@ -24,16 +24,19 @@
     "format:check": "pnpm exec prettier --check ."
   },
   "dependencies": {
+    "@lottiefiles/dotlottie-react": "^0.19.16",
+    "@lottiefiles/dotlottie-web": "^0.80.0",
     "next": "16.3.5",
     "react": "19.2.8",
     "react-dom": "19.2.8"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@tailwindcss/typography": "^0.5.20",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "eslint": "^9",
+    "eslint": "^10.11.0",
     "eslint-config-next": "16.3.5",
     "prettier": "^3.9.8",
     "tailwindcss": "^4",
