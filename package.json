@@ -1,12 +1,27 @@
 {
-  "name": "pm-web-v2",
-  "version": "0.1.0",
+  "name": "PM-Web_V2",
+  "version": "2.7.5",
+  "description": "A modern, high-performance technical documentation and engineering portfolio platform built with Next.js 16, Tailwind CSS 4, and TypeScript. Optimized for mechatronics research, digital architecture, and high-fidelity documentation.",
+  "author": "prasad-kmd",
+  "license": "AGPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/prasad-kmd/next-notion-cms.git"
+  },
+  "bugs": {
+    "url": "https://github.com/prasad-kmd/next-notion-cms/issues"
+  },
+  "homepage": "https://github.com/prasad-kmd/next-notion-cms/blob/main/README.md",
   "private": true,
   "scripts": {
-    "dev": "next dev",
     "build": "next build",
+    "dev": "next dev",
+    "lint": "eslint .",
     "start": "next start",
-    "lint": "eslint"
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
+    "format": "pnpm exec prettier --write .",
+    "format:check": "pnpm exec prettier --check ."
   },
   "dependencies": {
     "next": "16.3.5",
@@ -20,6 +35,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.5",
+    "prettier": "^3.9.8",
     "tailwindcss": "^4",
     "typescript": "^5"
   },
