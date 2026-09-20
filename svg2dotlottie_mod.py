@@ -1,41 +1,34 @@
 #!/usr/bin/env python3
 """
-SVG → dotLottie with Fill + Color Pulse + Reverse
-Duplicate of svg_to_dotlottie.py but with new sequence:
-  1. Forward stroke reveal (trim 0→100)
-  2. Fill closed contours (fill opacity 0→100)
-  3. Pulse fill color (e.g., black→gray→black)
-  4. Reverse (stroke + fill hide)
+SVG -> dotLottie with Fill + Color Pulse + Reverse
+- Forward stroke reveal (trim 0->100)
+- Fill closed contours (opacity 0->100)
+- Pulse fill color (black->gray->black)
+- Reverse (stroke + fill hide)
 
 Inputs: public/svg/ or public/SVG/
 Outputs: only .lottie to public/lottie/ (no JSON, no HTML, no bundle)
 
 Usage:
-  python3 svg_to_dotlottie_fill_pulse.py pm.svg
-  python3 svg_to_dotlottie.py pm.svg --color both --boomerang --reverse-delay 20 --pulse --pulse-count 3
-
-Params:
-  --color black|white|#hex|both
-  --stroke 3
-  --fr 60
-  --stagger 4
-  --duration 50 (forward)
-  --fill-duration 15 (fill fade in)
-  --pulse --no-pulse (default pulse on)
-  --pulse-duration 40 (total pulse time)
-  --pulse-count 2 (number of pulses)
-  --pulse-intensity 0.4 (how much color lightens for black, darkens for white, 0-1)
-  --reverse-delay 30 (hold at filled state before reverse)
-  --reverse-duration 50 (reverse time)
-  --delay 0 (initial delay)
-  --loop-delay 20
-  --loop / --no-loop, --autoplay, --speed
-  --mode forward|boomerang (boomerang includes reverse, forward stops after pulse)
+  python3 svg2dotlottie_mod.py pm.svg
+  python3 svg2dotlottie_mod.py pm.svg --color both --boomerang --reverse-delay 20 --pulse --pulse-count 3
 """
 
-import re, json, math, argparse, zipfile
+import re
+import json
+import math
+import argparse
+import zipfile
+import sys
 from pathlib import Path
 import xml.etree.ElementTree as ET
+
+# Force UTF-8 output on Windows to avoid charmap errors, but also use ASCII in prints
+try:
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+    sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+except Exception:
+    pass
 
 SVG_DIRS = [Path("public/svg"), Path("public/SVG"), Path("public/Svg")]
 LOTTIE_DIR = Path("public/lottie")
@@ -190,82 +183,49 @@ def parse_color(c):
     return [0,0,0]
 
 def pulse_color_keyframes(base_rgb, intensity, pulse_count, t_start, t_end):
-    """
-    Create color pulse: base -> pulse_color -> base -> pulse_color -> base ...
-    For black base [0,0,0], pulse to [intensity, intensity, intensity]
-    For white base [1,1,1], pulse to [1-intensity, 1-intensity, 1-intensity]
-    """
-    # Determine pulse color
-    if sum(base_rgb)/3 < 0.5:  # dark base (black)
+    if sum(base_rgb)/3 < 0.5:
         pulse_rgb = [min(1, c + intensity) for c in base_rgb]
-    else:  # light base (white)
+    else:
         pulse_rgb = [max(0, c - intensity) for c in base_rgb]
-
-    # Create keyframes
     total_frames = t_end - t_start
     if total_frames <= 0 or pulse_count <=0:
         return [{"t": t_start, "s": base_rgb}]
-
-    segment = total_frames / (pulse_count * 2)  # each pulse is 2 segments (base->pulse, pulse->base)
+    segment = total_frames / (pulse_count * 2)
     kfs = []
     t = t_start
-    # Start at base
     kfs.append({"t": int(t), "s": base_rgb, "o": {"x": [0.42], "y": [0]}, "i": {"x": [0.58], "y": [1]}})
-    
     for p in range(pulse_count):
-        # Go to pulse color
         t += segment
         kfs.append({"t": int(t), "s": pulse_rgb, "o": {"x": [0.42], "y": [0]}, "i": {"x": [0.58], "y": [1]}})
-        # Back to base
         t += segment
         kfs.append({"t": int(t), "s": base_rgb, "o": {"x": [0.42], "y": [0]}, "i": {"x": [0.58], "y": [1]}})
-    
-    # Ensure last is base
     if kfs[-1]["s"] != base_rgb:
         kfs.append({"t": int(t_end), "s": base_rgb})
-    
     return kfs
 
 def build_fill_opacity_keyframes(t_forward_done, t_fill_end, t_pulse_end, t_reverse_start, t_reverse_end, pulse_count, args):
-    """
-    Fill opacity: 0 until forward done, 0→100 during fill, pulse opacity during pulse, hold, then 0 during reverse
-    """
     kfs = []
-    # Before forward done: 0
     kfs.append({"t": 0, "s": [0]})
     kfs.append({"t": int(t_forward_done), "s": [0], "o": {"x": [0.42], "y": [0]}, "i": {"x": [0.58], "y": [1]}})
-    # Fill in
     kfs.append({"t": int(t_fill_end), "s": [100], "o": {"x": [0.42], "y": [0]}, "i": {"x": [0.58], "y": [1]}})
-
     if args.pulse and pulse_count>0 and t_pulse_end > t_fill_end:
-        # Pulse opacity: 100 → 70 → 100 → 70 → 100
         total = t_pulse_end - t_fill_end
         seg = total / (pulse_count * 2) if pulse_count>0 else total
         t = t_fill_end
-        current_op = 100
         for p in range(pulse_count):
             t += seg
-            # Dip to 60
             kfs.append({"t": int(t), "s": [60], "o": {"x": [0.42], "y": [0]}, "i": {"x": [0.58], "y": [1]}})
             t += seg
             kfs.append({"t": int(t), "s": [100], "o": {"x": [0.42], "y": [0]}, "i": {"x": [0.58], "y": [1]}})
-
-    # Hold until reverse start
     if t_reverse_start > t_fill_end:
-        # Ensure we have a keyframe at reverse start with 100
         if not any(kf["t"] == int(t_reverse_start) for kf in kfs):
             kfs.append({"t": int(t_reverse_start), "s": [100], "o": {"x": [0.42], "y": [0]}, "i": {"x": [0.58], "y": [1]}})
-
-    # Reverse: fade out fill
     if args.mode in ('boomerang','reverse') or args.boomerang:
         kfs.append({"t": int(t_reverse_end), "s": [0]})
-
-    # Sort by t
     kfs = sorted(kfs, key=lambda x: x["t"])
     return kfs
 
 def build_trim_keyframes(t0, t_forward_done, t_reverse_start, t_reverse_end, args):
-    """Trim e: 0→100 forward, hold, then 100→0 reverse"""
     if args.mode == 'reverse':
         return [
             {"t": int(t0), "s": [100], "o": {"x": [0.42], "y": [0]}, "i": {"x": [0.58], "y": [1]}},
@@ -278,7 +238,6 @@ def build_trim_keyframes(t0, t_forward_done, t_reverse_start, t_reverse_end, arg
             {"t": int(t_reverse_start), "s": [100], "o": {"x": [0.42], "y": [0]}, "i": {"x": [0.58], "y": [1]}},
             {"t": int(t_reverse_end), "s": [0]}
         ]
-    # forward only
     return [
         {"t": int(t0), "s": [0], "o": {"x": [0.42], "y": [0]}, "i": {"x": [0.58], "y": [1]}},
         {"t": int(t_forward_done), "s": [100]}
@@ -288,11 +247,9 @@ def create_lottie_with_fill_pulse(w,h,paths,color_rgb,args):
     layers=[]
     max_t=0
     is_boomerang = args.boomerang or args.mode == 'boomerang'
-
     for idx, pg in enumerate(paths):
         mat=pg['matrix']; d=pg['d']
         subpaths=parse_path(d)
-        # Convert to lottie shapes with closed flag
         stroke_shapes=[]; fill_shapes=[]
         for sp in subpaths:
             res = subpath_to_lottie(sp, mat)
@@ -301,50 +258,30 @@ def create_lottie_with_fill_pulse(w,h,paths,color_rgb,args):
             stroke_shapes.append(shape)
             if is_closed:
                 fill_shapes.append(shape)
-
         if not stroke_shapes: continue
-
-        # Timeline per glyph
         t0 = args.delay + idx * args.stagger
         t_forward_done = t0 + args.duration
         t_fill_end = t_forward_done + args.fill_duration
         t_pulse_end = t_fill_end + (args.pulse_duration if args.pulse else 0)
         t_reverse_start = t_pulse_end + args.reverse_delay
         t_reverse_end = t_reverse_start + (args.reverse_duration or args.duration)
-
         max_t = max(max_t, t_reverse_end if is_boomerang or args.mode=='reverse' else t_pulse_end)
-
-        # Trim for stroke
         trim_kf = build_trim_keyframes(t0, t_forward_done, t_reverse_start, t_reverse_end, args)
         trim = {"ty":"tm","s":{"a":0,"k":0},"e":{"a":1,"k":trim_kf},"o":{"a":0,"k":0},"m":1,"nm":"Trim"}
-
         stroke = {"ty":"st","c":{"a":0,"k":[color_rgb[0],color_rgb[1],color_rgb[2],1]},"o":{"a":0,"k":100},"w":{"a":0,"k":args.stroke},"lc":2,"lj":2,"ml":4,"bm":0,"nm":"Stroke"}
-
-        # Stroke group
         stroke_group = {"ty":"gr","it": stroke_shapes + [stroke, trim], "nm":"stroke-group"}
-
         shapes_for_layer = [stroke_group]
-
-        # Fill group (only if closed contours exist)
         if fill_shapes and args.fill:
-            # Fill opacity keyframes
             fill_op_kf = build_fill_opacity_keyframes(t_forward_done, t_fill_end, t_pulse_end, t_reverse_start, t_reverse_end, args.pulse_count, args)
             fill_op = {"a":1,"k":fill_op_kf}
-
-            # Fill color keyframes for pulse
             if args.pulse:
                 fill_color_kf = pulse_color_keyframes(color_rgb, args.pulse_intensity, args.pulse_count, t_fill_end, t_pulse_end)
                 fill_color = {"a":1,"k":fill_color_kf}
             else:
                 fill_color = {"a":0,"k":[color_rgb[0],color_rgb[1],color_rgb[2],1]}
-
             fill = {"ty":"fl","c":fill_color,"o":fill_op,"r":1,"bm":0,"nm":"Fill"}
-
-            # For fill, we need to duplicate shapes but without stroke, just fill
-            # Use same closed shapes
             fill_group = {"ty":"gr","it": fill_shapes + [fill], "nm":"fill-group"}
             shapes_for_layer.append(fill_group)
-
         layer = {
             "ddd":0,"ind":idx+1,"ty":4,"nm":f"glyph-{idx}","sr":1,
             "ks":{"o":{"a":0,"k":100},"r":{"a":0,"k":0},"p":{"a":0,"k":[0,0,0]},"a":{"a":0,"k":[0,0,0]},"s":{"a":0,"k":[100,100,100]}},
@@ -353,11 +290,9 @@ def create_lottie_with_fill_pulse(w,h,paths,color_rgb,args):
             "st":0,"bm":0
         }
         layers.append(layer)
-
     final_op = max(args.op, int(max_t)+20) if args.op else int(max_t)+20
     if is_boomerang:
         final_op = int(max_t) + args.loop_delay
-
     lottie = {"v":"5.7.4","fr":args.fr,"ip":0,"op":final_op,"w":w,"h":h,"nm":"fill-pulse","ddd":0,"assets":[],"layers":layers}
     return lottie, final_op
 
@@ -374,13 +309,14 @@ def create_dotlottie(lottie_data, out_path, args, anim_id):
             "speed": args.speed
         }],
         "author":"PM-Web_V2",
-        "description": f"Forward→Fill→Pulse→Reverse • {anim_id} • fill={args.fill} pulse={args.pulse} boomerang={args.boomerang}"
+        "description": f"Forward-Fill-Pulse-Reverse - {anim_id} - fill={args.fill} pulse={args.pulse} boomerang={args.boomerang}"
     }
     out_path=Path(out_path); out_path.parent.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(out_path,'w',compression=zipfile.ZIP_DEFLATED,compresslevel=9) as z:
         z.writestr("manifest.json", json.dumps(manifest, indent=2))
         z.writestr(f"animations/{anim_id}.json", json.dumps(lottie_data))
-    print(f"  → {out_path.name:40} {out_path.stat().st_size/1024:6.1f}KB | fill={args.fill} pulse={args.pulse} boomerang={args.boomerang} loop={args.loop}")
+    # Use ASCII only in print to avoid Windows cp1252 error
+    print(f"  -> {out_path.name:40} {out_path.stat().st_size/1024:6.1f}KB | fill={args.fill} pulse={args.pulse} boomerang={args.boomerang} loop={args.loop}")
 
 def find_svg(name):
     p=Path(name)
@@ -397,7 +333,7 @@ def find_svg(name):
     return None
 
 def main():
-    parser=argparse.ArgumentParser(description="SVG → .lottie with Fill + Pulse + Reverse (only .lottie output)")
+    parser=argparse.ArgumentParser(description="SVG -> .lottie with Fill + Pulse + Reverse (only .lottie output)")
     parser.add_argument("files", nargs='+', help="SVG files (pm.svg, pm, or all)")
     parser.add_argument("--color", default="black", help="black|white|#hex|both")
     parser.add_argument("--stroke", type=float, default=3)
@@ -411,8 +347,8 @@ def main():
     parser.add_argument("--pulse-duration", type=int, default=40, help="Total pulse duration")
     parser.add_argument("--pulse-count", type=int, default=2, help="Number of pulses")
     parser.add_argument("--pulse-intensity", type=float, default=0.4, help="Color pulse intensity 0-1")
-    parser.add_argument("--boomerang", "--ping-pong", action="store_true", help="Forward→Fill→Pulse→Reverse")
-    parser.add_argument("--mode", choices=["forward","reverse","boomerang"], default="boomerang", help="Default boomerang for this script (forward→fill→pulse→reverse)")
+    parser.add_argument("--boomerang", "--ping-pong", action="store_true", help="Forward-Fill-Pulse-Reverse")
+    parser.add_argument("--mode", choices=["forward","reverse","boomerang"], default="boomerang", help="Default boomerang")
     parser.add_argument("--reverse-delay", type=int, default=30, help="Hold at filled+pulsed state before reverse")
     parser.add_argument("--reverse-duration", type=int, default=0, help="Reverse duration, 0=same as duration")
     parser.add_argument("--delay", type=int, default=0)
@@ -424,10 +360,6 @@ def main():
     args=parser.parse_args()
 
     if args.boomerang: args.mode='boomerang'
-    # For this script, default is boomerang (forward→fill→pulse→reverse) as requested
-    if args.mode=='forward' and not args.boomerang:
-        # User explicitly wants forward only? Keep but note fill+ pulse still happens, then stops
-        pass
 
     svg_dir=None
     for d in SVG_DIRS:
@@ -442,7 +374,7 @@ def main():
         for n in args.files:
             f=find_svg(n)
             if f: input_files.append(f)
-            else: print(f"⚠ Not found: {n}")
+            else: print(f"[WARN] Not found: {n}")
 
     if not input_files:
         print("No SVGs"); return
@@ -481,7 +413,7 @@ def main():
             lottie_data['nm']=base
             create_dotlottie(lottie_data, dotlottie_path, args, anim_id=base)
 
-    print(f"\n✓ Done! .lottie with fill+pulse+reverse saved to {LOTTIE_DIR}/")
+    print(f"\n[OK] Done! .lottie with fill+pulse+reverse saved to {LOTTIE_DIR}/")
 
 if __name__=="__main__":
     main()

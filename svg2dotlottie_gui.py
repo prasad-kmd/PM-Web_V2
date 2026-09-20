@@ -23,7 +23,7 @@ LOTTIE_DIR = Path("public/lottie")
 class LottieGUI:
     def __init__(self, root):
         self.root = root
-        self.root.title("SVG → dotLottie Converter - PM Web V2")
+        self.root.title("SVG -> dotLottie Converter - PM Web V2")
         self.root.geometry("900x750")
         self.root.configure(bg="#0a0a0a")
 
@@ -41,9 +41,9 @@ class LottieGUI:
         main.pack(fill=tk.BOTH, expand=True)
 
         # Title
-        title = tk.Label(main, text="SVG → .lottie Studio", font=('SF Mono', 18, 'bold'), bg='#0a0a0a', fg='white')
+        title = tk.Label(main, text="SVG -> .lottie Studio", font=('SF Mono', 18, 'bold'), bg='#0a0a0a', fg='white')
         title.pack(anchor='w', pady=(0,5))
-        subtitle = tk.Label(main, text="Forward → Fill → Pulse → Reverse • public/svg/ → public/lottie/", font=('SF Mono', 10), bg='#0a0a0a', fg='#888')
+        subtitle = tk.Label(main, text="Forward -> Fill -> Pulse -> Reverse | public/svg/ -> public/lottie/", font=('SF Mono', 10), bg='#0a0a0a', fg='#888')
         subtitle.pack(anchor='w', pady=(0,20))
 
         # Top: SVG list + controls side by side
@@ -136,7 +136,7 @@ class LottieGUI:
         # Reverse / Boomerang
         self.add_section(controls_frame, "Reverse / Boomerang")
         self.vars['boomerang'] = tk.BooleanVar(value=True)
-        self.add_check(controls_frame, "Boomerang (Forward → Fill → Pulse → Reverse)", 'boomerang')
+        self.add_check(controls_frame, "Boomerang (Forward->Fill->Pulse->Reverse)", 'boomerang')
         self.vars['reverse_delay'] = tk.IntVar(value=30)
         self.add_slider(controls_frame, "Reverse Delay (hold before reverse)", 'reverse_delay', 0, 120, 10)
         self.vars['reverse_duration'] = tk.IntVar(value=0)
@@ -157,7 +157,7 @@ class LottieGUI:
         bottom = ttk.Frame(main)
         bottom.pack(fill=tk.BOTH, pady=(15,0))
 
-        self.convert_btn = tk.Button(bottom, text="▶ CONVERT SELECTED TO .LOTTIE", 
+        self.convert_btn = tk.Button(bottom, text="> CONVERT SELECTED TO .LOTTIE", 
                                      bg='#00DDB3', fg='black', font=('SF Mono', 12, 'bold'),
                                      bd=0, padx=20, pady=12, command=self.convert)
         self.convert_btn.pack(fill=tk.X, pady=(0,10))
@@ -286,19 +286,20 @@ class LottieGUI:
         else:
             cmd.append("--no-autoplay")
 
-        self.log(f"\n▶ Running: {' '.join(cmd)}\n")
+        self.log(f"\n> Running: {' '.join(cmd)}\n")
         self.convert_btn.config(state=tk.DISABLED, text="Converting...")
 
         def run():
             try:
-                result = subprocess.run(cmd, capture_output=True, text=True, cwd=Path.cwd())
+                # Use utf-8 with replace to avoid Windows cp1252 errors
+                result = subprocess.run(cmd, capture_output=True, text=True, encoding='utf-8', errors='replace', cwd=Path.cwd())
                 self.root.after(0, lambda: self.log(result.stdout))
                 if result.stderr:
                     self.root.after(0, lambda: self.log("ERR: " + result.stderr))
                 
                 # List output files
                 lottie_files = sorted(LOTTIE_DIR.glob("*.lottie"))
-                self.root.after(0, lambda: self.log(f"\n✓ Done! {len(lottie_files)} .lottie files in {LOTTIE_DIR}/"))
+                self.root.after(0, lambda: self.log(f"\n[OK] Done! {len(lottie_files)} .lottie files in {LOTTIE_DIR}/"))
                 for f in lottie_files[-8:]:
                     self.root.after(0, lambda ff=f: self.log(f"  {ff.name} {ff.stat().st_size/1024:.1f}KB"))
 
@@ -306,7 +307,7 @@ class LottieGUI:
             except Exception as e:
                 self.root.after(0, lambda: self.log(f"Error: {e}"))
             finally:
-                self.root.after(0, lambda: self.convert_btn.config(state=tk.NORMAL, text="▶ CONVERT SELECTED TO .LOTTIE"))
+                self.root.after(0, lambda: self.convert_btn.config(state=tk.NORMAL, text="> CONVERT SELECTED TO .LOTTIE"))
 
         threading.Thread(target=run, daemon=True).start()
 
