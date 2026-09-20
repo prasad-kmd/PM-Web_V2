@@ -39,6 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Miscellaneous
 public/desktop.ini
 desktop.ini*
 preview.html
@@ -47,3 +49,5 @@ collection.lottie
 public/lottie/*-black.json
 public/lottie/*-white.json
 *-white.json
+_dump
+/_dump
