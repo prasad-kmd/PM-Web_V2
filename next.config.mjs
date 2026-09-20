@@ -96,9 +96,7 @@ const nextConfig = {
       { protocol: "https", hostname: "shared.fastly.steamstatic.com" },
       { protocol: "https", hostname: "image.tmdb.org" },
       { protocol: "https", hostname: "prasadm.vercel.app" },
-      { protocol: "https", hostname: "prasadm.vercel.app/img/*" },
       { protocol: "https", hostname: "ghchart.rshah.org/409ba5/prasad-kmd" },
-      new URL("https://prasadm.vercel.app/img/**"),
     ],
     formats: ["image/webp", "image/avif"],
     dangerouslyAllowSVG: true, // For LQIP shimmers

@@ -1,26 +1,131 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ------------------------------------------------------------------ */
+/* PM-Web_V2 — Swiss Industrial Print design system                    */
+/* Substrate: matte documentation paper. Ink: carbon. Accent: hazard.  */
+/* ------------------------------------------------------------------ */
+
+@theme {
+  /* Substrate palette */
+  --color-paper: #f2f1ec;
+  --color-card: #fbfaf6;
+  --color-ink: #121210;
+  --color-ink-soft: #5a584f;
+  --color-hazard: #e61919;
+
+  /* shadcn-style aliases used by the footer block */
+  --color-background: #f2f1ec;
+  --color-foreground: #121210;
+  --color-muted: #1212100d;
+  --color-muted-foreground: #5a584f;
+  --color-primary: #e61919;
+  --color-border: #1212102b;
+
+  /* Type system — every face registered through next/font in lib/fonts.ts */
+  --font-display: var(--font-mozilla-headline);
+  --font-body: var(--font-google-sans);
+  --font-serif-display: var(--font-anthropic-serif-display);
+  --font-serif-text: var(--font-anthropic-serif-text);
+  --font-sans: var(--font-noto-sans-display);
+  --font-mono: var(--font-jetbrains-mono);
+  --font-cond: var(--font-qtype-cond);
+  --font-extd: var(--font-qtype-extd);
+  --font-square: var(--font-qtype-square);
+  --font-script: var(--font-amoria);
+  --font-sinhala: var(--font-noto-serif-sinhala);
+
+  --animate-blob: blob 26s ease-in-out infinite;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+@keyframes blob {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(4%, -6%) scale(1.08);
+  }
+  66% {
+    transform: translate(-5%, 5%) scale(0.94);
+  }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Vertical loading bar that times each hero carousel slide */
+@keyframes vbar {
+  from {
+    height: 0%;
+  }
+  to {
+    height: 100%;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Desktop: viewport-height chapters with smooth snap switching */
+@media (min-width: 768px) {
+  html {
+    scroll-snap-type: y mandatory;
   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--color-hazard);
+  color: var(--color-paper);
+}
+
+.snap-section {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+/* Backgrounds that stay pinned while sections scroll past them */
+.fixed-bg {
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+@media (max-width: 767px) {
+  .fixed-bg {
+    background-attachment: scroll;
+  }
+}
+
+/* Legacy font hooks used by the adapted footer block */
+.mozilla-headline {
+  font-family: var(--font-display);
+}
+
+.google-sans {
+  font-family: var(--font-body);
+}
+
+/* Paper wash laid over pinned photo backgrounds so ink stays legible
+   while the photograph still reads like a printed plate */
+.paper-wash {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(242, 241, 236, 0.86) 0%,
+      rgba(242, 241, 236, 0.6) 45%,
+      rgba(242, 241, 236, 0.82) 100%
+    );
+}
+
+/* Fine crosshair grid printed over the hero substrate */
+.blueprint-grid {
+  background-image:
+    linear-gradient(to right, rgba(18, 18, 16, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(18, 18, 16, 0.05) 1px, transparent 1px);
+  background-size: 56px 56px;
 }
