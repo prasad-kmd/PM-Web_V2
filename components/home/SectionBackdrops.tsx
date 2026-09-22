@@ -15,19 +15,19 @@ import { cn } from "@/lib/utils";
 const BACKDROPS = [
   {
     section: "about",
-    image: "/img/bg-about.jpg",
+    image: "/img/vivid.webp",
   },
   {
     section: "showcase",
-    image: "/img/bg-content.jpg",
+    image: "/img/glassy-sky.webp",
   },
   {
     section: "tools",
-    image: "/img/bg-tools.jpg",
+    image: "/img/teal.webp",
   },
   {
     section: "mission",
-    image: "/img/bg-mission.jpg",
+    image: "/img/sapphire.webp",
   },
 ] as const;
 
