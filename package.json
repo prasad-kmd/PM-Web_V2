@@ -24,6 +24,7 @@
     "format:check": "pnpm exec prettier --check ."
   },
   "dependencies": {
+    "@base-ui-components/react": "1.0.0-rc.0",
     "@floating-ui/react": "^0.27.20",
     "@gsap/react": "^2.1.2",
     "@lottiefiles/dotlottie-react": "^0.19.16",
@@ -37,6 +38,7 @@
     "radix-ui": "^1.6.7",
     "react": "19.2.8",
     "react-dom": "19.2.8",
+    "sonner": "^2.0.8",
     "tailwind-merge": "^3.7.0"
   },
   "devDependencies": {
