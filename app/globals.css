@@ -18,6 +18,26 @@
   --pm-hazard: #e61919;
   --pm-muted: rgb(18 18 16 / 0.05);
   --pm-border: rgb(18 18 16 / 0.17);
+  --sidebar: #fbfaf6;
+  --sidebar-foreground: #121210;
+  --sidebar-primary: #e61919;
+  --sidebar-primary-foreground: #f2f1ec;
+  --sidebar-accent: #e7e6e0;
+  --sidebar-accent-foreground: #121210;
+  --sidebar-border: rgb(18 18 16 / 0.17);
+  --sidebar-ring: #e61919;
+  --primary-foreground: #f2f1ec;
+  --ring: #e61919;
+  --input: rgb(18 18 16 / 0.17);
+  --destructive: #e61919;
+  --secondary: #e8e7e1;
+  --secondary-foreground: #121210;
+  --accent: #e8e7e1;
+  --accent-foreground: #121210;
+  --card-foreground: #121210;
+  --popover: #fbfaf6;
+  --popover-foreground: #121210;
+  --radius: 0px;
   color-scheme: light;
 }
 
@@ -29,6 +49,25 @@
   --pm-hazard: #ff2a2a;
   --pm-muted: rgb(236 235 228 / 0.06);
   --pm-border: rgb(236 235 228 / 0.18);
+  --sidebar: #171715;
+  --sidebar-foreground: #ecebe4;
+  --sidebar-primary: #ff2a2a;
+  --sidebar-primary-foreground: #0d0d0c;
+  --sidebar-accent: #242422;
+  --sidebar-accent-foreground: #ecebe4;
+  --sidebar-border: rgb(236 235 228 / 0.18);
+  --sidebar-ring: #ff2a2a;
+  --primary-foreground: #0d0d0c;
+  --ring: #ff2a2a;
+  --input: rgb(236 235 228 / 0.18);
+  --destructive: #ff2a2a;
+  --secondary: #242422;
+  --secondary-foreground: #ecebe4;
+  --accent: #242422;
+  --accent-foreground: #ecebe4;
+  --card-foreground: #ecebe4;
+  --popover: #171715;
+  --popover-foreground: #ecebe4;
   color-scheme: dark;
 }
 
@@ -40,13 +79,36 @@
   --color-ink-soft: var(--pm-ink-soft);
   --color-hazard: var(--pm-hazard);
 
-  /* shadcn-style aliases used by the footer block */
+  /* shadcn-style aliases used by the footer block and the sidebar */
   --color-background: var(--pm-paper);
   --color-foreground: var(--pm-ink);
   --color-muted: var(--pm-muted);
   --color-muted-foreground: var(--pm-ink-soft);
   --color-primary: var(--pm-hazard);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
   --color-border: var(--pm-border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
 
   /* Type system — every face registered through next/font in lib/fonts.ts */
   /* --font-display: var(--font-mozilla-headline); */
@@ -90,12 +152,27 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-anchor: none;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
-/* Desktop: viewport-height chapters with smooth snap switching */
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* Desktop: each chapter is one viewport, and a scroll jumps to the next.
+   Interior routes set data-snap="off" so they scroll normally. */
 @media (min-width: 768px) {
   html {
     scroll-snap-type: y mandatory;
+  }
+
+  html[data-snap="off"] {
+    scroll-snap-type: none;
   }
 }
 
@@ -114,6 +191,58 @@ body {
 .snap-section {
   scroll-snap-align: start;
   scroll-snap-stop: always;
+}
+
+/* The loader fills the content column beside the sidebar. The footer is
+   not part of that frame — it cannot share the viewport without clipping —
+   and snap stays off so the page cannot jump to the end. */
+html:has([data-loading-screen]),
+html[data-loading="on"] {
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  scroll-snap-type: none !important;
+}
+
+html:has([data-loading-screen]) body,
+html[data-loading="on"] body {
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+}
+
+html:has([data-loading-screen]) [data-slot="sidebar-wrapper"],
+html[data-loading="on"] [data-slot="sidebar-wrapper"],
+html:has([data-loading-screen]) [data-slot="sidebar-inset"],
+html[data-loading="on"] [data-slot="sidebar-inset"] {
+  height: 100dvh;
+  max-height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+}
+
+html:has([data-loading-screen]) [data-loading-screen],
+html[data-loading="on"] [data-loading-screen] {
+  flex: 1 1 auto;
+  height: 100%;
+  min-height: 0;
+  max-height: none;
+  overflow: hidden;
+}
+
+html:has([data-loading-screen]) #footer,
+html[data-loading="on"] #footer {
+  display: none;
+}
+
+/* The rail scrolls, but the bar itself stays hidden. */
+[data-sidebar="content"] {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+[data-sidebar="content"]::-webkit-scrollbar {
+  display: none;
 }
 
 /* Legacy font hooks used by the adapted footer block */

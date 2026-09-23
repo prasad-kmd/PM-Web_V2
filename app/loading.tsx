@@ -92,6 +92,24 @@ export default function Loading() {
     });
   }, [theme]);
 
+  // Keep the document parked at the top. Snap and scroll anchoring otherwise
+  // pull the in-flow footer into view and then refuse to come back up.
+  useEffect(() => {
+    const root = document.documentElement;
+    const previousSnap = root.style.scrollSnapType;
+    root.dataset.loading = "on";
+    root.style.scrollSnapType = "none";
+    const park = () => window.scrollTo(0, 0);
+    park();
+    window.addEventListener("scroll", park, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", park);
+      delete root.dataset.loading;
+      root.style.scrollSnapType = previousSnap;
+      window.scrollTo(0, 0);
+    };
+  }, []);
+
   const dark = theme === "dark";
 
   return (
@@ -101,11 +119,12 @@ export default function Loading() {
       aria-busy="true"
       aria-label="Loading PM Web"
       className={cn(
-        "fixed inset-0 z-[9999] flex flex-col items-center justify-center antialiased transition-colors duration-300",
+        "relative flex h-full min-h-0 w-full flex-1 flex-col items-center justify-center overflow-hidden px-6 py-8 antialiased transition-colors duration-300",
         dark
           ? "bg-black selection:bg-white/10"
           : "bg-paper selection:bg-black/10",
       )}
+      data-loading-screen=""
     >
       {/* Ambient depth */}
       <div className="pointer-events-none absolute inset-0">
@@ -126,10 +145,10 @@ export default function Loading() {
       </div>
 
       {/* Canvas for dotLottie-web - this is the actual animation */}
-      <div className="relative flex h-[320px] w-[320px] items-center justify-center sm:h-[440px] sm:w-[440px] md:h-[520px] md:w-[520px]">
+      <div className="relative flex min-h-0 w-full max-w-[min(420px,72vw)] flex-1 items-center justify-center">
         <canvas
           ref={canvasRef}
-          className="h-full w-full"
+          className="h-full max-h-[min(420px,52vh)] w-full"
           aria-hidden="true"
           // Prevent Next.js from trying to optimize canvas
           data-lottie={dark ? "pm4-white-fill-pulse" : "pm4-black-fill-pulse"}
@@ -150,7 +169,7 @@ export default function Loading() {
       </div>
 
       {/* Bottom meta */}
-      <div className="absolute bottom-8 flex flex-col items-center gap-4 sm:bottom-12">
+      <div className="mt-4 flex shrink-0 flex-col items-center gap-4">
         <div className="flex items-center gap-3">
           <span
             className={cn(

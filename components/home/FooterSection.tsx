@@ -3,9 +3,9 @@
 import Link from "next/link";
 import Image from "next/image";
 import {
-  GitBranch,
-  AtSign,
-  Briefcase,
+  Github,
+  Twitter,
+  Linkedin,
   Mail,
   ArrowUpRight,
   Globe,
@@ -43,9 +43,9 @@ const LEGAL_LINKS = [
 ] as const;
 
 const SOCIALS = [
-  { icon: GitBranch, href: siteConfig.socialLinks.github, label: "GitHub" },
-  { icon: AtSign, href: siteConfig.socialLinks.twitter, label: "Twitter" },
-  { icon: Briefcase, href: siteConfig.socialLinks.linkedin, label: "LinkedIn" },
+  { icon: Github, href: siteConfig.socialLinks.github, label: "GitHub" },
+  { icon: Twitter, href: siteConfig.socialLinks.twitter, label: "Twitter" },
+  { icon: Linkedin, href: siteConfig.socialLinks.linkedin, label: "LinkedIn" },
   { icon: Rss, href: "/feed.xml", label: "RSS Feed" },
   { icon: Mail, href: "/contact", label: "Contact" },
 ] as const;
