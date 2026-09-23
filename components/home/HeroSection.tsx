@@ -79,7 +79,7 @@ export default function HeroSection() {
               blur
               delay={60}
               duration={0.9}
-              className="font-display text-[clamp(2.7rem,4.9vw,5rem)] uppercase leading-[0.94] tracking-[-0.02em] text-ink"
+              className="font-cond text-[clamp(2.7rem,4.9vw,5rem)] uppercase leading-[0.94] tracking-[-0.02em] text-ink"
             />
 
             <div className="mt-6 max-w-md">

@@ -49,7 +49,8 @@
   --color-border: var(--pm-border);
 
   /* Type system — every face registered through next/font in lib/fonts.ts */
-  --font-display: var(--font-mozilla-headline);
+  /* --font-display: var(--font-mozilla-headline); */
+  --font-display: var(--font-qtype-cond);
   --font-body: var(--font-google-sans);
   --font-serif-display: var(--font-anthropic-serif-display);
   --font-serif-text: var(--font-anthropic-serif-text);

@@ -13,7 +13,7 @@ export interface HeroSlide {
   desc: string;
 }
 
-const CYCLE_MS = 6500;
+const CYCLE_MS = 5000;
 
 /**
  * Right-hand column of the hero: an auto-advancing image carousel whose
