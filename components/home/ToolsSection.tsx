@@ -1,4 +1,6 @@
 import FadeContent from "@/components/reactbits/FadeContent";
+import GlowCard from "@/components/reactbits/GlowCard";
+import BorderGlow from "@/components/reactbits/BorderGlow";
 import SplitText from "@/components/reactbits/SplitText";
 import SectionShell from "@/components/home/SectionShell";
 
@@ -20,6 +22,16 @@ const TOOLGROUPS = [
     tools: ["CNC Milling", "FDM / SLA Printing", "Laser Cutting", "Lathe Work", "Solder Bench"],
   },
 ] as const;
+
+/** BorderGlow shell tuning: 16px radius matches rounded-2xl cards. */
+const GLOW_PROPS: Parameters<typeof BorderGlow>[0] = {
+  borderRadius: 16,
+  glowRadius: 24,
+  glowIntensity: 0.8,
+  glowColor: "252 60 62",
+  animated: true,
+  colors: ["#a78bfa", "#8b5cf6", "#6366f1"],
+};
 
 export default function ToolsSection() {
   return (
@@ -48,26 +60,30 @@ export default function ToolsSection() {
             duration={0.8}
             className="h-full"
           >
-            <div className="flex h-full flex-col rounded-2xl border border-border bg-card p-6 shadow-sm md:p-7">
-              <div className="flex items-center justify-between gap-4">
-                <h3 className="font-display text-lg font-medium tracking-tight text-ink md:text-xl">
-                  {group.name}
-                </h3>
-                <span className="text-xs font-medium tabular-nums text-ink-soft">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-              </div>
-              <ul className="mt-5 flex flex-wrap gap-2">
-                {group.tools.map((tool) => (
-                  <li
-                    key={tool}
-                    className="rounded-full bg-muted px-3 py-1.5 text-xs font-medium text-ink-soft transition-colors duration-200 hover:bg-primary/10 hover:text-primary"
-                  >
-                    {tool}
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <BorderGlow className="h-full" {...GLOW_PROPS}>
+              <GlowCard className="h-full">
+                <div className="relative flex h-full flex-col p-6 md:p-7">
+                  <div className="flex items-center justify-between gap-4">
+                    <h3 className="font-display text-lg font-medium tracking-tight text-ink md:text-xl">
+                      {group.name}
+                    </h3>
+                    <span className="text-xs font-medium tabular-nums text-ink-soft">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                  </div>
+                  <ul className="mt-5 flex flex-wrap gap-2">
+                    {group.tools.map((tool) => (
+                      <li
+                        key={tool}
+                        className="rounded-full bg-muted px-3 py-1.5 text-xs font-medium text-ink-soft transition-colors duration-200 hover:bg-primary/10 hover:text-primary"
+                      >
+                        {tool}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </GlowCard>
+            </BorderGlow>
           </FadeContent>
         ))}
       </div>

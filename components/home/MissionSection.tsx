@@ -1,5 +1,7 @@
 import SplitText from "@/components/reactbits/SplitText";
 import FadeContent from "@/components/reactbits/FadeContent";
+import GlowCard from "@/components/reactbits/GlowCard";
+import BorderGlow from "@/components/reactbits/BorderGlow";
 import SectionShell from "@/components/home/SectionShell";
 
 const TARGETS = [
@@ -17,6 +19,15 @@ const TARGETS = [
   },
 ] as const;
 
+/** BorderGlow shell tuning: 16px radius matches rounded-2xl cards. */
+const GLOW_PROPS: Parameters<typeof BorderGlow>[0] = {
+  borderRadius: 16,
+  glowRadius: 24,
+  glowIntensity: 0.8,
+  glowColor: "252 60 62",
+  colors: ["#a78bfa", "#8b5cf6", "#6366f1"],
+};
+
 export default function MissionSection() {
   return (
     <SectionShell id="mission" label="Mission">
@@ -33,9 +44,10 @@ export default function MissionSection() {
           />
           <FadeContent duration={0.9} className="mt-8 max-w-xl">
             <p className="font-body text-sm leading-relaxed text-ink-soft md:text-[15px]">
-              My target is simple to say and hard to do: build local engineering
-              capability that survives contact with the real world. Every
-              project on this site is measured against three commitments.
+              My target is simple to say and hard to do: build local
+              engineering capability that survives contact with the real
+              world. Every project on this site is measured against three
+              commitments.
             </p>
           </FadeContent>
           <FadeContent delay={0.15} duration={0.9} className="mt-8">
@@ -56,19 +68,23 @@ export default function MissionSection() {
                 delay={index * 0.12}
                 duration={0.8}
               >
-                <div className="group rounded-2xl border border-border bg-card p-6 shadow-sm transition-colors duration-200 hover:border-primary/40">
-                  <div className="flex items-baseline gap-4">
-                    <span className="text-sm font-semibold tabular-nums text-primary">
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
-                    <h3 className="font-display text-xl font-medium tracking-tight text-ink">
-                      {target.name}
-                    </h3>
-                  </div>
-                  <p className="mt-3 font-body text-sm leading-relaxed text-ink-soft">
-                    {target.desc}
-                  </p>
-                </div>
+                <BorderGlow {...GLOW_PROPS}>
+                  <GlowCard>
+                    <div className="relative p-6">
+                      <div className="flex items-baseline gap-4">
+                        <span className="text-sm font-semibold tabular-nums text-primary">
+                          {String(index + 1).padStart(2, "0")}
+                        </span>
+                        <h3 className="font-display text-xl font-medium tracking-tight text-ink">
+                          {target.name}
+                        </h3>
+                      </div>
+                      <p className="mt-3 font-body text-sm leading-relaxed text-ink-soft">
+                        {target.desc}
+                      </p>
+                    </div>
+                  </GlowCard>
+                </BorderGlow>
               </FadeContent>
             ))}
           </div>
