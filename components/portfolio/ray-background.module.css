@@ -1,0 +1,123 @@
+/* Ray / stripes animated background — carried over from the previous site
+   hero (PMEngineerLK-NextJS "ray-hero-bg"), retuned from the old teal
+   accent to this site's violet. Rays fan from the top-right corner; the
+   ::after layer drifts against them for the electric feel. Pure CSS,
+   no dependencies. */
+
+.rayHeroBg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  user-select: none;
+  z-index: -1;
+
+  /* Controls */
+  --ray-speed: 52s;
+  --ray-blur: 12px;
+
+  /* Accent hues — violet, matching the site primary */
+  --ray-h: 252;
+  --ray-s: 56%;
+
+  --ray-stripe-color: hsl(var(--ray-h) var(--ray-s) 60% / 0.1);
+
+  --ray-c1: hsl(calc(var(--ray-h) + 0) var(--ray-s) 52% / 0.95);
+  --ray-c2: hsl(calc(var(--ray-h) + 18) var(--ray-s) 58% / 0.95);
+  --ray-c3: hsl(calc(var(--ray-h) + 36) var(--ray-s) 64% / 0.95);
+  --ray-c4: hsl(calc(var(--ray-h) + 54) var(--ray-s) 70% / 0.95);
+  --ray-c5: hsl(calc(var(--ray-h) + 0) var(--ray-s) 52% / 0.95);
+
+  --stripes: repeating-linear-gradient(
+    100deg,
+    var(--ray-stripe-color) 0%,
+    var(--ray-stripe-color) 7%,
+    transparent 10%,
+    transparent 12%,
+    var(--ray-stripe-color) 16%
+  );
+
+  --rainbow: repeating-linear-gradient(
+    100deg,
+    var(--ray-c1) 10%,
+    var(--ray-c2) 15%,
+    var(--ray-c3) 20%,
+    var(--ray-c4) 25%,
+    var(--ray-c5) 30%
+  );
+
+  background-image: var(--stripes), var(--rainbow);
+  background-size: 320% 220%;
+  background-position:
+    50% 50%,
+    50% 50%;
+
+  /* The "look" */
+  filter: blur(var(--ray-blur)) invert(1);
+  opacity: 0.55;
+
+  /* Constrain the rays so they do not wash the whole hero */
+  -webkit-mask-image: radial-gradient(
+    ellipse at 100% 0%,
+    #000 40%,
+    transparent 70%
+  );
+  mask-image: radial-gradient(
+    ellipse at 100% 0%,
+    #000 40%,
+    transparent 70%
+  );
+
+  transform: translateZ(0);
+}
+
+.rayHeroBg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  background-image: var(--stripes), var(--rainbow);
+  background-size: 220% 140%;
+  background-position:
+    50% 50%,
+    50% 50%;
+
+  /* gives that "electric" feel */
+  mix-blend-mode: difference;
+
+  animation: raySmoothBg var(--ray-speed) linear infinite;
+  will-change: background-position;
+}
+
+/* Dark theme tuning (less intense + no invert) */
+:global(.dark) .rayHeroBg {
+  --ray-h: 258;
+  --ray-s: 89%;
+
+  filter: blur(calc(var(--ray-blur) + 2px)) saturate(180%);
+  opacity: 0.28;
+}
+
+:global(.dark) .rayHeroBg::after {
+  mix-blend-mode: lighten;
+  opacity: 0.9;
+}
+
+@keyframes raySmoothBg {
+  from {
+    background-position:
+      50% 50%,
+      50% 50%;
+  }
+  to {
+    background-position:
+      320% 50%,
+      320% 50%;
+  }
+}
+
+/* Accessibility / perf */
+@media (prefers-reduced-motion: reduce) {
+  .rayHeroBg::after {
+    animation: none;
+  }
+}
