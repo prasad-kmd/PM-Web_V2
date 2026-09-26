@@ -24,7 +24,7 @@ import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from '@/components/animate-ui/components/animate/tooltip';
+} from '@/components/ui/tooltip';
 import {
   Highlight,
   HighlightItem,
@@ -128,7 +128,7 @@ function SidebarProvider({
 
   return (
     <LocalSidebarProvider value={contextValue}>
-      <TooltipProvider openDelay={0}>
+      <TooltipProvider delayDuration={0}>
         <div
           data-slot="sidebar-wrapper"
           style={
@@ -613,10 +613,15 @@ function SidebarMenuButton({
     };
   }
 
+  // Only show tooltip when collapsed and not on mobile — ensures it appears on collapsed sidebar
+  if (state !== 'collapsed' || isMobile) {
+    return button;
+  }
+
   return (
-    <Tooltip side="right" align="center">
+    <Tooltip>
       <TooltipTrigger asChild>{button}</TooltipTrigger>
-      <TooltipContent hidden={state !== 'collapsed' || isMobile} {...tooltip} />
+      <TooltipContent side="right" align="center" {...tooltip} />
     </Tooltip>
   );
 }
