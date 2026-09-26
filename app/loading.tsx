@@ -132,8 +132,8 @@ export default function Loading() {
           className={cn(
             "absolute inset-0",
             dark
-              ? "bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,0.09)_0%,_rgba(255,255,255,0.03)_25%,_transparent_65%)]"
-              : "bg-[radial-gradient(ellipse_at_center,_rgba(18,18,16,0.07)_0%,_rgba(18,18,16,0.025)_25%,_transparent_65%)]",
+              ? "bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.09)_0%,rgba(255,255,255,0.03)_25%,transparent_65%)]"
+              : "bg-[radial-gradient(ellipse_at_center,rgba(18,18,16,0.07)_0%,rgba(18,18,16,0.025)_25%,transparent_65%)]",
           )}
         />
         <div
@@ -175,8 +175,8 @@ export default function Loading() {
             className={cn(
               "h-px w-12",
               dark
-                ? "bg-gradient-to-r from-transparent to-white/20"
-                : "bg-gradient-to-r from-transparent to-black/20",
+                ? "bg-linear-to-r from-transparent to-white/20"
+                : "bg-linear-to-r from-transparent to-black/20",
             )}
             aria-hidden="true"
           />
@@ -192,8 +192,8 @@ export default function Loading() {
             className={cn(
               "h-px w-12",
               dark
-                ? "bg-gradient-to-l from-transparent to-white/20"
-                : "bg-gradient-to-l from-transparent to-black/20",
+                ? "bg-linear-to-l from-transparent to-white/20"
+                : "bg-linear-to-l from-transparent to-black/20",
             )}
             aria-hidden="true"
           />
