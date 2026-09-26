@@ -4,70 +4,70 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* ------------------------------------------------------------------ */
-/* PM-Web_V2 — Swiss Industrial Print design system                    */
-/* Light: matte documentation paper / carbon ink.                      */
-/* Dark:  deactivated CRT substrate / white phosphor ink.              */
-/* Accent (both): aviation hazard red.                                 */
+/* PM-Web_V2 — Studio Clean design system                              */
+/* Light: zinc neutrals on #FAFAFA, white surfaces.                    */
+/* Dark:  zinc-950 substrate with elevated #111113 surfaces.           */
+/* Accent (both): violet — the "hazard" token is now the brand accent. */
 /* ------------------------------------------------------------------ */
 
 :root {
-  --pm-paper: #f2f1ec;
-  --pm-card: #fbfaf6;
-  --pm-ink: #121210;
-  --pm-ink-soft: #5a584f;
-  --pm-hazard: #e61919;
-  --pm-muted: rgb(18 18 16 / 0.05);
-  --pm-border: rgb(18 18 16 / 0.17);
-  --sidebar: #fbfaf6;
-  --sidebar-foreground: #121210;
-  --sidebar-primary: #e61919;
-  --sidebar-primary-foreground: #f2f1ec;
-  --sidebar-accent: #e7e6e0;
-  --sidebar-accent-foreground: #121210;
-  --sidebar-border: rgb(18 18 16 / 0.17);
-  --sidebar-ring: #e61919;
-  --primary-foreground: #f2f1ec;
-  --ring: #e61919;
-  --input: rgb(18 18 16 / 0.17);
-  --destructive: #e61919;
-  --secondary: #e8e7e1;
-  --secondary-foreground: #121210;
-  --accent: #e8e7e1;
-  --accent-foreground: #121210;
-  --card-foreground: #121210;
-  --popover: #fbfaf6;
-  --popover-foreground: #121210;
-  --radius: 0px;
+  --pm-paper: #fafafa;
+  --pm-card: #ffffff;
+  --pm-ink: #18181b;
+  --pm-ink-soft: #71717a;
+  --pm-hazard: #6e56cf;
+  --pm-muted: #f4f4f5;
+  --pm-border: #e4e4e7;
+  --sidebar: #fafafa;
+  --sidebar-foreground: #18181b;
+  --sidebar-primary: #6e56cf;
+  --sidebar-primary-foreground: #fafafa;
+  --sidebar-accent: #f4f4f5;
+  --sidebar-accent-foreground: #18181b;
+  --sidebar-border: #e4e4e7;
+  --sidebar-ring: #6e56cf;
+  --primary-foreground: #fafafa;
+  --ring: #6e56cf;
+  --input: #e4e4e7;
+  --destructive: #dc2626;
+  --secondary: #f4f4f5;
+  --secondary-foreground: #18181b;
+  --accent: #f4f4f5;
+  --accent-foreground: #18181b;
+  --card-foreground: #18181b;
+  --popover: #ffffff;
+  --popover-foreground: #18181b;
+  --radius: 0.75rem;
   color-scheme: light;
 }
 
 .dark {
-  --pm-paper: #0d0d0c;
-  --pm-card: #171715;
-  --pm-ink: #ecebe4;
-  --pm-ink-soft: #a3a196;
-  --pm-hazard: #ff2a2a;
-  --pm-muted: rgb(236 235 228 / 0.06);
-  --pm-border: rgb(236 235 228 / 0.18);
-  --sidebar: #171715;
-  --sidebar-foreground: #ecebe4;
-  --sidebar-primary: #ff2a2a;
-  --sidebar-primary-foreground: #0d0d0c;
-  --sidebar-accent: #242422;
-  --sidebar-accent-foreground: #ecebe4;
-  --sidebar-border: rgb(236 235 228 / 0.18);
-  --sidebar-ring: #ff2a2a;
-  --primary-foreground: #0d0d0c;
-  --ring: #ff2a2a;
-  --input: rgb(236 235 228 / 0.18);
-  --destructive: #ff2a2a;
-  --secondary: #242422;
-  --secondary-foreground: #ecebe4;
-  --accent: #242422;
-  --accent-foreground: #ecebe4;
-  --card-foreground: #ecebe4;
-  --popover: #171715;
-  --popover-foreground: #ecebe4;
+  --pm-paper: #09090b;
+  --pm-card: #111113;
+  --pm-ink: #fafafa;
+  --pm-ink-soft: #a1a1aa;
+  --pm-hazard: #8b5cf6;
+  --pm-muted: #26262b;
+  --pm-border: #27272a;
+  --sidebar: #111113;
+  --sidebar-foreground: #fafafa;
+  --sidebar-primary: #8b5cf6;
+  --sidebar-primary-foreground: #fafafa;
+  --sidebar-accent: #26262b;
+  --sidebar-accent-foreground: #fafafa;
+  --sidebar-border: #27272a;
+  --sidebar-ring: #8b5cf6;
+  --primary-foreground: #fafafa;
+  --ring: #8b5cf6;
+  --input: #27272a;
+  --destructive: #ef4444;
+  --secondary: #26262b;
+  --secondary-foreground: #fafafa;
+  --accent: #26262b;
+  --accent-foreground: #fafafa;
+  --card-foreground: #fafafa;
+  --popover: #111113;
+  --popover-foreground: #fafafa;
   color-scheme: dark;
 }
 
@@ -107,11 +107,14 @@
   --color-sidebar-ring: var(--sidebar-ring);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
+  --radius-lg: calc(var(--radius));
   --radius-xl: calc(var(--radius) * 1.4);
 
   /* Type system — every face registered through next/font in lib/fonts.ts */
-  /* --font-display: var(--font-mozilla-headline); */
+  /* Studio Clean: one humanist sans across display, condensed and body.  */
+  /* The QType condensed / Mozilla headline faces stay registered in      */
+  /* lib/fonts.ts — flipping these vars back restores the print identity. */
+  /* --font-display: var(--font-qtype-cond); */
   --font-display: var(--font-qtype-cond);
   --font-body: var(--font-google-sans);
   --font-serif-display: var(--font-anthropic-serif-display);
@@ -165,7 +168,8 @@ body::-webkit-scrollbar {
 }
 
 /* Desktop: each chapter is one viewport, and a scroll jumps to the next.
-   Interior routes set data-snap="off" so they scroll normally. */
+   Interior routes set data-snap="off" so they scroll normally.
+   Mobile: sections stack vertically, grow to fit content, scroll normally. */
 @media (min-width: 768px) {
   html {
     scroll-snap-type: y mandatory;
@@ -174,6 +178,11 @@ body::-webkit-scrollbar {
   html[data-snap="off"] {
     scroll-snap-type: none;
   }
+}
+
+.snap-section {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
 }
 
 body {
@@ -188,14 +197,20 @@ body {
   color: var(--pm-paper);
 }
 
-.snap-section {
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
+/* Soft substrate scrim laid over the pinned section backdrops so ink stays
+   legible while the photograph still reads as ambient colour. Tracks the
+   theme because it is mixed from the paper token. */
+.backdrop-scrim {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--pm-paper) 88%, transparent) 0%,
+    color-mix(in srgb, var(--pm-paper) 64%, transparent) 45%,
+    color-mix(in srgb, var(--pm-paper) 82%, transparent) 100%
+  );
 }
 
 /* The loader fills the content column beside the sidebar. The footer is
-   not part of that frame — it cannot share the viewport without clipping —
-   and snap stays off so the page cannot jump to the end. */
+   not part of that frame — it cannot share the viewport without clipping. */
 html:has([data-loading-screen]),
 html[data-loading="on"] {
   height: 100dvh;
@@ -254,31 +269,3 @@ html[data-loading="on"] #footer {
   font-family: var(--font-body);
 }
 
-/* Substrate wash laid over the pinned photo backdrops so ink stays
-   legible while the photograph still reads like a printed plate.
-   Tracks the theme because it is mixed from the paper token. */
-.paper-wash {
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--pm-paper) 86%, transparent) 0%,
-      color-mix(in srgb, var(--pm-paper) 60%, transparent) 45%,
-      color-mix(in srgb, var(--pm-paper) 82%, transparent) 100%
-    );
-}
-
-/* Fine crosshair grid printed over the hero substrate */
-.blueprint-grid {
-  background-image:
-    linear-gradient(
-      to right,
-      color-mix(in srgb, var(--pm-ink) 6%, transparent) 1px,
-      transparent 1px
-    ),
-    linear-gradient(
-      to bottom,
-      color-mix(in srgb, var(--pm-ink) 6%, transparent) 1px,
-      transparent 1px
-    );
-  background-size: 56px 56px;
-}

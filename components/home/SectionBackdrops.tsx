@@ -4,30 +4,35 @@ import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * Viewport-pinned photo backdrops for sections 02–05.
+ * Viewport-pinned ambient backdrops for the chapter sections (02–05).
  *
  * `background-attachment: fixed` is unreliable on mobile browsers (iOS Safari
  * silently falls back to scrolling the image), so the backdrops live here as
  * fixed, viewport-sized layers instead. An IntersectionObserver tracks which
  * chapter owns the viewport and cross-fades its backdrop in — the photograph
  * never moves while sections scroll past it, on any device.
+ *
+ * Each layer carries its own soft substrate scrim (.backdrop-scrim, defined
+ * in globals.css) so ink stays legible while the photograph reads as ambient
+ * colour rather than a printed plate. NOTE: filenames are capitalized on
+ * disk — the previous lowercase paths 404'd on case-sensitive hosts.
  */
 const BACKDROPS = [
   {
     section: "about",
-    image: "/img/vivid.webp",
+    image: "/img/Vivid.webp",
   },
   {
     section: "showcase",
-    image: "/img/glassy-sky.webp",
+    image: "/img/Glassy-sky.webp",
   },
   {
     section: "tools",
-    image: "/img/teal.webp",
+    image: "/img/Teal.webp",
   },
   {
     section: "mission",
-    image: "/img/sapphire.webp",
+    image: "/img/Sapphire.webp",
   },
 ] as const;
 
@@ -74,11 +79,16 @@ export default function SectionBackdrops() {
         <div
           key={backdrop.section}
           className={cn(
-            "absolute inset-0 bg-cover bg-center transition-opacity duration-700 ease-out dark:brightness-[0.55] dark:saturate-[0.85]",
+            "absolute inset-0 transition-opacity duration-700 ease-out",
             active === backdrop.section ? "opacity-100" : "opacity-0",
           )}
-          style={{ backgroundImage: `url(${backdrop.image})` }}
-        />
+        >
+          <div
+            className="absolute inset-0 bg-cover bg-center dark:brightness-[0.55]"
+            style={{ backgroundImage: `url(${backdrop.image})` }}
+          />
+          <div className="backdrop-scrim absolute inset-0" />
+        </div>
       ))}
     </div>
   );

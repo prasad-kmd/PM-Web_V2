@@ -1,7 +1,8 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import type { ReactNode } from "react";
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import {
   SidebarInset,
   SidebarProvider,
@@ -12,10 +13,12 @@ import { AppSidebar } from "@/components/site/AppSidebar";
 
 /**
  * Global frame. variant="sidebar" pushes the page instead of covering it.
- * Homepage chapter snap stays on the document scroller — this shell must not
- * become its own scroll container, or the section jump stops working.
+ * The rail starts collapsed (icon mode) on desktop. Homepage chapter snap
+ * stays on the document scroller — this shell must not become its own
+ * scroll container, or the section jump stops working. Interior routes set
+ * data-snap="off" so they scroll normally.
  */
-export function SiteShell({ children }: { children: React.ReactNode }) {
+export function SiteShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
@@ -28,11 +31,11 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
   }, [pathname]);
 
   return (
-    <SidebarProvider defaultOpen className="min-h-svh flex-1">
+    <SidebarProvider defaultOpen={false} className="min-h-svh flex-1">
       <AppSidebar />
       <SidebarInset className="min-h-svh min-w-0 bg-transparent">
         <SidebarTrigger
-          className="fixed top-3 left-3 z-30 border border-ink/20 bg-paper/90 text-ink md:hidden"
+          className="fixed top-3 left-3 z-30 rounded-lg border border-border bg-card/90 text-ink shadow-sm backdrop-blur-sm md:hidden"
           aria-label="Open sidebar"
         />
         {children}

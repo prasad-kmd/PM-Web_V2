@@ -28,15 +28,15 @@ export default function ThemeToggle() {
       onClick={() => applyTheme(next)}
       aria-label={`Switch to ${next} theme`}
       title={`Switch to ${next} theme`}
-      className="google-sans flex items-center gap-3 rounded-full border border-border/50 bg-muted/30 px-4 py-2 backdrop-blur-sm transition-colors hover:border-primary/50 hover:bg-muted/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+      className="flex items-center gap-2.5 rounded-full border border-border/60 bg-muted/40 px-4 py-2 backdrop-blur-sm transition-colors hover:border-primary/50 hover:bg-muted/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
     >
       {theme === "dark" ? (
-        <Sun className="h-3.5 w-3.5 text-muted-foreground" strokeWidth={1.5} />
+        <Sun className="size-3.5 text-muted-foreground" strokeWidth={1.5} />
       ) : (
-        <Moon className="h-3.5 w-3.5 text-muted-foreground" strokeWidth={1.5} />
+        <Moon className="size-3.5 text-muted-foreground" strokeWidth={1.5} />
       )}
-      <span className="font-mono text-[10px] font-medium uppercase tracking-tighter text-muted-foreground">
-        {theme === "dark" ? "Dark" : "Light"} Mode
+      <span className="text-xs font-medium text-muted-foreground">
+        {theme === "dark" ? "Dark" : "Light"} mode
       </span>
     </button>
   );

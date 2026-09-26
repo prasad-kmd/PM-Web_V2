@@ -5,7 +5,7 @@ import { siteConfig } from "@/lib/config";
 
 export default function AboutSection() {
   return (
-    <SectionShell id="about" label="SEC.02 // BRIEFING">
+    <SectionShell id="about" label="About">
       <div className="grid gap-10 md:grid-cols-12 md:gap-14">
         <div className="md:col-span-7">
           <SplitText
@@ -15,7 +15,7 @@ export default function AboutSection() {
             textAlign="left"
             from={{ opacity: 0, y: 32 }}
             to={{ opacity: 1, y: 0 }}
-            className="font-serif-display text-[clamp(1.9rem,3.4vw,3.4rem)] leading-[1.08] text-ink"
+            className="font-display text-[clamp(1.9rem,3.4vw,3.1rem)] font-semibold leading-[1.08] tracking-[-0.02em] text-ink"
           />
           <FadeContent duration={0.9} className="mt-8 max-w-xl space-y-5">
             <p className="font-body text-sm leading-relaxed text-ink-soft md:text-[15px]">
@@ -31,21 +31,26 @@ export default function AboutSection() {
               the line than I did.
             </p>
           </FadeContent>
-          <FadeContent delay={0.2} duration={0.9} className="mt-8 flex flex-wrap gap-x-8 gap-y-2 font-mono text-[10px] uppercase tracking-[0.25em] text-ink-soft">
-            <span>{siteConfig.revision}</span>
+          <FadeContent
+            delay={0.2}
+            duration={0.9}
+            className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-xs text-ink-soft"
+          >
             <span>{siteConfig.location}</span>
+            <span>{siteConfig.coordinates}</span>
             <span>{siteConfig.timezone}</span>
           </FadeContent>
         </div>
 
         <div className="md:col-span-5">
           <FadeContent duration={0.9} className="h-full">
-            <div className="relative border-2 border-ink bg-card p-6 md:p-7">
-              <span aria-hidden className="absolute -left-px -top-px h-4 w-4 border-l-4 border-t-4 border-hazard" />
-              <span aria-hidden className="absolute -bottom-px -right-px h-4 w-4 border-b-4 border-r-4 border-hazard" />
-              <p className="flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.3em] text-hazard">
-                <span className="inline-block h-2 w-2 animate-pulse bg-hazard" aria-hidden />
-                Notice // Site Status
+            <div className="relative h-full rounded-2xl border border-border bg-card p-6 shadow-sm md:p-7">
+              <p className="flex items-center gap-2.5 text-xs font-semibold uppercase tracking-[0.14em] text-ink-soft">
+                <span className="relative flex size-2" aria-hidden>
+                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-primary/60" />
+                  <span className="relative inline-flex size-2 rounded-full bg-primary" />
+                </span>
+                Site status
               </p>
               <p className="mt-4 font-body text-sm leading-relaxed text-ink">
                 This platform is under active construction. Sections are being
@@ -56,19 +61,21 @@ export default function AboutSection() {
                 Found a fault? Report it through the contact page and it goes
                 on the board like everything else.
               </p>
-              <div className="mt-6 grid grid-cols-3 gap-2 border-t border-border pt-4 font-mono text-[10px] uppercase tracking-[0.2em] text-ink-soft">
-                <span>
-                  STATUS
-                  <span className="mt-1 block text-ink">BUILDING</span>
-                </span>
-                <span>
-                  PRIORITY
-                  <span className="mt-1 block text-hazard">HIGH</span>
-                </span>
-                <span>
-                  MODE
-                  <span className="mt-1 block text-ink">DOCUMENTED</span>
-                </span>
+              <div className="mt-6 grid grid-cols-3 gap-4 border-t border-border pt-5">
+                <div>
+                  <p className="text-xs text-ink-soft">Status</p>
+                  <p className="mt-1 text-sm font-medium text-ink">Building</p>
+                </div>
+                <div>
+                  <p className="text-xs text-ink-soft">Priority</p>
+                  <p className="mt-1 text-sm font-medium text-primary">High</p>
+                </div>
+                <div>
+                  <p className="text-xs text-ink-soft">Mode</p>
+                  <p className="mt-1 text-sm font-medium text-ink">
+                    Documented
+                  </p>
+                </div>
               </div>
             </div>
           </FadeContent>

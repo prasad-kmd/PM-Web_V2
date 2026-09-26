@@ -7,9 +7,10 @@ interface SectionShellProps {
 }
 
 /**
- * Full-viewport chapter. The pinned photograph behind it is owned by
- * <SectionBackdrops /> (viewport-fixed so it never scrolls, on any device);
- * the shell only lays the substrate wash over it for legibility.
+ * Chapter frame: one viewport tall on desktop, where a scroll snaps
+ * chapter-to-chapter. On mobile it stacks, grows to fit its content and
+ * scrolls normally. The pinned photograph behind it is owned by
+ * <SectionBackdrops />; the shell stays transparent over it.
  */
 export default function SectionShell({ id, label, children }: SectionShellProps) {
   return (
@@ -18,10 +19,9 @@ export default function SectionShell({ id, label, children }: SectionShellProps)
       aria-label={label}
       className="snap-section relative min-h-dvh md:h-dvh md:overflow-hidden"
     >
-      <div className="paper-wash absolute inset-0" aria-hidden />
-      <div className="relative z-10 mx-auto flex h-full w-full max-w-7xl flex-col justify-center px-6 py-14 md:px-12">
-        <p className="mb-8 flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.3em] text-ink-soft md:mb-10">
-          <span className="inline-block h-2 w-2 bg-hazard" aria-hidden />
+      <div className="mx-auto flex w-full max-w-7xl flex-col px-6 py-16 md:h-full md:justify-center md:px-12 md:py-12">
+        <p className="mb-8 flex items-center gap-2.5 text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft md:mb-10">
+          <span className="size-1.5 rounded-full bg-primary" aria-hidden />
           {label}
         </p>
         {children}

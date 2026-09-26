@@ -117,14 +117,14 @@ function SidebarBrand() {
               className="transition-opacity group-data-[collapsible=icon]:group-hover/brand:opacity-0"
             >
               <Link href="/">
-                <span className="flex size-8 shrink-0 items-center justify-center bg-hazard font-display text-sm text-paper">
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary font-display text-sm font-semibold text-primary-foreground">
                   P
                 </span>
                 <span className="grid min-w-0 text-left leading-tight">
-                  <span className="truncate font-display text-base tracking-wide">
+                  <span className="truncate font-display text-base font-medium tracking-tight">
                     {siteConfig.name}
                   </span>
-                  <span className="truncate font-mono text-[10px] uppercase tracking-[0.18em] text-sidebar-foreground/60">
+                  <span className="truncate text-xs text-sidebar-foreground/60">
                     {siteConfig.revision}
                   </span>
                 </span>
@@ -155,7 +155,7 @@ export function AppSidebar() {
       side="left"
       variant="sidebar"
       collapsible="icon"
-      className="z-40 border-r-2 border-sidebar-border"
+      className="z-40 border-r border-sidebar-border"
     >
       <SidebarBrand />
 
@@ -193,7 +193,7 @@ export function AppSidebar() {
               rel="noreferrer"
               aria-label={social.label}
               title={social.label}
-              className="flex size-8 items-center justify-center rounded-md text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sidebar-ring"
+              className="flex size-8 items-center justify-center rounded-lg text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sidebar-ring"
             >
               <social.icon className="size-4" strokeWidth={1.5} />
             </a>
