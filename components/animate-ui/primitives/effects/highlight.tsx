@@ -228,12 +228,8 @@ function Highlight<T extends React.ElementType = 'div'>({
   }, []);
 
   React.useEffect(() => {
-    if (value !== undefined) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setActiveValue(value);
-    } else if (defaultValue !== undefined) {
-      setActiveValue(defaultValue);
-    }
+    if (value !== undefined) setActiveValue(value);
+    else if (defaultValue !== undefined) setActiveValue(defaultValue);
   }, [value, defaultValue]);
 
   const id = React.useId();

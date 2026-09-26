@@ -12,16 +12,21 @@ export function useControlledState<T, Rest extends any[] = []>(
   },
 ): readonly [T, (next: T, ...args: Rest) => void] {
   const { value, defaultValue, onChange } = props;
-  const [uncontrolled, setUncontrolled] = React.useState<T>(defaultValue as T);
-  const isControlled = value !== undefined;
-  const state = isControlled ? value : uncontrolled;
+
+  const [state, setInternalState] = React.useState<T>(
+    value !== undefined ? value : (defaultValue as T),
+  );
+
+  React.useEffect(() => {
+    if (value !== undefined) setInternalState(value);
+  }, [value]);
 
   const setState = React.useCallback(
     (next: T, ...args: Rest) => {
-      if (!isControlled) setUncontrolled(next);
+      setInternalState(next);
       onChange?.(next, ...args);
     },
-    [isControlled, onChange],
+    [onChange],
   );
 
   return [state, setState] as const;

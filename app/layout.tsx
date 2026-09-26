@@ -4,6 +4,8 @@ import Script from "next/script";
 import "./globals.css";
 import { fontClasses, fontVariables } from "@/lib/fonts";
 import { SiteShell } from "@/components/site/SiteShell";
+import { CustomContextMenu } from "@/components/custom-context-menu";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: {
@@ -43,7 +45,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         </Script>
       </head>
       <body className="flex min-h-full flex-col">
-        <SiteShell>{children}</SiteShell>
+        <CustomContextMenu>
+          <SiteShell>{children}</SiteShell>
+        </CustomContextMenu>
+        <Toaster richColors position="bottom-right" />
       </body>
     </html>
   );
