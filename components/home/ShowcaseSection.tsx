@@ -9,6 +9,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import FadeContent from "@/components/reactbits/FadeContent";
+import GlowCard from "@/components/reactbits/GlowCard";
+import BorderGlow from "@/components/reactbits/BorderGlow";
 import SplitText from "@/components/reactbits/SplitText";
 import SectionShell from "@/components/home/SectionShell";
 
@@ -56,9 +58,20 @@ const CARDS: ShowcaseCard[] = [
   },
 ];
 
+/** BorderGlow shell tuning: 16px radius matches rounded-2xl cards. */
+const GLOW_PROPS: Parameters<typeof BorderGlow>[0] = {
+  borderRadius: 16,
+  glowRadius: 24,
+  glowIntensity: 0.8,
+  glowColor: "252 60 62",
+  colors: ["#a78bfa", "#8b5cf6", "#6366f1"],
+};
+
 /**
- * Chapter 03 — the archive index as a bento board: one featured photo card
- * (Projects) plus four compact drawers. On desktop the board fills the
+ * Chapter 03 — the archive index as a bento board. Each card is a
+ * BorderGlow shell (ReactBits) providing the mesh border, edge fill and
+ * directional outer glow; the four content cards additionally carry a
+ * GlowCard interior light under the text. On desktop the board fills the
  * chapter height (grid rows stretch), so nothing is clipped by the
  * one-viewport snap; on mobile it stacks and grows.
  */
@@ -87,38 +100,40 @@ export default function ShowcaseSection() {
           duration={0.7}
           className="h-64 md:col-span-2 md:h-52 lg:col-span-1 lg:row-span-2 lg:h-full"
         >
-          <Link
-            href={FEATURED.href}
-            className="group relative block h-full overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-shadow duration-300 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-          >
-            <Image
-              src={FEATURED.image}
-              alt={FEATURED.alt}
-              fill
-              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 100vw, 33vw"
-              className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-            />
-            <div
-              aria-hidden
-              className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/35 to-black/10"
-            />
-            <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-6">
-              <div className="min-w-0">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/60">
-                  {FEATURED.eyebrow}
-                </p>
-                <h3 className="mt-1.5 font-display text-2xl font-semibold tracking-tight text-white md:text-3xl">
-                  {FEATURED.name}
-                </h3>
-                <p className="mt-1.5 max-w-sm font-body text-xs leading-relaxed text-white/75 md:text-sm">
-                  {FEATURED.desc}
-                </p>
+          <BorderGlow className="h-full" {...GLOW_PROPS}>
+            <Link
+              href={FEATURED.href}
+              className="group relative block h-full overflow-hidden rounded-[15px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            >
+              <Image
+                src={FEATURED.image}
+                alt={FEATURED.alt}
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 100vw, 33vw"
+                className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+              />
+              <div
+                aria-hidden
+                className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/35 to-black/10"
+              />
+              <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-6">
+                <div className="min-w-0">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/60">
+                    {FEATURED.eyebrow}
+                  </p>
+                  <h3 className="mt-1.5 font-display text-2xl font-semibold tracking-tight text-white md:text-3xl">
+                    {FEATURED.name}
+                  </h3>
+                  <p className="mt-1.5 max-w-sm font-body text-xs leading-relaxed text-white/75 md:text-sm">
+                    {FEATURED.desc}
+                  </p>
+                </div>
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white backdrop-blur-sm transition-colors duration-200 group-hover:border-primary group-hover:bg-primary group-hover:text-primary-foreground">
+                  <ArrowUpRight className="size-4" aria-hidden />
+                </span>
               </div>
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white backdrop-blur-sm transition-colors duration-200 group-hover:border-primary group-hover:bg-primary group-hover:text-primary-foreground">
-                <ArrowUpRight className="size-4" aria-hidden />
-              </span>
-            </div>
-          </Link>
+            </Link>
+          </BorderGlow>
         </FadeContent>
 
         {/* The four compact drawers */}
@@ -129,25 +144,29 @@ export default function ShowcaseSection() {
             duration={0.7}
             className="h-full"
           >
-            <Link
-              href={card.href}
-              className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-sm transition-colors duration-200 hover:border-primary/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring md:p-6"
-            >
-              <card.icon
-                className="size-6 text-primary"
-                strokeWidth={1.75}
-                aria-hidden
-              />
-              <h3 className="mt-4 font-display text-lg font-medium tracking-tight text-ink md:text-xl">
-                {card.name}
-              </h3>
-              <p className="mt-2 font-body text-sm leading-relaxed text-ink-soft">
-                {card.desc}
-              </p>
-              <span className="absolute right-5 top-5 flex size-8 items-center justify-center rounded-full border border-border text-ink-soft transition-colors duration-200 group-hover:border-primary group-hover:bg-primary group-hover:text-primary-foreground">
-                <ArrowUpRight className="size-3.5" aria-hidden />
-              </span>
-            </Link>
+            <BorderGlow className="h-full" {...GLOW_PROPS}>
+              <GlowCard className="h-full">
+                <Link
+                  href={card.href}
+                  className="group relative flex h-full flex-col p-5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring md:p-6"
+                >
+                  <card.icon
+                    className="size-6 text-primary"
+                    strokeWidth={1.75}
+                    aria-hidden
+                  />
+                  <h3 className="mt-4 font-display text-lg font-medium tracking-tight text-ink md:text-xl">
+                    {card.name}
+                  </h3>
+                  <p className="mt-2 font-body text-sm leading-relaxed text-ink-soft">
+                    {card.desc}
+                  </p>
+                  <span className="absolute right-5 top-5 flex size-8 items-center justify-center rounded-full border border-border text-ink-soft transition-colors duration-200 group-hover:border-primary group-hover:bg-primary group-hover:text-primary-foreground">
+                    <ArrowUpRight className="size-3.5" aria-hidden />
+                  </span>
+                </Link>
+              </GlowCard>
+            </BorderGlow>
           </FadeContent>
         ))}
       </div>
