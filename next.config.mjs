@@ -97,6 +97,7 @@ const nextConfig = {
       { protocol: "https", hostname: "image.tmdb.org" },
       { protocol: "https", hostname: "prasadm.vercel.app" },
       { protocol: "https", hostname: "ghchart.rshah.org/409ba5/prasad-kmd" },
+      { protocol: "https", hostname: "images.unsplash.com" },
     ],
     formats: ["image/webp", "image/avif"],
     dangerouslyAllowSVG: true, // For LQIP shimmers
