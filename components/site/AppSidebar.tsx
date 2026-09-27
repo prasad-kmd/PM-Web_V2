@@ -32,6 +32,7 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/animate-ui/components/radix/sidebar";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { siteConfig } from "@/lib/config";
 import { applyTheme, getDocumentTheme, subscribeTheme } from "@/lib/theme";
 
@@ -186,17 +187,22 @@ export function AppSidebar() {
           className="flex items-center justify-center gap-1 px-1 group-data-[collapsible=icon]:flex-col"
         >
           {SOCIALS.map((social) => (
-            <a
-              key={social.label}
-              href={social.href}
-              target="_blank"
-              rel="noreferrer"
-              aria-label={social.label}
-              title={social.label}
-              className="flex size-8 items-center justify-center rounded-lg text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sidebar-ring"
-            >
-              <social.icon className="size-4" strokeWidth={1.5} />
-            </a>
+            <Tooltip key={social.label}>
+              <TooltipTrigger asChild>
+                <a
+                  href={social.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={social.label}
+                  className="flex size-8 items-center justify-center rounded-lg text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sidebar-ring"
+                >
+                  <social.icon className="size-4" strokeWidth={1.5} />
+                </a>
+              </TooltipTrigger>
+              <TooltipContent side="right" sideOffset={8}>
+                {social.label}
+              </TooltipContent>
+            </Tooltip>
           ))}
         </div>
       </SidebarFooter>

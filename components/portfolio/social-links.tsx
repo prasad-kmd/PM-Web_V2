@@ -18,7 +18,6 @@ export default function SocialLinks({ className = "" }: { className?: string }) 
             target="_blank"
             rel="noopener noreferrer"
             aria-label={link.label}
-            title={link.label}
             className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-ink-soft shadow-sm transition-colors hover:border-primary/40 hover:text-ink"
           >
             <link.icon className="size-3.5" aria-hidden />

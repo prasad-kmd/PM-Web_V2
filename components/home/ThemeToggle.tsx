@@ -27,7 +27,6 @@ export default function ThemeToggle() {
       type="button"
       onClick={() => applyTheme(next)}
       aria-label={`Switch to ${next} theme`}
-      title={`Switch to ${next} theme`}
       className="flex items-center gap-2.5 rounded-full border border-border/60 bg-muted/40 px-4 py-2 backdrop-blur-sm transition-colors hover:border-primary/50 hover:bg-muted/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
     >
       {theme === "dark" ? (

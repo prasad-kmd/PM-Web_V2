@@ -58,10 +58,10 @@ export default function PortfolioPage() {
     <div className="relative isolate">
       <div
         aria-hidden
-        className="absolute inset-x-0 top-0 -z-10 h-[34rem] overflow-hidden"
+        className="absolute inset-x-0 top-0 -z-10 h-136 overflow-hidden"
       >
         <RayBackground />
-        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-paper" />
+        <div className="absolute inset-x-0 bottom-0 h-40 bg-linear-to-b from-transparent to-paper" />
       </div>
 
       <div className="mx-auto w-full max-w-7xl px-6 py-12 md:px-12 md:py-12">
@@ -284,7 +284,6 @@ export default function PortfolioPage() {
                   {INTERESTS.map((interest) => (
                     <li
                       key={interest.name}
-                      title={interest.blurb}
                       className="flex items-center gap-2.5 text-xs text-ink-soft"
                     >
                       <span

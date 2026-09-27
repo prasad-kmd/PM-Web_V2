@@ -3,13 +3,11 @@
 import type { ReactNode } from "react";
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/animate-ui/components/radix/sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/animate-ui/components/radix/sidebar";
 import FooterSection from "@/components/home/FooterSection";
 import { AppSidebar } from "@/components/site/AppSidebar";
+import { FloatingNavbar } from "@/components/site/FloatingNavbar";
+import { MobileBottomNav } from "@/components/site/MobileBottomNav";
 
 /**
  * Global frame. variant="sidebar" pushes the page instead of covering it.
@@ -34,12 +32,11 @@ export function SiteShell({ children }: { children: ReactNode }) {
     <SidebarProvider defaultOpen={false} className="min-h-svh flex-1">
       <AppSidebar />
       <SidebarInset className="min-h-svh min-w-0 bg-transparent">
-        <SidebarTrigger
-          className="fixed top-3 left-3 z-30 rounded-lg border border-border bg-card/90 text-ink shadow-sm backdrop-blur-sm md:hidden"
-          aria-label="Open sidebar"
-        />
         {children}
         <FooterSection />
+        <div className="h-24 shrink-0 md:hidden" aria-hidden />
+        <FloatingNavbar />
+        <MobileBottomNav />
       </SidebarInset>
     </SidebarProvider>
   );
