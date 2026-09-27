@@ -167,11 +167,69 @@
   }
 }
 
+/* Reader controls keep long-form Notion content comfortable to scan and adapt to text needs. */
+.reader-content {
+  --reader-leading: 1.8;
+  max-width: 82ch;
+  margin-inline: auto;
+  color: var(--pm-ink);
+  font-family:
+    var(--reader-font, var(--font-noto-sans-display)), system-ui, sans-serif;
+  font-size: var(--reader-size, 1.125rem);
+  line-height: var(--reader-leading);
+}
+
+.reader-content :where(p, li, blockquote, td, th, summary) {
+  font-size: var(--reader-size, 1.125rem) !important;
+  line-height: var(--reader-leading) !important;
+}
+
+.reader-content :where(h2, h3, h4) {
+  font-family:
+    var(--reader-font, var(--font-noto-sans-display)), system-ui, sans-serif !important;
+  letter-spacing: -0.02em;
+}
+
+.reader-content :where(pre, code) {
+  font-size: var(--reader-code-size, 0.875rem);
+  line-height: 1.65;
+}
+
+.reader-content.reader-high-contrast {
+  --pm-ink: #111111;
+  color: #111111;
+  background: #ffffff;
+  border-color: #555555;
+}
+
+.dark .reader-content.reader-high-contrast {
+  --pm-ink: #ffffff;
+  color: #ffffff;
+  background: #050505;
+  border-color: #dddddd;
+}
+
+.reader-content.reader-high-contrast a {
+  color: #0645ad;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.dark .reader-content.reader-high-contrast a {
+  color: #8ab4ff;
+}
+
 html {
   scroll-behavior: smooth;
   overflow-anchor: none;
   scrollbar-width: none;
   -ms-overflow-style: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 html::-webkit-scrollbar,
@@ -276,4 +334,3 @@ html[data-loading="on"] #footer {
 
 /* Font utility classes come from the semantic `font-display` and `font-body`
    tokens registered in the @theme block above. */
-

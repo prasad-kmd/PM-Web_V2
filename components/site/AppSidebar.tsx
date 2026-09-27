@@ -4,7 +4,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSyncExternalStore } from "react";
 import {
+  BookOpen,
+  Bookmark,
   Boxes,
+  FileText,
   FolderKanban,
   Github,
   GraduationCap,
@@ -40,9 +43,12 @@ import { applyTheme, getDocumentTheme, subscribeTheme } from "@/lib/theme";
 const NAV_ITEMS: { name: string; href: string; icon: LucideIcon }[] = [
   { name: "Portfolio", href: "/portfolio", icon: FolderKanban },
   { name: "Blog", href: "/blog", icon: Newspaper },
+  { name: "Articles", href: "/articles", icon: FileText },
   { name: "Projects", href: "/projects", icon: Boxes },
   { name: "Tools", href: "/tools", icon: Wrench },
   { name: "Tutorials", href: "/tutorials", icon: GraduationCap },
+  { name: "Glossary", href: "/glossary", icon: BookOpen },
+  { name: "Saved", href: "/bookmarks", icon: Bookmark },
 ];
 
 const SOCIALS = [
@@ -62,7 +68,7 @@ function SidebarNavLink({
 }) {
   const pathname = usePathname();
   const { isMobile, setOpenMobile } = useSidebar();
-  const active = pathname === href;
+  const active = pathname === href || pathname.startsWith(`${href}/`);
 
   return (
     <SidebarMenuItem>

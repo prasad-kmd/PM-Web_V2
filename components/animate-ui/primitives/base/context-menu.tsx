@@ -30,12 +30,14 @@ const [ContextMenuProvider, useContextMenu] =
   getStrictContext<ContextMenuContextType>('ContextMenuContext');
 
 type ContextMenuProps = React.ComponentProps<typeof ContextMenuPrimitive.Root>;
+type ContextMenuOpenChange = NonNullable<ContextMenuProps["onOpenChange"]>;
+type ContextMenuOpenChangeDetails = Parameters<ContextMenuOpenChange>[1];
 
 function ContextMenu(props: ContextMenuProps) {
-  const [isOpen, setIsOpen] = useControlledState({
+  const [isOpen, setIsOpen] = useControlledState<boolean, [details?: ContextMenuOpenChangeDetails]>({
     value: props?.open,
     defaultValue: props?.defaultOpen,
-    onChange: props?.onOpenChange,
+    onChange: (next, details) => props.onOpenChange?.(next, details as ContextMenuOpenChangeDetails),
   });
   const [highlightedValue, setHighlightedValue] = React.useState<string | null>(null);
 
@@ -133,10 +135,9 @@ type ContextMenuItemProps = Omit<React.ComponentProps<typeof ContextMenuPrimitiv
 
 function ContextMenuItem({ disabled, label, closeOnClick, nativeButton, id, ...props }: ContextMenuItemProps) {
   const { setHighlightedValue } = useContextMenuActiveValue();
-  const [, highlightedRef] = useDataState<HTMLDivElement>('highlighted', undefined, (value) => {
+  const [, highlightedRef] = useDataState<HTMLDivElement>('highlighted', undefined, (value, element) => {
     if (value === true) {
-      const el = highlightedRef.current;
-      const v = el?.dataset.value || el?.id || null;
+      const v = element?.dataset.value || element?.id || null;
       if (v) setHighlightedValue(v);
     }
   });
@@ -188,6 +189,8 @@ export {
   useContextMenuActiveValue,
   useContextMenu,
   type ContextMenuProps,
+  type ContextMenuGroupProps,
+  type ContextMenuGroupLabelProps,
   type ContextMenuTriggerProps,
   type ContextMenuPortalProps,
   type ContextMenuPositionerProps,

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import Script from "next/script";
 import "./globals.css";
+import "katex/dist/katex.min.css";
+import "highlight.js/styles/github-dark.min.css";
 import { fontClasses, fontVariables } from "@/lib/fonts";
 import { SiteShell } from "@/components/site/SiteShell";
 import { CustomContextMenu } from "@/components/custom-context-menu";
@@ -13,6 +15,8 @@ import {
 } from "@/lib/accent-colors";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://prasadm.vercel.app"),
+  alternates: { types: { "application/rss+xml": "/rss.xml" } },
   title: {
     default: "PrasadM — Mechanical + Mechatronics Engineer",
     template: "%s — PrasadM",

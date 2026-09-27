@@ -14,7 +14,7 @@ function parseDatasetValue(value: string | null): DataStateValue {
 function useDataState<T extends HTMLElement = HTMLElement>(
   key: string,
   forwardedRef?: React.Ref<T | null>,
-  onChange?: (value: DataStateValue) => void,
+  onChange?: (value: DataStateValue, element: T | null) => void,
 ): [DataStateValue, React.RefObject<T | null>] {
   const localRef = React.useRef<T | null>(null);
   React.useImperativeHandle(forwardedRef, () => localRef.current as T);
@@ -45,7 +45,7 @@ function useDataState<T extends HTMLElement = HTMLElement>(
   const value = React.useSyncExternalStore(subscribe, getSnapshot);
 
   React.useEffect(() => {
-    if (onChange) onChange(value);
+    if (onChange) onChange(value, localRef.current);
   }, [value, onChange]);
 
   return [value, localRef];

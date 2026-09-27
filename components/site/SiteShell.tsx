@@ -8,6 +8,7 @@ import FooterSection from "@/components/home/FooterSection";
 import { AppSidebar } from "@/components/site/AppSidebar";
 import { FloatingNavbar } from "@/components/site/FloatingNavbar";
 import { MobileBottomNav } from "@/components/site/MobileBottomNav";
+import { ContentBookmarksProvider } from "@/components/notion/ContentBookmarksProvider";
 
 /**
  * Global frame. variant="sidebar" pushes the page instead of covering it.
@@ -29,15 +30,17 @@ export function SiteShell({ children }: { children: ReactNode }) {
   }, [pathname]);
 
   return (
-    <SidebarProvider defaultOpen={false} className="min-h-svh flex-1">
-      <AppSidebar />
-      <SidebarInset className="min-h-svh min-w-0 bg-transparent">
-        {children}
-        <FooterSection />
-        <div className="h-24 shrink-0 md:hidden" aria-hidden />
-        <FloatingNavbar />
-        <MobileBottomNav />
-      </SidebarInset>
-    </SidebarProvider>
+    <ContentBookmarksProvider>
+      <SidebarProvider defaultOpen={false} className="min-h-svh flex-1">
+        <AppSidebar />
+        <SidebarInset className="min-h-svh min-w-0 bg-transparent">
+          {children}
+          <FooterSection />
+          <div className="h-24 shrink-0 md:hidden" aria-hidden />
+          <FloatingNavbar />
+          <MobileBottomNav />
+        </SidebarInset>
+      </SidebarProvider>
+    </ContentBookmarksProvider>
   );
 }

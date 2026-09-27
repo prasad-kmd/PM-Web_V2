@@ -2,7 +2,9 @@
 
 import { motion } from "motion/react";
 import {
+  BookOpen,
   Boxes,
+  FileText,
   FolderKanban,
   GraduationCap,
   Moon,
@@ -26,9 +28,11 @@ import { applyTheme, getDocumentTheme, subscribeTheme } from "@/lib/theme";
 const NAV_ITEMS: { label: string; href: string; icon: LucideIcon }[] = [
   { label: "Portfolio", href: "/portfolio", icon: FolderKanban },
   { label: "Blog", href: "/blog", icon: Newspaper },
+  { label: "Articles", href: "/articles", icon: FileText },
   { label: "Projects", href: "/projects", icon: Boxes },
   { label: "Tools", href: "/tools", icon: Wrench },
   { label: "Tutorials", href: "/tutorials", icon: GraduationCap },
+  { label: "Glossary", href: "/glossary", icon: BookOpen },
 ];
 
 export function FloatingNavbar() {
