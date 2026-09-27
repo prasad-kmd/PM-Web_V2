@@ -128,11 +128,13 @@ const GRADIENT_POSITIONS = [
   "51% 4%",
 ];
 const COLOR_MAP = [0, 1, 2, 0, 1, 2, 1];
+const FOUR_COLOR_MAP = [0, 1, 2, 3, 0, 1, 3];
 
 function buildMeshGradients(colors: string[]): string[] {
   const gradients: string[] = [];
+  const colorMap = colors.length >= 4 ? FOUR_COLOR_MAP : COLOR_MAP;
   for (let i = 0; i < 7; i++) {
-    const c = colors[Math.min(COLOR_MAP[i], colors.length - 1)];
+    const c = colors[Math.min(colorMap[i], colors.length - 1)];
     gradients.push(
       `radial-gradient(at ${GRADIENT_POSITIONS[i]}, ${c} 0px, transparent 50%)`,
     );

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import FadeContent from "@/components/reactbits/FadeContent";
+import BorderGlow from "@/components/reactbits/BorderGlow";
 import GlowCard from "@/components/reactbits/GlowCard";
 import BorderGlowTheme from "@/components/reactbits/BorderGlowTheme";
 import SkewedCarousel from "@/components/reactbits/SkewedCarousel";
@@ -68,38 +69,46 @@ export default function PortfolioPage() {
         <header>
 
           <FadeContent duration={0.9} className="mt-6">
-            <BorderGlowTheme glowIntensity={0.8}>
-              <GlowCard>
-                <div className="relative grid gap-6 p-6 md:grid-cols-[auto_1fr] md:items-center md:p-8">
-                  <div className="relative size-50 overflow-hidden rounded-2xl border border-border shadow-sm md:size-50">
-                    <Image
-                      src="/img/hero/robot-arm.jpg"
-                      alt="Portrait stand-in — six-axis robot arm at work"
-                      fill
-                      priority
-                      sizes="240px"
-                      className="object-cover"
-                    />
-                  </div>
-                  <div className="min-w-0">
-                    <h1 className="font-display text-[clamp(2rem,4.4vw,3.4rem)] font-semibold leading-none tracking-[-0.02em] text-ink">
-                      {PROFILE.firstName}
-                      <span className="text-primary"> {PROFILE.lastName}</span>
-                    </h1>
-                    <p className="mt-2.5 text-sm font-medium text-primary">
-                      {PROFILE.role}
-                    </p>
-                    <p className="mt-1 text-xs text-ink-soft">
-                      {PROFILE.statusLine}
-                    </p>
-                    <p className="mt-3 max-w-2xl text-xs leading-relaxed text-ink-soft md:text-[13px]">
-                      {PROFILE.summary[0]}
-                    </p>
-                    <SocialLinks className="mt-4" />
-                  </div>
+            <BorderGlow
+              colors={["#4285F4", "#EA4335", "#FBBC05", "#34A853"]}
+              glowColor="210 70 60"
+              borderRadius={16}
+              glowRadius={26}
+              glowIntensity={0.9}
+              edgeSensitivity={28}
+              coneSpread={30}
+              fillOpacity={0.28}
+              className="rounded-2xl"
+            >
+              <div className="relative grid gap-6 p-6 md:grid-cols-[auto_1fr] md:items-center md:p-8">
+                <div className="relative size-50 overflow-hidden rounded-2xl border border-border shadow-sm md:size-50">
+                  <Image
+                    src="/img/hero/robot-arm.jpg"
+                    alt="Portrait stand-in — six-axis robot arm at work"
+                    fill
+                    priority
+                    sizes="240px"
+                    className="object-cover"
+                  />
                 </div>
-              </GlowCard>
-            </BorderGlowTheme>
+                <div className="min-w-0">
+                  <h1 className="font-display text-[clamp(2rem,4.4vw,3.4rem)] font-semibold leading-none tracking-[-0.02em] text-ink">
+                    {PROFILE.firstName}
+                    <span className="text-primary"> {PROFILE.lastName}</span>
+                  </h1>
+                  <p className="mt-2.5 text-sm font-medium text-primary">
+                    {PROFILE.role}
+                  </p>
+                  <p className="mt-1 text-xs text-ink-soft">
+                    {PROFILE.statusLine}
+                  </p>
+                  <p className="mt-3 max-w-2xl text-xs leading-relaxed text-ink-soft md:text-[13px]">
+                    {PROFILE.summary[0]}
+                  </p>
+                  <SocialLinks className="mt-4" />
+                </div>
+              </div>
+            </BorderGlow>
           </FadeContent>
 
           <FadeContent delay={0.1} duration={0.9} className="mt-5">
@@ -139,82 +148,74 @@ export default function PortfolioPage() {
         <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_20rem]">
           <div className="min-w-0 space-y-6">
             <FadeContent duration={0.8}>
-              <BorderGlowTheme className="h-full" glowIntensity={0.8}>
-                <GlowCard className="h-full">
-                  <section
-                    aria-label="Featured projects"
-                    className="relative p-6 md:p-7"
-                  >
-                    <h2 className="font-mono text-[12px] uppercase tracking-[0.2em] text-primary">
-                      Featured projects
-                    </h2>
-                    <div className="mt-6 pb-2">
-                      <SkewedCarousel
-                        items={CAROUSEL_ITEMS}
-                        cardWidth={480}
-                        aspectRatio="16 / 10"
-                        rotation={45}
-                        borderRadius={12}
-                        loop
-                        className="py-4"
-                      />
-                    </div>
-                  </section>
-                </GlowCard>
-              </BorderGlowTheme>
+              <section
+                aria-label="Featured projects"
+                className="rounded-2xl border border-border bg-card p-6 shadow-sm"
+              >
+                <h2 className="font-mono text-[12px] uppercase tracking-[0.2em] text-primary">
+                  Featured projects
+                </h2>
+                <div className="mt-6 pb-2">
+                  <SkewedCarousel
+                    items={CAROUSEL_ITEMS}
+                    cardWidth={480}
+                    aspectRatio="16 / 10"
+                    rotation={45}
+                    borderRadius={12}
+                    loop
+                    className="py-4"
+                  />
+                </div>
+              </section>
             </FadeContent>
 
             <FadeContent delay={0.1} duration={0.8}>
-              <BorderGlowTheme className="h-full" glowIntensity={0.8}>
-                <GlowCard className="h-full">
-                  <section
-                    aria-label="Professional milestones"
-                    className="relative p-6 md:p-7"
-                  >
-                    <h2 className="font-mono text-[12px] uppercase tracking-[0.2em] text-primary">
-                      Professional milestones
-                    </h2>
-                    <div className="relative mt-6 space-y-8 border-l-2 border-primary/20 pl-7">
-                      {EXPERIENCE.map((entry) => (
-                        <article key={entry.org} className="relative">
-                          <span
-                            aria-hidden
-                            className="absolute -left-[35px] top-1 size-3.5 rounded-full border-2 border-primary/40 bg-card"
-                          />
-                          <p className="font-mono text-xs tabular-nums text-primary">
-                            {entry.period}
-                          </p>
-                          <h3 className="mt-1 font-display text-xl font-medium tracking-tight text-ink">
-                            {entry.role}
-                          </h3>
-                          <p className="mt-0.5 text-xs font-medium text-ink-soft">
-                            {entry.org} · {entry.location}
-                          </p>
-                          <p className="mt-2 text-xs leading-relaxed text-ink-soft md:text-[13px]">
-                            {entry.summary}
-                          </p>
-                          {entry.points.length > 0 ? (
-                            <ul className="mt-2.5 space-y-1.5">
-                              {entry.points.map((point) => (
-                                <li
-                                  key={point}
-                                  className="flex gap-2.5 text-xs leading-relaxed text-ink-soft md:text-[13px]"
-                                >
-                                  <span
-                                    className="mt-[7px] size-1 shrink-0 rounded-full bg-primary/70"
-                                    aria-hidden
-                                  />
-                                  {point}
-                                </li>
-                              ))}
-                            </ul>
-                          ) : null}
-                        </article>
-                      ))}
-                    </div>
-                  </section>
-                </GlowCard>
-              </BorderGlowTheme>
+              <section
+                aria-label="Professional milestones"
+                className="rounded-2xl border border-border bg-card p-6 shadow-sm"
+              >
+                <h2 className="font-mono text-[12px] uppercase tracking-[0.2em] text-primary">
+                  Professional milestones
+                </h2>
+                <div className="relative mt-6 space-y-8 border-l-2 border-primary/20 pl-7">
+                  {EXPERIENCE.map((entry) => (
+                    <article key={entry.org} className="relative">
+                      <span
+                        aria-hidden
+                        className="absolute -left-[35px] top-1 size-3.5 rounded-full border-2 border-primary/40 bg-card"
+                      />
+                      <p className="font-mono text-xs tabular-nums text-primary">
+                        {entry.period}
+                      </p>
+                      <h3 className="mt-1 font-display text-xl font-medium tracking-tight text-ink">
+                        {entry.role}
+                      </h3>
+                      <p className="mt-0.5 text-xs font-medium text-ink-soft">
+                        {entry.org} · {entry.location}
+                      </p>
+                      <p className="mt-2 text-xs leading-relaxed text-ink-soft md:text-[13px]">
+                        {entry.summary}
+                      </p>
+                      {entry.points.length > 0 ? (
+                        <ul className="mt-2.5 space-y-1.5">
+                          {entry.points.map((point) => (
+                            <li
+                              key={point}
+                              className="flex gap-2.5 text-xs leading-relaxed text-ink-soft md:text-[13px]"
+                            >
+                              <span
+                                className="mt-[7px] size-1 shrink-0 rounded-full bg-primary/70"
+                                aria-hidden
+                              />
+                              {point}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
+                    </article>
+                  ))}
+                </div>
+              </section>
             </FadeContent>
           </div>
 
