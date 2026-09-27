@@ -1,10 +1,6 @@
-/* Ray / stripes animated background — carried over from the previous site
-   hero (PMEngineerLK-NextJS "ray-hero-bg"), retuned from the old teal
-   accent to this site's violet. Rays fan from the top-right corner; the
-   ::after layer drifts against them for the electric feel. Pure CSS,
-   no dependencies. */
+/* Accent-aware animated ray backdrop for the portfolio profile header. */
 
-.rayHeroBg {
+.portfolioRayBackdrop {
   position: absolute;
   inset: 0;
   pointer-events: none;
@@ -15,9 +11,9 @@
   --ray-speed: 52s;
   --ray-blur: 12px;
 
-  /* Accent hues — violet, matching the site primary */
-  --ray-h: 252;
-  --ray-s: 56%;
+  /* Keep the rays aligned with the selected Studio Clean accent. */
+  --ray-h: var(--pm-accent-light-hue);
+  --ray-s: var(--pm-accent-light-saturation);
 
   --ray-stripe-color: hsl(var(--ray-h) var(--ray-s) 60% / 0.1);
 
@@ -70,7 +66,7 @@
   transform: translateZ(0);
 }
 
-.rayHeroBg::after {
+.portfolioRayBackdrop::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -89,15 +85,15 @@
 }
 
 /* Dark theme tuning (less intense + no invert) */
-:global(.dark) .rayHeroBg {
-  --ray-h: 258;
-  --ray-s: 89%;
+:global(.dark) .portfolioRayBackdrop {
+  --ray-h: var(--pm-accent-dark-hue);
+  --ray-s: var(--pm-accent-dark-saturation);
 
   filter: blur(calc(var(--ray-blur) + 2px)) saturate(180%);
   opacity: 0.28;
 }
 
-:global(.dark) .rayHeroBg::after {
+:global(.dark) .portfolioRayBackdrop::after {
   mix-blend-mode: lighten;
   opacity: 0.9;
 }
@@ -117,7 +113,7 @@
 
 /* Accessibility / perf */
 @media (prefers-reduced-motion: reduce) {
-  .rayHeroBg::after {
+  .portfolioRayBackdrop::after {
     animation: none;
   }
 }

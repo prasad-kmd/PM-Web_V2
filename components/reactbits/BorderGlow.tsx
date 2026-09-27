@@ -56,8 +56,6 @@ function parseHSL(hslStr: string): { h: number; s: number; l: number } {
 }
 
 function buildBoxShadow(glowColor: string, intensity: number): string {
-  const { h, s, l } = parseHSL(glowColor);
-  const base = `${h}deg ${s}% ${l}%`;
   const layers: [number, number, number, number, number, boolean][] = [
     [0, 0, 0, 1, 100, true],
     [0, 0, 1, 0, 60, true],
@@ -73,10 +71,19 @@ function buildBoxShadow(glowColor: string, intensity: number): string {
     [0, 0, 25, 2, 20, false],
     [0, 0, 50, 2, 10, false],
   ];
+  const usesCSSColor = glowColor.includes("var(");
+  const { h, s, l } = usesCSSColor
+    ? { h: 0, s: 0, l: 0 }
+    : parseHSL(glowColor);
+  const base = `${h}deg ${s}% ${l}%`;
+
   return layers
     .map(([x, y, blur, spread, alpha, inset]) => {
       const a = Math.min(alpha * intensity, 100);
-      return `${inset ? "inset " : ""}${x}px ${y}px ${blur}px ${spread}px hsl(${base} / ${a}%)`;
+      const color = usesCSSColor
+        ? `color-mix(in srgb, ${glowColor} ${a}%, transparent)`
+        : `hsl(${base} / ${a}%)`;
+      return `${inset ? "inset " : ""}${x}px ${y}px ${blur}px ${spread}px ${color}`;
     })
     .join(", ");
 }
@@ -163,14 +170,18 @@ const BorderGlow: FC<BorderGlowProps> = ({
   children,
   className = "",
   edgeSensitivity = 30,
-  glowColor = "40 80 80",
+  glowColor = "var(--pm-accent)",
   backgroundColor,
   borderRadius = 28,
   glowRadius = 40,
   glowIntensity = 1.0,
   coneSpread = 25,
   animated = false,
-  colors = ["#c084fc", "#f472b6", "#38bdf8"],
+  colors = [
+    "var(--pm-accent)",
+    "color-mix(in srgb, var(--pm-accent) 76%, white)",
+    "color-mix(in srgb, var(--pm-accent) 52%, white)",
+  ],
   fillOpacity = 0.5,
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);

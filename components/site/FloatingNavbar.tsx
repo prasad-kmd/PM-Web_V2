@@ -19,6 +19,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { AccentPicker } from "@/components/site/AccentPicker";
 import { cn } from "@/lib/utils";
 import { applyTheme, getDocumentTheme, subscribeTheme } from "@/lib/theme";
 
@@ -83,6 +84,7 @@ export function FloatingNavbar() {
       })}
 
       <span className="mx-1 h-5 w-px bg-border" aria-hidden />
+      <AccentPicker placement="floating" side="bottom" />
 
       <Tooltip>
         <TooltipTrigger asChild>

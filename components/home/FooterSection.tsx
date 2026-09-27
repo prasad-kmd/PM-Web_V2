@@ -84,8 +84,8 @@ function FooterColumn({
 
 /**
  * Site footer — the final chapter: one viewport tall on desktop (snaps like
- * the other sections), flowing height on mobile. Soft violet ambience
- * behind the columns.
+ * the other sections), flowing height on mobile. A soft accent ambience
+ * sits behind the columns.
  */
 export default function FooterSection() {
   const currentYear = new Date().getFullYear();

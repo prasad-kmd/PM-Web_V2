@@ -33,6 +33,7 @@ import {
   useSidebar,
 } from "@/components/animate-ui/components/radix/sidebar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { AccentPicker } from "@/components/site/AccentPicker";
 import { siteConfig } from "@/lib/config";
 import { applyTheme, getDocumentTheme, subscribeTheme } from "@/lib/theme";
 
@@ -177,6 +178,9 @@ export function AppSidebar() {
       <SidebarFooter>
         <SidebarSeparator />
         <SidebarMenu>
+          <SidebarMenuItem>
+            <AccentPicker placement="sidebar" side="top" />
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <ThemeRailButton />
           </SidebarMenuItem>

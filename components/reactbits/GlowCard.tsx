@@ -42,7 +42,7 @@ export default function GlowCard({
   };
 
   const color =
-    glowColor ?? "color-mix(in srgb, var(--pm-hazard) 12%, transparent)";
+    glowColor ?? "color-mix(in srgb, var(--pm-accent) 12%, transparent)";
   const backgroundImage = useMotionTemplate`radial-gradient(320px circle at ${mouseX}px ${mouseY}px, ${color}, transparent 70%)`;
 
   return (

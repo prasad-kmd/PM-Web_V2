@@ -7,7 +7,7 @@
 /* PM-Web_V2 — Studio Clean design system                              */
 /* Light: zinc neutrals on #FAFAFA, white surfaces.                    */
 /* Dark:  zinc-950 substrate with elevated #111113 surfaces.           */
-/* Accent (both): violet — the "hazard" token is now the brand accent. */
+/* Accent: violet by default, user-selectable through the palette control. */
 /* ------------------------------------------------------------------ */
 
 :root {
@@ -15,19 +15,36 @@
   --pm-card: #ffffff;
   --pm-ink: #18181b;
   --pm-ink-soft: #71717a;
-  --pm-hazard: #6e56cf;
+  --pm-accent-light-hue: 252;
+  --pm-accent-light-saturation: 56%;
+  --pm-accent-light-lightness: 57%;
+  --pm-accent-light-foreground: #fafafa;
+  --pm-accent-dark-hue: 258;
+  --pm-accent-dark-saturation: 90%;
+  --pm-accent-dark-lightness: 66%;
+  --pm-accent-dark-foreground: #fafafa;
+  --pm-accent-light: hsl(
+    var(--pm-accent-light-hue) var(--pm-accent-light-saturation)
+      var(--pm-accent-light-lightness)
+  );
+  --pm-accent-dark: hsl(
+    var(--pm-accent-dark-hue) var(--pm-accent-dark-saturation)
+      var(--pm-accent-dark-lightness)
+  );
+  --pm-accent: var(--pm-accent-light);
+  --pm-accent-foreground: var(--pm-accent-light-foreground);
   --pm-muted: #f4f4f5;
   --pm-border: #e4e4e7;
   --sidebar: #fafafa;
   --sidebar-foreground: #18181b;
-  --sidebar-primary: #6e56cf;
-  --sidebar-primary-foreground: #fafafa;
-  --sidebar-accent: #f4f4f5;
-  --sidebar-accent-foreground: #18181b;
+  --sidebar-primary: var(--pm-accent);
+  --sidebar-primary-foreground: var(--pm-accent-foreground);
+  --sidebar-accent: color-mix(in srgb, var(--pm-accent) 12%, transparent);
+  --sidebar-accent-foreground: var(--pm-accent);
   --sidebar-border: #e4e4e7;
-  --sidebar-ring: #6e56cf;
-  --primary-foreground: #fafafa;
-  --ring: #6e56cf;
+  --sidebar-ring: var(--pm-accent);
+  --primary-foreground: var(--pm-accent-foreground);
+  --ring: var(--pm-accent);
   --input: #e4e4e7;
   --destructive: #dc2626;
   --secondary: #f4f4f5;
@@ -46,19 +63,20 @@
   --pm-card: #111113;
   --pm-ink: #fafafa;
   --pm-ink-soft: #a1a1aa;
-  --pm-hazard: #8b5cf6;
+  --pm-accent: var(--pm-accent-dark);
+  --pm-accent-foreground: var(--pm-accent-dark-foreground);
   --pm-muted: #26262b;
   --pm-border: #27272a;
   --sidebar: #111113;
   --sidebar-foreground: #fafafa;
-  --sidebar-primary: #8b5cf6;
-  --sidebar-primary-foreground: #fafafa;
-  --sidebar-accent: #26262b;
-  --sidebar-accent-foreground: #fafafa;
+  --sidebar-primary: var(--pm-accent);
+  --sidebar-primary-foreground: var(--pm-accent-foreground);
+  --sidebar-accent: color-mix(in srgb, var(--pm-accent) 18%, transparent);
+  --sidebar-accent-foreground: var(--pm-accent);
   --sidebar-border: #27272a;
-  --sidebar-ring: #8b5cf6;
-  --primary-foreground: #fafafa;
-  --ring: #8b5cf6;
+  --sidebar-ring: var(--pm-accent);
+  --primary-foreground: var(--pm-accent-foreground);
+  --ring: var(--pm-accent);
   --input: #27272a;
   --destructive: #ef4444;
   --secondary: #26262b;
@@ -77,14 +95,14 @@
   --color-card: var(--pm-card);
   --color-ink: var(--pm-ink);
   --color-ink-soft: var(--pm-ink-soft);
-  --color-hazard: var(--pm-hazard);
+  --color-brand-accent: var(--pm-accent);
 
   /* shadcn-style aliases used by the footer block and the sidebar */
   --color-background: var(--pm-paper);
   --color-foreground: var(--pm-ink);
   --color-muted: var(--pm-muted);
   --color-muted-foreground: var(--pm-ink-soft);
-  --color-primary: var(--pm-hazard);
+  --color-primary: var(--pm-accent);
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
@@ -110,11 +128,7 @@
   --radius-lg: calc(var(--radius));
   --radius-xl: calc(var(--radius) * 1.4);
 
-  /* Type system — every face registered through next/font in lib/fonts.ts */
-  /* Studio Clean: one humanist sans across display, condensed and body.  */
-  /* The QType condensed / Mozilla headline faces stay registered in      */
-  /* lib/fonts.ts — flipping these vars back restores the print identity. */
-  /* --font-display: var(--font-qtype-cond); */
+  /* Studio Clean type roles: compact display faces with a clear sans body. */
   --font-display: var(--font-qtype-cond);
   --font-body: var(--font-google-sans);
   --font-serif-display: var(--font-anthropic-serif-display);
@@ -193,7 +207,7 @@ body {
 }
 
 ::selection {
-  background: var(--pm-hazard);
+  background: var(--pm-accent);
   color: var(--pm-paper);
 }
 
@@ -260,12 +274,6 @@ html[data-loading="on"] #footer {
   display: none;
 }
 
-/* Legacy font hooks used by the adapted footer block */
-.mozilla-headline {
-  font-family: var(--font-display);
-}
-
-.google-sans {
-  font-family: var(--font-body);
-}
+/* Font utility classes come from the semantic `font-display` and `font-body`
+   tokens registered in the @theme block above. */
 

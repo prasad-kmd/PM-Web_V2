@@ -91,7 +91,7 @@ export function CustomContextMenu({ children }: { children: React.ReactNode }) {
           borderRadius={14}
           glowIntensity={0.9}
           edgeSensitivity={32}
-          variant="violet"
+          variant="accent"
           className="w-full"
         >
           <div className="relative rounded-[14px] overflow-hidden bg-popover/95 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.12),0_1px_2px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)]">

@@ -6,6 +6,11 @@ import { fontClasses, fontVariables } from "@/lib/fonts";
 import { SiteShell } from "@/components/site/SiteShell";
 import { CustomContextMenu } from "@/components/custom-context-menu";
 import { Toaster } from "sonner";
+import {
+  ACCENT_COLORS,
+  ACCENT_STORAGE_KEY,
+  getAccentCSSVariables,
+} from "@/lib/accent-colors";
 
 export const metadata: Metadata = {
   title: {
@@ -17,17 +22,29 @@ export const metadata: Metadata = {
 };
 
 /**
- * Runs before first paint so the stored / system theme is applied with no
- * flash of the wrong substrate. Mirrors lib/theme.ts getInitialTheme().
+ * Runs before first paint so the stored / system theme and selected accent are
+ * applied without a flash of the default palette.
  */
+const ACCENT_BOOT_VALUES = Object.fromEntries(
+  ACCENT_COLORS.map((color) => [color.id, getAccentCSSVariables(color)]),
+);
+
 const THEME_BOOT_SCRIPT = `(function () {
   try {
     var stored = localStorage.getItem("pm-theme");
     var dark = stored
       ? stored === "dark"
       : window.matchMedia("(prefers-color-scheme: dark)").matches;
-    document.documentElement.classList.toggle("dark", dark);
-    if (location.pathname !== "/") document.documentElement.dataset.snap = "off";
+    var root = document.documentElement;
+    root.classList.toggle("dark", dark);
+    var accents = ${JSON.stringify(ACCENT_BOOT_VALUES)};
+    var accent = accents[localStorage.getItem("${ACCENT_STORAGE_KEY}")];
+    if (accent) {
+      Object.keys(accent).forEach(function (property) {
+        root.style.setProperty(property, accent[property]);
+      });
+    }
+    if (location.pathname !== "/") root.dataset.snap = "off";
   } catch (error) {}
 })();`;
 

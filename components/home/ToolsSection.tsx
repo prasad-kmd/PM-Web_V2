@@ -28,9 +28,13 @@ const GLOW_PROPS: Parameters<typeof BorderGlow>[0] = {
   borderRadius: 16,
   glowRadius: 24,
   glowIntensity: 0.8,
-  glowColor: "252 60 62",
+  glowColor: "var(--pm-accent)",
   animated: true,
-  colors: ["#a78bfa", "#8b5cf6", "#6366f1"],
+  colors: [
+    "var(--pm-accent)",
+    "color-mix(in srgb, var(--pm-accent) 76%, white)",
+    "color-mix(in srgb, var(--pm-accent) 52%, white)",
+  ],
 };
 
 export default function ToolsSection() {
