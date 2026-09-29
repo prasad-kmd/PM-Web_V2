@@ -19,3 +19,21 @@ export function getReaderMetrics(
 export function formatPixels(value: number) {
   return `${Number(value.toFixed(2))} px`;
 }
+
+/** Inverse of the display/CSS metrics; keep existing saved multipliers compatible. */
+export function pixelsToReaderSetting(
+  key: "fontSize" | "lineHeight" | "wordSpacing" | "letterSpacing",
+  pixels: number,
+  bodySize: number,
+): number {
+  switch (key) {
+    case "fontSize":
+      return pixels / 16;
+    case "lineHeight":
+      return pixels / (bodySize * 1.7);
+    case "wordSpacing":
+      return 1 + pixels / (bodySize * 0.5);
+    case "letterSpacing":
+      return 1 + pixels / (bodySize * 0.1);
+  }
+}

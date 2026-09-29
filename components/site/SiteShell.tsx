@@ -45,8 +45,9 @@ export function SiteShell({ children }: { children: ReactNode }) {
             <FooterSection />
             <div className="h-24 shrink-0 md:hidden" aria-hidden />
             <FloatingNavbar />
-            <MobileBottomNav />
-            <AccessibilityPanel />
+            <AccessibilityPanel>
+              <MobileBottomNav />
+            </AccessibilityPanel>
             <ScrollToTop />
           </SidebarInset>
         </SidebarProvider>

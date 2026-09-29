@@ -22,7 +22,7 @@ export function FloatingButton({
       aria-label="Reading options"
       {...props}
       className={cn(
-        "fixed right-4 bottom-[calc(env(safe-area-inset-bottom)_+_9rem)] z-40 lg:right-8 lg:bottom-24 inline-flex min-h-11 border border-border bg-card shadow-sm items-center gap-2 rounded-xl px-3 py-2.5 font-mono text-[11px] font-bold tracking-[0.14em] text-primary uppercase transition-colors hover:bg-muted/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+        "fixed right-4 bottom-[calc(env(safe-area-inset-bottom)_+_9rem)] z-40 lg:right-8 lg:bottom-24 hidden md:inline-flex min-h-11 border border-border bg-card shadow-sm items-center gap-2 rounded-xl px-3 py-2.5 font-mono text-[11px] font-bold tracking-[0.14em] text-primary uppercase transition-colors hover:bg-muted/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
         className,
       )}
     >

@@ -9,7 +9,7 @@ import {
   type SpringOptions,
 } from "motion/react";
 import Link from "next/link";
-import { useRef, type ReactNode } from "react";
+import { useRef, type ReactNode, type ReactElement } from "react";
 import {
   Tooltip,
   TooltipContent,
@@ -29,6 +29,10 @@ export type DockItemData = {
   onClick?: () => void;
   active?: boolean;
   expanded?: boolean;
+  /** Compose an action with a semantic trigger without nesting buttons. */
+  renderAction?: (
+    button: ReactElement<Record<string, unknown>>,
+  ) => ReactElement;
 };
 
 export type DockProps = {
@@ -76,12 +80,24 @@ function DockItem({
       : "text-ink-soft hover:bg-muted hover:text-ink",
   );
 
+  const action = (
+    <button
+      type="button"
+      onClick={item.onClick}
+      className={controlClass}
+      aria-label={item.label}
+      aria-expanded={item.expanded}
+    >
+      {item.icon}
+    </button>
+  );
+
   return (
     <motion.div
       ref={ref}
       style={{ width: size, height: size }}
       className={cn(
-        "relative inline-flex shrink-0 items-center justify-center rounded-2xl border border-border/70 bg-background/90 shadow-sm",
+        "relative inline-flex min-w-0 shrink items-center justify-center rounded-2xl border border-border/70 bg-background/90 shadow-sm",
         item.active && "border-primary/40",
       )}
     >
@@ -96,16 +112,10 @@ function DockItem({
             >
               {item.icon}
             </Link>
+          ) : item.renderAction ? (
+            item.renderAction(action)
           ) : (
-            <button
-              type="button"
-              onClick={item.onClick}
-              className={controlClass}
-              aria-label={item.label}
-              aria-expanded={item.expanded}
-            >
-              {item.icon}
-            </button>
+            action
           )}
         </TooltipTrigger>
         <TooltipContent side="top" sideOffset={10}>
@@ -128,7 +138,7 @@ export default function Dock({
   const mouseX = useMotionValue(-1000);
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex justify-center px-2 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] md:hidden">
+    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center px-2 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] md:hidden">
       <nav
         aria-label={label}
         onMouseMove={(event) => mouseX.set(event.clientX)}

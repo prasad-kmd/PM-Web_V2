@@ -186,22 +186,34 @@ export function AccessibilityProvider({ children }: { children: ReactNode }) {
     if (!hydrated) return;
     const persisted: Partial<AccessibilitySettings> = { ...settings };
     delete persisted.isPanelOpen;
-    try {
-      window.localStorage.setItem(
-        ACCESSIBILITY_STORAGE_KEY,
-        JSON.stringify(persisted),
-      );
-    } catch {
-      // Storage can be unavailable (private browsing); preferences still work
-      // for the current session.
-    }
+    // Keep synchronous storage writes off the slider's pointer-move hot path.
+    const persist = () => {
+      try {
+        window.localStorage.setItem(
+          ACCESSIBILITY_STORAGE_KEY,
+          JSON.stringify(persisted),
+        );
+      } catch {
+        // Preferences still work for this session when storage is unavailable.
+      }
+    };
+    const timer = window.setTimeout(persist, 180);
+    window.addEventListener("pagehide", persist);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("pagehide", persist);
+    };
   }, [settings, hydrated]);
 
   const updateSetting = <K extends keyof AccessibilitySettings>(
     key: K,
     value: AccessibilitySettings[K],
   ) => {
-    setSettings((previous) => ({ ...previous, [key]: value }));
+    setSettings((previous) =>
+      Object.is(previous[key], value)
+        ? previous
+        : { ...previous, [key]: value },
+    );
   };
 
   const resetAllSettings = () => {

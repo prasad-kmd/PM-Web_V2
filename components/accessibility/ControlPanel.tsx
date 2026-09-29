@@ -31,6 +31,7 @@ import {
 import {
   getReaderMetrics,
   formatPixels,
+  pixelsToReaderSetting,
 } from "@/lib/accessibility/reader-metrics";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
@@ -48,39 +49,34 @@ const SLIDERS: Array<{
   icon: LucideIcon;
   min: number;
   max: number;
-  step: number;
 }> = [
   {
     key: "fontSize",
     label: "Text size",
     icon: Type,
-    min: 0.85,
-    max: 1.5,
-    step: 0.05,
+    min: 12,
+    max: 24,
   },
   {
     key: "lineHeight",
     label: "Line spacing",
     icon: AlignLeft,
-    min: 1,
-    max: 1.4,
-    step: 0.05,
+    min: 18,
+    max: 60,
   },
   {
     key: "wordSpacing",
     label: "Word spacing",
     icon: List,
-    min: 0.8,
-    max: 1.5,
-    step: 0.05,
+    min: -2,
+    max: 12,
   },
   {
     key: "letterSpacing",
     label: "Letter spacing",
     icon: LetterText,
-    min: 0.9,
-    max: 1.3,
-    step: 0.05,
+    min: -1,
+    max: 4,
   },
 ];
 
@@ -177,8 +173,8 @@ export function ControlPanel() {
         </div>
 
         <div className="grid grid-cols-1 gap-x-4 gap-y-2 min-[400px]:grid-cols-2">
-          {SLIDERS.map(({ key, label, icon, min, max, step }) => {
-            const value = values[key];
+          {SLIDERS.map(({ key, label, icon, min, max }) => {
+            const value = pixels[key];
             return (
               <div key={key} className="flex min-w-0 flex-col gap-0.5">
                 <div className="flex flex-wrap items-center justify-between gap-x-1 gap-y-0.5">
@@ -192,11 +188,16 @@ export function ControlPanel() {
                   aria-label={label}
                   aria-valuetext={formatPixels(pixels[key])}
                   value={[value]}
-                  min={min}
-                  max={max}
-                  step={step}
+                  min={Math.min(min, Math.floor(value))}
+                  max={Math.max(max, Math.ceil(value))}
+                  step={1}
                   onValueChange={([next]) => {
-                    if (next !== undefined) updateSetting(key, next);
+                    if (next !== undefined) {
+                      updateSetting(
+                        key,
+                        pixelsToReaderSetting(key, next, pixels.fontSize),
+                      );
+                    }
                   }}
                 />
               </div>
@@ -205,7 +206,7 @@ export function ControlPanel() {
         </div>
 
         <p className="text-[11px] leading-4 text-ink-soft">
-          Pixel values; word and letter spacing add extra gaps.
+          1 px per step. Word and letter spacing add extra gaps.
         </p>
         <div className="flex items-center justify-between gap-3 border-t border-border pt-3">
           <div className="flex flex-col gap-0.5">

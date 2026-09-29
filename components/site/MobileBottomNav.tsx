@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Accessibility,
   Boxes,
   FolderKanban,
   Menu,
@@ -12,12 +13,16 @@ import {
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useSyncExternalStore } from "react";
+import { DialogTrigger } from "@/components/animate-ui/components/base/dialog";
+import { isReaderRoute } from "@/lib/accessibility/content-routes";
+import { useAccessibility } from "@/contexts/AccessibilityContext";
 import Dock, { type DockItemData } from "@/components/reactbits/Dock";
 import { useSidebar } from "@/components/animate-ui/components/radix/sidebar";
 import { applyTheme, getDocumentTheme, subscribeTheme } from "@/lib/theme";
 
 export function MobileBottomNav() {
   const pathname = usePathname();
+  const { isPanelOpen } = useAccessibility();
   const { openMobile, setOpenMobile } = useSidebar();
   const theme = useSyncExternalStore(
     subscribeTheme,
@@ -71,6 +76,17 @@ export function MobileBottomNav() {
       ),
     },
   ];
+
+  if (isReaderRoute(pathname)) {
+    items.splice(4, 0, {
+      label: "Reading options",
+      active: isPanelOpen,
+      icon: (
+        <Accessibility className="size-[18px]" strokeWidth={1.8} aria-hidden />
+      ),
+      renderAction: (button) => <DialogTrigger render={button} />,
+    });
+  }
 
   return <Dock items={items} label="Mobile navigation" />;
 }
