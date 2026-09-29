@@ -91,6 +91,12 @@
       "skillPath": "skills/motion-design/SKILL.md",
       "computedHash": "4f16f46c81f25a2a25b7a4720b7ea001e65f384b31b5b7f4b455fef87fbc9016"
     },
+    "notion-api": {
+      "source": "intellectronica/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/notion-api/SKILL.md",
+      "computedHash": "46d0841e05042daa8c309c4f6b7e71b6747301e98955bed2dde4ef2726dccd6c"
+    },
     "redesign-existing-projects": {
       "source": "Leonxlnx/taste-skill",
       "sourceType": "github",
