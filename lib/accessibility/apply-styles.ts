@@ -1,3 +1,4 @@
+import { getReaderMetrics } from "@/lib/accessibility/reader-metrics";
 import {
   READER_FONTS,
   type AccessibilitySettings,
@@ -23,18 +24,21 @@ export function applyAccessibilityStyles(
 ) {
   const font =
     READER_FONTS.find((option) => option.name === settings.fontFamily) ??
+    READER_FONTS.find((option) => option.name === "google-sans") ??
     READER_FONTS[0];
+
+  const metrics = getReaderMetrics(settings);
 
   container.style.setProperty("--a11y-font-size", `${settings.fontSize}`);
   container.style.setProperty("--a11y-font-family", font.variable);
   container.style.setProperty("--a11y-leading", `${settings.lineHeight}`);
   container.style.setProperty(
     "--a11y-word-spacing",
-    `${((settings.wordSpacing - 1) * 0.5).toFixed(3)}em`,
+    `${metrics.wordSpacing}px`,
   );
   container.style.setProperty(
     "--a11y-letter-spacing",
-    `${((settings.letterSpacing - 1) * 0.1).toFixed(3)}em`,
+    `${metrics.letterSpacing}px`,
   );
 
   container.classList.toggle("a11y-high-contrast", settings.isHighContrast);

@@ -287,7 +287,9 @@ export function ContentOutline({
                 </div>
                 <div
                   ref={scrollRef}
-                  className="min-h-0 flex-1 overflow-y-auto overscroll-contain pr-2 pb-4"
+                  className="toc-scrollbar-hidden relative min-h-0 flex-1 overflow-y-auto overscroll-contain pr-2 pb-4"
+                  tabIndex={0}
+                  aria-label="Scrollable table of contents"
                 >
                   <HookSidebar
                     aria-label="Table of contents"

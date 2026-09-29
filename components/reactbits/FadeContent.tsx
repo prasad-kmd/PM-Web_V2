@@ -1,9 +1,9 @@
 "use client";
 
-import * as React from 'react';
-import { useRef, useEffect } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import * as React from "react";
+import { useRef, useEffect } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -28,16 +28,16 @@ const FadeContent: React.FC<FadeContentProps> = ({
   container,
   blur = false,
   duration = 1000,
-  ease = 'power2.out',
+  ease = "power2.out",
   delay = 0,
   threshold = 0.1,
   initialOpacity = 0,
   disappearAfter = 0,
   disappearDuration = 0.5,
-  disappearEase = 'power2.in',
+  disappearEase = "power2.in",
   onComplete,
   onDisappearanceComplete,
-  className = '',
+  className = "",
   ...props
 }) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -56,7 +56,7 @@ const FadeContent: React.FC<FadeContentProps> = ({
     disappearDuration,
     disappearEase,
     onComplete,
-    onDisappearanceComplete
+    onDisappearanceComplete,
   });
 
   // Keep the snapshot fresh after every render (no dep array on purpose).
@@ -73,13 +73,16 @@ const FadeContent: React.FC<FadeContentProps> = ({
       disappearDuration,
       disappearEase,
       onComplete,
-      onDisappearanceComplete
+      onDisappearanceComplete,
     };
   });
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+
+    // Never hide essential controls behind an entrance animation in reduced motion.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const {
       container: containerSetting,
@@ -93,12 +96,15 @@ const FadeContent: React.FC<FadeContentProps> = ({
       disappearDuration: disappearDurationSetting,
       disappearEase: disappearEaseSetting,
       onComplete: onCompleteSetting,
-      onDisappearanceComplete: onDisappearanceCompleteSetting
+      onDisappearanceComplete: onDisappearanceCompleteSetting,
     } = settingsRef.current;
 
-    let scrollerTarget: Element | string | null = containerSetting || document.getElementById('snap-main-container') || null;
+    let scrollerTarget: Element | string | null =
+      containerSetting ||
+      document.getElementById("snap-main-container") ||
+      null;
 
-    if (typeof scrollerTarget === 'string') {
+    if (typeof scrollerTarget === "string") {
       scrollerTarget = document.querySelector(scrollerTarget);
     }
 
@@ -107,8 +113,8 @@ const FadeContent: React.FC<FadeContentProps> = ({
 
     gsap.set(el, {
       autoAlpha: initialOpacitySetting,
-      filter: blurSetting ? 'blur(10px)' : 'blur(0px)',
-      willChange: 'opacity, filter, transform'
+      filter: blurSetting ? "blur(10px)" : "blur(0px)",
+      willChange: "opacity, filter, transform",
     });
 
     const tl = gsap.timeline({
@@ -119,21 +125,21 @@ const FadeContent: React.FC<FadeContentProps> = ({
         if (disappearAfterSetting > 0) {
           gsap.to(el, {
             autoAlpha: initialOpacitySetting,
-            filter: blurSetting ? 'blur(10px)' : 'blur(0px)',
+            filter: blurSetting ? "blur(10px)" : "blur(0px)",
             delay: getSeconds(disappearAfterSetting),
             duration: getSeconds(disappearDurationSetting),
             ease: disappearEaseSetting,
-            onComplete: () => onDisappearanceCompleteSetting?.()
+            onComplete: () => onDisappearanceCompleteSetting?.(),
           });
         }
-      }
+      },
     });
 
     tl.to(el, {
       autoAlpha: 1,
-      filter: 'blur(0px)',
+      filter: "blur(0px)",
       duration: getSeconds(durationSetting),
-      ease: easeSetting
+      ease: easeSetting,
     });
 
     const st = ScrollTrigger.create({
@@ -141,7 +147,7 @@ const FadeContent: React.FC<FadeContentProps> = ({
       scroller: scrollerTarget || window,
       start: `top ${startPct}%`,
       once: true,
-      onEnter: () => tl.play()
+      onEnter: () => tl.play(),
     });
 
     return () => {

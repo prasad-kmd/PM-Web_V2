@@ -28,6 +28,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  getReaderMetrics,
+  formatPixels,
+} from "@/lib/accessibility/reader-metrics";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -45,8 +49,6 @@ const SLIDERS: Array<{
   min: number;
   max: number;
   step: number;
-  /** How the current value reads in the badge next to the label. */
-  format: (value: number) => string;
 }> = [
   {
     key: "fontSize",
@@ -55,7 +57,6 @@ const SLIDERS: Array<{
     min: 0.85,
     max: 1.5,
     step: 0.05,
-    format: (value) => `${Math.round(value * 100)}%`,
   },
   {
     key: "lineHeight",
@@ -64,7 +65,6 @@ const SLIDERS: Array<{
     min: 1,
     max: 1.4,
     step: 0.05,
-    format: (value) => `${Math.round(value * 100)}%`,
   },
   {
     key: "wordSpacing",
@@ -73,7 +73,6 @@ const SLIDERS: Array<{
     min: 0.8,
     max: 1.5,
     step: 0.05,
-    format: (value) => `${Math.round(value * 100)}%`,
   },
   {
     key: "letterSpacing",
@@ -82,7 +81,6 @@ const SLIDERS: Array<{
     min: 0.9,
     max: 1.3,
     step: 0.05,
-    format: (value) => `${Math.round(value * 100)}%`,
   },
 ];
 
@@ -98,9 +96,9 @@ function SectionLabel({
   return (
     <Label
       id={id}
-      className="flex items-center gap-2 font-mono text-[10px] font-black tracking-[0.2em] text-ink-soft uppercase"
+      className="flex items-center gap-1.5 text-[11px] font-medium text-ink"
     >
-      <Icon aria-hidden="true" className="size-3" />
+      <Icon aria-hidden="true" className="size-3.5" />
       {children}
     </Label>
   );
@@ -131,22 +129,24 @@ export function ControlPanel() {
     letterSpacing,
   };
 
+  const pixels = getReaderMetrics(values);
+
   return (
     <DialogPopup
       from="bottom"
-      className="max-h-[min(85dvh,40rem)] w-[min(26rem,calc(100vw-2rem))] overflow-y-auto border-border bg-card p-0 sm:max-w-md"
+      className="max-h-[calc(100dvh-2rem)] w-[min(22rem,calc(100vw-2rem))] overflow-y-auto border-border bg-card p-0 gap-0 sm:max-w-[22rem]"
     >
-      <DialogHeader className="flex flex-col gap-1 border-b border-border px-5 py-4 text-left">
-        <DialogTitle className="font-sans text-base font-semibold text-ink">
+      <DialogHeader className="flex flex-col gap-1 border-b border-border px-4 py-3 pr-10 text-left">
+        <DialogTitle className="font-sans text-sm font-semibold text-ink">
           Reading options
         </DialogTitle>
-        <DialogDescription className="font-mono text-[10px] tracking-[0.16em] text-ink-soft uppercase">
-          Applies to articles, tutorials and project write-ups
+        <DialogDescription className="text-[11px] leading-4 text-ink-soft">
+          Adjust the reading view.
         </DialogDescription>
       </DialogHeader>
 
-      <div className="flex flex-col gap-6 px-5 py-5">
-        <div className="flex flex-col gap-2.5">
+      <div className="flex flex-col gap-3.5 px-4 py-3">
+        <div className="flex flex-col gap-1.5">
           <SectionLabel id={typefaceLabelId} icon={Type}>
             Typeface
           </SectionLabel>
@@ -156,7 +156,7 @@ export function ControlPanel() {
           >
             <SelectTrigger
               aria-labelledby={typefaceLabelId}
-              className="h-9 w-full border-border bg-muted/40 font-mono text-xs"
+              className="h-8 min-h-8 w-full border-ink-soft/60 bg-muted/40 text-xs"
             >
               <SelectValue placeholder="Select a reading font" />
             </SelectTrigger>
@@ -166,7 +166,7 @@ export function ControlPanel() {
                   <SelectItem
                     key={font.name}
                     value={font.name}
-                    className="text-xs"
+                    className="min-h-8 text-xs"
                   >
                     {font.label}
                   </SelectItem>
@@ -176,67 +176,73 @@ export function ControlPanel() {
           </Select>
         </div>
 
-        <div className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">
-          {SLIDERS.map(({ key, label, icon, min, max, step, format }) => {
+        <div className="grid grid-cols-1 gap-x-4 gap-y-2 min-[400px]:grid-cols-2">
+          {SLIDERS.map(({ key, label, icon, min, max, step }) => {
             const value = values[key];
             return (
-              <div key={key} className="flex flex-col gap-2.5">
-                <div className="flex items-center justify-between gap-2">
+              <div key={key} className="flex min-w-0 flex-col gap-0.5">
+                <div className="flex flex-wrap items-center justify-between gap-x-1 gap-y-0.5">
                   <SectionLabel icon={icon}>{label}</SectionLabel>
-                  <span className="rounded bg-primary/10 px-1.5 py-0.5 font-mono text-[10px] font-black text-primary tabular-nums">
-                    {format(value)}
+                  <span className="rounded bg-primary/10 px-1.5 py-0.5 font-mono text-[10px] font-medium text-primary tabular-nums">
+                    {formatPixels(pixels[key])}
                   </span>
                 </div>
                 <Slider
+                  className="min-h-7 [&_[data-slot=slider-track]]:h-1 [&_[data-slot=slider-thumb]]:size-4"
                   aria-label={label}
+                  aria-valuetext={formatPixels(pixels[key])}
                   value={[value]}
                   min={min}
                   max={max}
                   step={step}
-                  onValueChange={([next]) => updateSetting(key, next)}
+                  onValueChange={([next]) => {
+                    if (next !== undefined) updateSetting(key, next);
+                  }}
                 />
               </div>
             );
           })}
         </div>
 
-        <div className="flex items-center justify-between gap-4 border-t border-border/60 pt-4">
+        <p className="text-[11px] leading-4 text-ink-soft">
+          Pixel values; word and letter spacing add extra gaps.
+        </p>
+        <div className="flex items-center justify-between gap-3 border-t border-border pt-3">
           <div className="flex flex-col gap-0.5">
             <SectionLabel id={contrastLabelId} icon={Contrast}>
-              High contrast text
+              High contrast
             </SectionLabel>
-            <p className="text-[11px] leading-4 text-ink-soft">
-              Maximise text-to-background contrast while reading
-            </p>
           </div>
-          <Switch
-            aria-labelledby={contrastLabelId}
-            checked={isHighContrast}
-            onCheckedChange={(checked) =>
-              updateSetting("isHighContrast", checked)
-            }
-          />
+          <div className="flex shrink-0 items-center gap-2">
+            <span className="text-[11px] font-medium text-ink">
+              {isHighContrast ? "On" : "Off"}
+            </span>
+            <Switch
+              size="sm"
+              aria-labelledby={contrastLabelId}
+              checked={isHighContrast}
+              onCheckedChange={(checked) =>
+                updateSetting("isHighContrast", checked)
+              }
+            />
+          </div>
         </div>
       </div>
 
-      <DialogFooter className="flex-row items-center justify-between gap-3 border-t border-border px-5 py-4">
+      <DialogFooter className="flex-row items-center justify-between gap-3 border-t border-border px-4 py-2 sm:justify-between">
         <Button
           type="button"
           variant="ghost"
           size="sm"
           onClick={resetAllSettings}
-          className="font-mono text-[10px] tracking-[0.14em] uppercase"
+          className="h-8 min-h-8 text-[11px]"
         >
           <RotateCcw aria-hidden="true" data-icon="inline-start" />
           Reset
         </Button>
         <DialogClose
           render={
-            <Button
-              type="button"
-              size="sm"
-              className="font-mono text-[10px] tracking-[0.14em] uppercase"
-            >
+            <Button type="button" size="sm" className="h-8 min-h-8 text-[11px]">
               Done
             </Button>
           }

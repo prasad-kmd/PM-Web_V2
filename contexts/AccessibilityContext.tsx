@@ -29,7 +29,7 @@ export type ReaderFontOption = {
 
 export const READER_FONTS: ReaderFontOption[] = [
   {
-    name: "default",
+    name: "noto-sans-display",
     variable: "var(--font-noto-sans-display)",
     label: "Noto Sans Display",
   },
@@ -81,7 +81,7 @@ export type AccessibilitySettings = {
 
 export const DEFAULT_ACCESSIBILITY_SETTINGS: AccessibilitySettings = {
   fontSize: 1,
-  fontFamily: "default",
+  fontFamily: "google-sans",
   lineHeight: 1,
   wordSpacing: 1,
   letterSpacing: 1,
@@ -149,7 +149,9 @@ function readStoredSettings(): Partial<AccessibilitySettings> {
       settings.letterSpacing = stored.letterSpacing;
     }
 
-    const fontFamily = stored.fontFamily;
+    // Migrate the old implicit default; preserve explicitly selected fonts.
+    const fontFamily =
+      stored.fontFamily === "default" ? "google-sans" : stored.fontFamily;
     if (
       typeof fontFamily === "string" &&
       READER_FONTS.some((font) => font.name === fontFamily)

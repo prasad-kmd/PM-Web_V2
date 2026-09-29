@@ -169,14 +169,17 @@
 
 /* Reader controls keep long-form Notion content comfortable to scan and adapt to text needs.
    The --a11y-* variables are written by components/accessibility/ContentArea from
-   the reading options dialog; every one of them has a neutral fallback so the
-   defaults stay identical to the pre-preference design. */
+   the reading options dialog. Body-text pixels match the panel readouts;
+   the container width is independent of the selected font and text size. */
 .reader-content {
-  --reader-size: calc(1.125rem * var(--a11y-font-size, 1));
-  --reader-code-size: calc(0.875rem * var(--a11y-font-size, 1));
-  --reader-leading: calc(1.8 * var(--a11y-leading, 1));
-  --reader-font: var(--a11y-font-family, var(--font-noto-sans-display));
-  max-width: 82ch;
+  --reader-size: calc(16px * var(--a11y-font-size, 1));
+  --reader-code-size: calc(14px * var(--a11y-font-size, 1));
+  --reader-leading: calc(1.7 * var(--a11y-leading, 1));
+  --reader-font: var(--a11y-font-family, var(--font-google-sans));
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
   margin-inline: auto;
   color: var(--pm-ink);
   font-family: var(--reader-font), system-ui, sans-serif;
@@ -348,3 +351,11 @@ html[data-loading="on"] #footer {
 
 /* Font utility classes come from the semantic `font-display` and `font-body`
    tokens registered in the @theme block above. */
+
+/* Hide only the TOC scrollbar; wheel, touch and keyboard scrolling stay enabled. */
+.toc-scrollbar-hidden {
+  scrollbar-width: none;
+}
+.toc-scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}

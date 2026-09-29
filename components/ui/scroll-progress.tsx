@@ -83,16 +83,13 @@ const ScrollProgress = ({
 
   const collapsedRef = React.useRef<HTMLDivElement>(null);
   const openRef = React.useRef<HTMLDivElement>(null);
-  const labelRef = React.useRef<HTMLSpanElement>(null);
   const rootRef = React.useRef<HTMLDivElement>(null);
 
   const [collapsedSize, setCollapsedSize] = React.useState<Size>();
   const [openSize, setOpenSize] = React.useState<Size>();
-  const [labelWidth, setLabelWidth] = React.useState<number>();
 
   useIsoLayoutEffect(() => {
     const measure = () => {
-      if (labelRef.current) setLabelWidth(labelRef.current.offsetWidth);
       if (collapsedRef.current) {
         setCollapsedSize({
           width: collapsedRef.current.offsetWidth,
@@ -109,7 +106,6 @@ const ScrollProgress = ({
 
     measure();
     const ro = new ResizeObserver(measure);
-    if (labelRef.current) ro.observe(labelRef.current);
     if (collapsedRef.current) ro.observe(collapsedRef.current);
     if (openRef.current) ro.observe(openRef.current);
     document.fonts?.ready.then(measure).catch(() => {});
@@ -122,7 +118,14 @@ const ScrollProgress = ({
       if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
     };
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") {
+        setOpen(false);
+        requestAnimationFrame(() =>
+          rootRef.current
+            ?.querySelector<HTMLButtonElement>("[aria-expanded]")
+            ?.focus(),
+        );
+      }
     };
     document.addEventListener("pointerdown", onPointer);
     document.addEventListener("keydown", onKey);
@@ -160,30 +163,36 @@ const ScrollProgress = ({
     <div
       ref={rootRef}
       data-slot="scroll-progress"
-      className={cn("fixed bottom-6 left-1/2 z-50 -translate-x-1/2", className)}
+      className={cn(
+        "fixed bottom-6 left-4 z-50 w-[min(22rem,calc(100vw-8rem))]",
+        className,
+      )}
       {...props}
     >
-      <div className="pointer-events-none invisible absolute" aria-hidden>
+      <div
+        className="pointer-events-none invisible absolute w-full"
+        aria-hidden
+      >
         <div
           ref={collapsedRef}
-          className="inline-flex items-center gap-2.5 py-1.5 pl-2 pr-4"
+          className="flex h-11 w-full min-w-0 items-center gap-2.5 py-1.5 pl-2 pr-4"
         >
-          <span className="h-5 w-5" />
-          <span
-            ref={labelRef}
-            className="whitespace-nowrap text-sm font-medium leading-none"
-          >
+          <span className="h-5 w-5 shrink-0" />
+          <span className="min-w-0 flex-1 truncate text-sm font-medium leading-none">
             {label}
           </span>
         </div>
-        <div ref={openRef} className="w-max p-1.5">
+        <div
+          ref={openRef}
+          className="max-h-[min(50dvh,24rem)] w-full overflow-hidden p-1.5"
+        >
           {sections.map((s) => (
             <div
               key={s.id}
-              className="flex items-center gap-3 px-3 py-2 text-sm font-medium leading-none"
+              className="flex h-11 min-w-0 items-center gap-3 px-3 py-2 text-sm font-medium leading-none"
             >
-              <span className="h-1.5 w-1.5" />
-              <span className="whitespace-nowrap">{s.label}</span>
+              <span className="h-1.5 w-1.5 shrink-0" />
+              <span className="min-w-0 truncate">{s.label}</span>
             </div>
           ))}
         </div>
@@ -193,7 +202,7 @@ const ScrollProgress = ({
         <motion.div
           data-slot="scroll-progress-surface"
           className={cn(
-            "absolute bottom-0 left-1/2 -translate-x-1/2 overflow-hidden border border-border/60 bg-background/70 shadow-lg backdrop-blur-md",
+            "absolute bottom-0 left-1/2 -translate-x-1/2 overflow-hidden border border-border/60 bg-background/95 shadow-lg backdrop-blur-md",
             squircle,
           )}
           initial={false}
@@ -208,7 +217,9 @@ const ScrollProgress = ({
             {open ? (
               <motion.ul
                 key="list"
-                className="absolute inset-0 flex flex-col p-1.5"
+                id={`${layoutId}-sections`}
+                aria-label="Table of contents"
+                className="toc-scrollbar-hidden absolute inset-0 flex flex-col overflow-y-auto overscroll-contain p-1.5"
                 initial={{
                   opacity: 0,
                   filter: reduceMotion ? undefined : "blur(4px)",
@@ -223,12 +234,15 @@ const ScrollProgress = ({
                 {sections.map((s, i) => {
                   const isActive = s.id === activeId;
                   return (
-                    <li key={s.id}>
+                    <li key={s.id} className="shrink-0">
                       <button
                         type="button"
+                        title={s.label}
+                        aria-current={isActive ? "location" : undefined}
+                        autoFocus={isActive}
                         onClick={() => selectSection(s.id)}
                         className={cn(
-                          "relative flex w-full items-center gap-3 rounded-[14px] px-3 py-2 text-left text-sm font-medium leading-none transition-colors",
+                          "relative flex h-11 w-full min-w-0 items-center gap-3 rounded-[14px] px-3 py-2 text-left text-sm font-medium leading-none transition-colors",
                           squircle,
                           isActive
                             ? "text-foreground"
@@ -265,7 +279,7 @@ const ScrollProgress = ({
                           }}
                         />
                         <motion.span
-                          className="relative whitespace-nowrap"
+                          className="relative min-w-0 flex-1 truncate"
                           initial={
                             reduceMotion
                               ? undefined
@@ -290,8 +304,11 @@ const ScrollProgress = ({
                 key="pill"
                 type="button"
                 onClick={() => setOpen(true)}
-                aria-label="Show sections"
-                className="absolute inset-0 flex items-center gap-2.5 py-1.5 pl-2 pr-4"
+                aria-label={`Show table of contents: ${label ?? "Sections"}`}
+                aria-expanded={open}
+                aria-controls={`${layoutId}-sections`}
+                title={label}
+                className="absolute inset-0 flex h-11 min-w-0 items-center gap-2.5 py-1.5 pl-2 pr-4"
                 initial={{
                   opacity: 0,
                   filter: reduceMotion ? undefined : "blur(4px)",
@@ -330,10 +347,7 @@ const ScrollProgress = ({
                   </svg>
                 </span>
 
-                <span
-                  className="relative h-5 shrink-0"
-                  style={{ width: labelWidth }}
-                >
+                <span className="relative h-5 min-w-0 flex-1 overflow-hidden">
                   <AnimatePresence initial={false}>
                     {label && (
                       <motion.span
@@ -341,7 +355,7 @@ const ScrollProgress = ({
                         // whenever the reader enters a new section.
                         key={label}
                         data-slot="scroll-progress-label"
-                        className="absolute inset-y-0 left-0 flex items-center whitespace-nowrap text-sm font-medium leading-none text-foreground"
+                        className="absolute inset-0 block truncate text-left text-sm font-medium leading-5 text-foreground"
                         initial={
                           reduceMotion
                             ? { opacity: 0 }
