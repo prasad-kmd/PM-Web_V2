@@ -1,10 +1,11 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import Image from "next/image";
 import { marked } from "marked";
 import sanitizeHtml from "sanitize-html";
 import katex from "katex";
-import hljs from "highlight.js/lib/common";
+import type { ThemedToken } from "shiki";
 import type { NotionBlock } from "@/lib/notion-cms";
+import { highlightCode, type HighlightedCode } from "@/lib/highlighting/shiki";
 import { CopyCodeButton } from "@/components/notion/CopyCodeButton";
 import { MermaidDiagram } from "@/components/notion/MermaidDiagram";
 import { NotionQuiz, type QuizSpec } from "@/components/notion/NotionQuiz";
@@ -45,19 +46,86 @@ function safeHref(value: unknown): string | null {
   return null;
 }
 
-function highlightCode(code: string, language: string): string | null {
-  if (
-    ["plain text", "text", "plaintext", "none"].includes(language.toLowerCase())
-  )
-    return null;
-  const highlighted = hljs.getLanguage(language)
-    ? hljs.highlight(code, { language }).value
-    : hljs.highlightAuto(code).value;
-  return sanitizeHtml(highlighted, {
-    allowedTags: ["span"],
-    allowedAttributes: { span: ["class"] },
-    disallowedTagsMode: "discard",
-  });
+/**
+ * Shiki emits font styles as a bitmask (italic = 1, bold = 2, underline = 4).
+ * Turn the set bits into inline styles for the token span.
+ */
+function tokenStyle(token: ThemedToken): CSSProperties {
+  const style: CSSProperties = {};
+  if (token.color) style.color = token.color;
+  const fontStyle = token.fontStyle ?? 0;
+  if (fontStyle & 1) style.fontStyle = "italic";
+  if (fontStyle & 2) style.fontWeight = 600;
+  if (fontStyle & 4) style.textDecoration = "underline";
+  return style;
+}
+
+/**
+ * Code blocks are highlighted ahead of rendering, keyed by Notion block id, so
+ * the block tree itself can stay a synchronous render.
+ */
+type HighlightMap = Map<string, HighlightedCode>;
+
+function codeSource(block: NotionBlock): string {
+  const data = record(block[block.type]);
+  return textValue(data?.rich_text);
+}
+
+/** Walks the whole block tree and pre-highlights every code block it finds. */
+async function collectHighlights(blocks: NotionBlock[]): Promise<HighlightMap> {
+  const entries: Array<[string, Promise<HighlightedCode | null>]> = [];
+
+  const visit = (items: NotionBlock[]) => {
+    for (const block of items) {
+      if (block.type === "code") {
+        const data = record(block.code);
+        const language =
+          typeof data?.language === "string" ? data.language : "plain text";
+        // Mermaid fences are rendered as live diagrams, not code.
+        if (language.toLowerCase() !== "mermaid") {
+          entries.push([block.id, highlightCode(codeSource(block), language)]);
+        }
+      }
+      if (block.children?.length) visit(block.children);
+    }
+  };
+
+  visit(blocks);
+
+  const highlights: HighlightMap = new Map();
+  await Promise.all(
+    entries.map(async ([id, pending]) => {
+      const highlighted = await pending;
+      if (highlighted) highlights.set(id, highlighted);
+    }),
+  );
+  return highlights;
+}
+
+function ShikiCode({ highlighted }: { highlighted: HighlightedCode }) {
+  return (
+    <pre
+      className="overflow-x-auto p-4 text-[13px] leading-6"
+      style={{
+        backgroundColor: highlighted.background,
+        color: highlighted.foreground,
+      }}
+    >
+      <code className={`language-${highlighted.language}`}>
+        {highlighted.lines.map((line, lineIndex) => (
+          // Lines only change when the source changes, so the index is a
+          // stable key here.
+          <span key={lineIndex} className="block">
+            {line.map((token, tokenIndex) => (
+              <span key={tokenIndex} style={tokenStyle(token)}>
+                {token.content}
+              </span>
+            ))}
+          </span>
+        ))}
+      </code>
+    </pre>
+  );
 }
 
 function renderMarkdown(source: string): string {
@@ -325,7 +393,10 @@ function captionText(data: RecordValue): string {
   return textValue(data.caption);
 }
 
-function renderListItem(block: NotionBlock): ReactNode {
+function renderListItem(
+  block: NotionBlock,
+  highlights: HighlightMap,
+): ReactNode {
   const data = blockData(block);
   return (
     <li
@@ -335,17 +406,19 @@ function renderListItem(block: NotionBlock): ReactNode {
       {renderText(data.rich_text)}
       {block.children?.length ? (
         <div className="mt-2">
-          <NotionBlocks blocks={block.children} />
+          <Blocks blocks={block.children} highlights={highlights} />
         </div>
       ) : null}
     </li>
   );
 }
 
-function renderBlock(block: NotionBlock): ReactNode {
+function renderBlock(block: NotionBlock, highlights: HighlightMap): ReactNode {
   const data = blockData(block);
   const children = block.children;
-  const nested = children?.length ? <NotionBlocks blocks={children} /> : null;
+  const nested = children?.length ? (
+    <Blocks blocks={children} highlights={highlights} />
+  ) : null;
   const text = renderText(data.rich_text);
 
   switch (block.type) {
@@ -463,28 +536,34 @@ function renderBlock(block: NotionBlock): ReactNode {
           />
         );
       }
-      const highlightedCode = highlightCode(code, language.toLowerCase());
+      const highlighted = highlights.get(block.id);
+      const surface = highlighted?.background ?? "#282c34";
       return (
         <figure
           key={block.id}
-          className="group overflow-hidden rounded-xl border border-border bg-zinc-950 text-zinc-100 dark:bg-black"
+          className="group overflow-hidden rounded-xl border border-border"
+          style={{ backgroundColor: surface }}
         >
           <figcaption className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-2">
             <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-zinc-400">
-              {language}
+              {highlighted?.language ?? language}
             </span>
             <CopyCodeButton code={code} />
           </figcaption>
-          <pre className="overflow-x-auto p-4 text-[13px] leading-6">
-            <code
-              className={`language-${language.toLowerCase().replace(/[^a-z0-9_-]/g, "-")}`}
-              {...(highlightedCode
-                ? { dangerouslySetInnerHTML: { __html: highlightedCode } }
-                : {})}
+          {highlighted ? (
+            <ShikiCode highlighted={highlighted} />
+          ) : (
+            <pre
+              className="overflow-x-auto p-4 text-[13px] leading-6"
+              style={{ backgroundColor: surface, color: "#abb2bf" }}
             >
-              {highlightedCode ? null : code}
-            </code>
-          </pre>
+              <code
+                className={`language-${language.toLowerCase().replace(/[^a-z0-9_-]/g, "-")}`}
+              >
+                {code}
+              </code>
+            </pre>
+          )}
         </figure>
       );
     }
@@ -695,7 +774,7 @@ function renderBlock(block: NotionBlock): ReactNode {
           {children?.map((column) => (
             <div key={column.id} className="min-w-0 space-y-4">
               {column.children?.length ? (
-                <NotionBlocks blocks={column.children} />
+                <Blocks blocks={column.children} highlights={highlights} />
               ) : null}
             </div>
           ))}
@@ -748,7 +827,17 @@ function renderBlock(block: NotionBlock): ReactNode {
   }
 }
 
-export function NotionBlocks({ blocks }: { blocks: NotionBlock[] }) {
+/**
+ * Synchronous renderer for a list of blocks. Highlights are resolved before
+ * rendering (see `NotionBlocks`) and passed down through the whole tree.
+ */
+function Blocks({
+  blocks,
+  highlights,
+}: {
+  blocks: NotionBlock[];
+  highlights: HighlightMap;
+}) {
   const content: ReactNode[] = [];
   let index = 0;
 
@@ -770,14 +859,23 @@ export function NotionBlocks({ blocks }: { blocks: NotionBlock[] }) {
           key={`${block.id}-list`}
           className={`space-y-2 pl-6 ${listType === "bulleted_list_item" ? "list-disc" : "list-decimal"}`}
         >
-          {grouped.map(renderListItem)}
+          {grouped.map((item) => renderListItem(item, highlights))}
         </List>,
       );
       continue;
     }
-    content.push(renderBlock(block));
+    content.push(renderBlock(block, highlights));
     index += 1;
   }
 
   return <div className="space-y-5">{content}</div>;
+}
+
+/**
+ * Renders a Notion block tree. Code blocks are highlighted with Shiki up front
+ * so the tree itself can render synchronously on the server.
+ */
+export async function NotionBlocks({ blocks }: { blocks: NotionBlock[] }) {
+  const highlights = await collectHighlights(blocks);
+  return <Blocks blocks={blocks} highlights={highlights} />;
 }

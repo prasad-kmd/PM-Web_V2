@@ -3,7 +3,6 @@ import type { ReactNode } from "react";
 import Script from "next/script";
 import "./globals.css";
 import "katex/dist/katex.min.css";
-import "highlight.js/styles/github-dark.min.css";
 import { fontClasses, fontVariables } from "@/lib/fonts";
 import { SiteShell } from "@/components/site/SiteShell";
 import { CustomContextMenu } from "@/components/custom-context-menu";

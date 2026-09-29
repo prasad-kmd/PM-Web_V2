@@ -13,7 +13,7 @@ const SUPPORTS = [
     icon: Type,
     title: "Adjust the reading view",
     description:
-      "On long-form content, use Reading options to enlarge text, switch between sans-serif and serif, change line spacing, or enable higher contrast.",
+      "On any article, tutorial or project write-up, open the floating A11Y button at the bottom-right of the page. Reading options lets you resize text, switch typeface, adjust line, word and letter spacing, or turn on high contrast. Choices are remembered on this device.",
   },
   {
     icon: Keyboard,

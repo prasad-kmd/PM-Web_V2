@@ -2,7 +2,11 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { List, X } from "lucide-react";
+import {
+  HookSidebar,
+  type HookSidebarItem,
+} from "@/components/ui/hook-sidebar";
+import { ScrollProgress } from "@/components/ui/scroll-progress";
 import type { AuthorSummary, ContentHeading } from "@/lib/notion-cms";
 
 function socialUrl(value: string, platform: "github" | "x" | "linkedin") {
@@ -32,6 +36,7 @@ function socialUrl(value: string, platform: "github" | "x" | "linkedin") {
   return `https://${domain}/${path.split("/").map(encodeURIComponent).join("/")}`;
 }
 
+/** Thin progress bar pinned to the top of the reading column (desktop only). */
 function DesktopReadingProgress() {
   const progressRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -74,188 +79,6 @@ function DesktopReadingProgress() {
   );
 }
 
-function MobileSectionProgress({
-  sections,
-}: {
-  sections: Array<{ id: string; label: string }>;
-}) {
-  const [activeId, setActiveId] = useState(sections[0]?.id || "");
-  const [open, setOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  const progressRef = useRef<SVGCircleElement>(null);
-
-  useEffect(() => {
-    let frame = 0;
-    const update = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => {
-        const threshold = 128;
-        let active = sections[0]?.id || "";
-        for (const section of sections) {
-          const top = document
-            .getElementById(section.id)
-            ?.getBoundingClientRect().top;
-          if (typeof top === "number" && top <= threshold) active = section.id;
-          else if (typeof top === "number") break;
-        }
-        setActiveId((current) => (current === active ? current : active));
-        const scrollable =
-          document.documentElement.scrollHeight - window.innerHeight;
-        const progress =
-          scrollable > 0
-            ? Math.min(1, Math.max(0, window.scrollY / scrollable))
-            : 0;
-        progressRef.current?.style.setProperty(
-          "stroke-dashoffset",
-          String(62.83 * (1 - progress)),
-        );
-      });
-    };
-    update();
-    window.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update, { passive: true });
-    return () => {
-      cancelAnimationFrame(frame);
-      window.removeEventListener("scroll", update);
-      window.removeEventListener("resize", update);
-    };
-  }, [sections]);
-
-  useEffect(() => {
-    if (!open) return;
-    const onPointerDown = (event: PointerEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
-    };
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setOpen(false);
-        triggerRef.current?.focus();
-      }
-    };
-    document.addEventListener("pointerdown", onPointerDown);
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.removeEventListener("pointerdown", onPointerDown);
-      document.removeEventListener("keydown", onKeyDown);
-    };
-  }, [open]);
-
-  const activeSection =
-    sections.find((section) => section.id === activeId) || sections[0];
-
-  const selectSection = (id: string) => {
-    setActiveId(id);
-    setOpen(false);
-    const target = document.getElementById(id);
-    const reduceMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-    target?.scrollIntoView({
-      behavior: reduceMotion ? "auto" : "smooth",
-      block: "start",
-    });
-    triggerRef.current?.focus({ preventScroll: true });
-  };
-
-  return (
-    <div
-      ref={rootRef}
-      className="fixed bottom-[calc(env(safe-area-inset-bottom)_+_5.25rem)] left-1/2 z-40 w-[min(22rem,calc(100vw_-_2rem))] -translate-x-1/2 lg:hidden"
-    >
-      <section
-        id="mobile-section-outline"
-        aria-label="Page sections"
-        hidden={!open}
-        className={`${open ? "block" : "hidden"} mb-2 max-h-[min(55vh,24rem)] overflow-y-auto rounded-xl border border-border bg-card p-2 shadow-xl`}
-      >
-        <div className="mb-1 flex items-center justify-between px-2 py-1">
-          <h2 className="text-xs font-semibold text-ink">Page sections</h2>
-          <button
-            type="button"
-            onClick={() => {
-              setOpen(false);
-              triggerRef.current?.focus();
-            }}
-            aria-label="Close page sections"
-            className="inline-flex size-8 items-center justify-center rounded-md text-ink-soft hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-          >
-            <X aria-hidden="true" className="size-4" />
-          </button>
-        </div>
-        <ol className="divide-y divide-border/70">
-          {sections.map((section, index) => {
-            const active = section.id === activeId;
-            return (
-              <li key={section.id}>
-                <button
-                  type="button"
-                  onClick={() => selectSection(section.id)}
-                  aria-current={active ? "location" : undefined}
-                  className={`flex min-h-11 w-full items-start gap-3 rounded-md px-2 py-2 text-left text-sm leading-5 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${active ? "bg-primary/10 font-medium text-primary" : "text-ink-soft hover:bg-muted hover:text-ink"}`}
-                >
-                  <span
-                    aria-hidden="true"
-                    className="mt-0.5 w-6 shrink-0 font-mono text-[10px] tabular-nums"
-                  >
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                  <span className="min-w-0 flex-1">{section.label}</span>
-                </button>
-              </li>
-            );
-          })}
-        </ol>
-      </section>
-      <button
-        ref={triggerRef}
-        type="button"
-        aria-expanded={open}
-        aria-controls="mobile-section-outline"
-        aria-label={
-          activeSection
-            ? `Page sections. Current section: ${activeSection.label}`
-            : "Show page sections"
-        }
-        onClick={() => setOpen((value) => !value)}
-        className="mx-auto flex min-h-11 max-w-full items-center gap-2.5 rounded-full border border-border bg-card/95 px-3 py-2 text-left text-sm font-medium text-ink shadow-lg backdrop-blur focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-      >
-        <span
-          className="relative inline-flex size-5 shrink-0 items-center justify-center"
-          aria-hidden="true"
-        >
-          <svg viewBox="0 0 24 24" className="size-5 -rotate-90">
-            <circle
-              cx="12"
-              cy="12"
-              r="10"
-              fill="none"
-              strokeWidth="2.5"
-              className="stroke-ink/15"
-            />
-            <circle
-              ref={progressRef}
-              cx="12"
-              cy="12"
-              r="10"
-              fill="none"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeDasharray="62.83"
-              strokeDashoffset="62.83"
-              className="stroke-primary"
-            />
-          </svg>
-        </span>
-        <span className="max-w-[16rem] truncate">
-          {activeSection?.label || "Page sections"}
-        </span>
-        <List aria-hidden="true" className="size-4 shrink-0 text-ink-soft" />
-      </button>
-    </div>
-  );
-}
-
 export function ContentOutline({
   headings,
   author,
@@ -266,10 +89,11 @@ export function ContentOutline({
   published: string | null;
 }) {
   const [activeId, setActiveId] = useState("");
-  const navRef = useRef<HTMLElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const shallowest = headings.length
     ? Math.min(...headings.map((heading) => heading.level))
     : 0;
+
   const mobileSections = useMemo(
     () =>
       headings
@@ -277,6 +101,17 @@ export function ContentOutline({
         .map(({ id, text }) => ({ id, label: text })),
     [headings, shallowest],
   );
+
+  const sidebarItems = useMemo<HookSidebarItem[]>(
+    () =>
+      headings.map((heading) => ({
+        label: heading.text,
+        depth: Math.max(0, Math.min(heading.level - shallowest, 2)),
+      })),
+    [headings, shallowest],
+  );
+
+  const activeIndex = headings.findIndex((heading) => heading.id === activeId);
 
   useEffect(() => {
     if (!headings.length) return;
@@ -298,18 +133,33 @@ export function ContentOutline({
     return () => observer.disconnect();
   }, [headings]);
 
+  // Keep the active row visible inside the sidebar's own scroller without
+  // scrolling the page itself.
   useEffect(() => {
-    if (!activeId || !navRef.current) return;
-    const activeRow = navRef.current.querySelector<HTMLElement>(
-      '[data-toc-active="true"]',
+    const container = scrollRef.current;
+    if (!container) return;
+    const row = container.querySelector<HTMLElement>(
+      '[data-slot="hook-sidebar-item"][data-active="true"]',
     );
-    const reduceMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-    activeRow?.scrollIntoView({
-      behavior: reduceMotion ? "auto" : "smooth",
-      block: "nearest",
-    });
+    if (!row) return;
+
+    const rowTop = row.offsetTop;
+    const rowBottom = rowTop + row.offsetHeight;
+    const viewTop = container.scrollTop;
+    const viewBottom = viewTop + container.clientHeight;
+    const behavior = window.matchMedia("(prefers-reduced-motion: reduce)")
+      .matches
+      ? ("auto" as const)
+      : ("smooth" as const);
+
+    if (rowTop < viewTop) {
+      container.scrollTo({ top: Math.max(0, rowTop - 8), behavior });
+    } else if (rowBottom > viewBottom) {
+      container.scrollTo({
+        top: rowBottom - container.clientHeight + 8,
+        behavior,
+      });
+    }
   }, [activeId]);
 
   const selectHeading = (heading: ContentHeading) => {
@@ -322,6 +172,11 @@ export function ContentOutline({
     });
   };
 
+  const selectHeadingAt = (index: number) => {
+    const heading = headings[index];
+    if (heading) selectHeading(heading);
+  };
+
   return (
     <>
       <DesktopReadingProgress />
@@ -330,7 +185,7 @@ export function ContentOutline({
           <div className="flex h-full min-h-0 flex-col gap-6">
             {author ? (
               <section className="shrink-0 border-b border-border pb-5">
-                <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-ink-soft">
+                <p className="font-mono text-[10px] tracking-[0.16em] text-ink-soft uppercase">
                   Written by
                 </p>
                 <div className="mt-3 flex items-center gap-3">
@@ -375,7 +230,7 @@ export function ContentOutline({
                       href={socialUrl(author.github, "github")}
                       target="_blank"
                       rel="noreferrer noopener"
-                      className="focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary hover:underline"
+                      className="hover:underline focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                     >
                       GitHub
                     </a>
@@ -385,7 +240,7 @@ export function ContentOutline({
                       href={socialUrl(author.twitter, "x")}
                       target="_blank"
                       rel="noreferrer noopener"
-                      className="focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary hover:underline"
+                      className="hover:underline focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                     >
                       X
                     </a>
@@ -395,7 +250,7 @@ export function ContentOutline({
                       href={socialUrl(author.linkedin, "linkedin")}
                       target="_blank"
                       rel="noreferrer noopener"
-                      className="focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary hover:underline"
+                      className="hover:underline focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                     >
                       LinkedIn
                     </a>
@@ -425,48 +280,33 @@ export function ContentOutline({
                   />
                   <h2
                     id="content-toc-heading"
-                    className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-soft"
+                    className="font-mono text-[10px] font-semibold tracking-[0.16em] text-ink-soft uppercase"
                   >
                     Table of contents
                   </h2>
                 </div>
-                <nav
-                  ref={navRef}
-                  aria-label="Table of contents"
-                  className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-4 pr-2"
+                <div
+                  ref={scrollRef}
+                  className="min-h-0 flex-1 overflow-y-auto overscroll-contain pr-2 pb-4"
                 >
-                  <ol className="space-y-0.5 border-l border-border">
-                    {headings.map((heading) => {
-                      const depth = Math.max(
-                        0,
-                        Math.min(heading.level - shallowest, 3),
-                      );
-                      return (
-                        <li key={heading.id}>
-                          <a
-                            href={`#${heading.id}`}
-                            data-toc-active={activeId === heading.id}
-                            aria-current={
-                              activeId === heading.id ? "location" : undefined
-                            }
-                            onClick={() => selectHeading(heading)}
-                            style={{ paddingLeft: `${0.75 + depth * 0.75}rem` }}
-                            className={`block rounded-r-md py-2 pr-2 text-left leading-5 transition-colors focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-primary ${depth === 0 ? "text-sm" : depth === 1 ? "text-[13px]" : "text-xs"} ${activeId === heading.id ? "border-l-2 border-primary bg-primary/5 font-medium text-ink" : "border-l-2 border-transparent text-ink-soft hover:bg-muted/70 hover:text-ink"}`}
-                          >
-                            {heading.text}
-                          </a>
-                        </li>
-                      );
-                    })}
-                  </ol>
-                </nav>
+                  <HookSidebar
+                    aria-label="Table of contents"
+                    items={sidebarItems}
+                    value={activeIndex}
+                    onChange={selectHeadingAt}
+                    color="var(--pm-accent)"
+                  />
+                </div>
               </section>
             ) : null}
           </div>
         </aside>
       ) : null}
       {mobileSections.length ? (
-        <MobileSectionProgress sections={mobileSections} />
+        <ScrollProgress
+          sections={mobileSections}
+          className="bottom-[calc(env(safe-area-inset-bottom)_+_5.5rem)] z-30 lg:hidden"
+        />
       ) : null}
     </>
   );

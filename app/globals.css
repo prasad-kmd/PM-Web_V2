@@ -167,55 +167,69 @@
   }
 }
 
-/* Reader controls keep long-form Notion content comfortable to scan and adapt to text needs. */
+/* Reader controls keep long-form Notion content comfortable to scan and adapt to text needs.
+   The --a11y-* variables are written by components/accessibility/ContentArea from
+   the reading options dialog; every one of them has a neutral fallback so the
+   defaults stay identical to the pre-preference design. */
 .reader-content {
-  --reader-leading: 1.8;
+  --reader-size: calc(1.125rem * var(--a11y-font-size, 1));
+  --reader-code-size: calc(0.875rem * var(--a11y-font-size, 1));
+  --reader-leading: calc(1.8 * var(--a11y-leading, 1));
+  --reader-font: var(--a11y-font-family, var(--font-noto-sans-display));
   max-width: 82ch;
   margin-inline: auto;
   color: var(--pm-ink);
-  font-family:
-    var(--reader-font, var(--font-noto-sans-display)), system-ui, sans-serif;
-  font-size: var(--reader-size, 1.125rem);
+  font-family: var(--reader-font), system-ui, sans-serif;
+  font-size: var(--reader-size);
   line-height: var(--reader-leading);
+  word-spacing: var(--a11y-word-spacing, normal);
+  letter-spacing: var(--a11y-letter-spacing, normal);
 }
 
 .reader-content :where(p, li, blockquote, td, th, summary) {
-  font-size: var(--reader-size, 1.125rem) !important;
+  font-size: var(--reader-size) !important;
   line-height: var(--reader-leading) !important;
 }
 
 .reader-content :where(h2, h3, h4) {
-  font-family:
-    var(--reader-font, var(--font-noto-sans-display)), system-ui, sans-serif !important;
+  font-family: var(--reader-font), system-ui, sans-serif !important;
   letter-spacing: -0.02em;
 }
 
 .reader-content :where(pre, code) {
-  font-size: var(--reader-code-size, 0.875rem);
+  font-size: var(--reader-code-size);
   line-height: 1.65;
 }
 
-.reader-content.reader-high-contrast {
+/* High contrast mode: `.a11y-high-contrast` is toggled by the reading options
+   dialog, `.reader-high-contrast` is kept as the legacy class name. */
+.reader-content.reader-high-contrast,
+.a11y-high-contrast {
   --pm-ink: #111111;
+  --pm-ink-soft: #333333;
   color: #111111;
   background: #ffffff;
   border-color: #555555;
 }
 
-.dark .reader-content.reader-high-contrast {
+.dark .reader-content.reader-high-contrast,
+.dark .a11y-high-contrast {
   --pm-ink: #ffffff;
+  --pm-ink-soft: #d4d4d8;
   color: #ffffff;
   background: #050505;
   border-color: #dddddd;
 }
 
-.reader-content.reader-high-contrast a {
+.reader-content.reader-high-contrast a,
+.a11y-high-contrast a {
   color: #0645ad;
   text-decoration: underline;
   text-underline-offset: 0.2em;
 }
 
-.dark .reader-content.reader-high-contrast a {
+.dark .reader-content.reader-high-contrast a,
+.dark .a11y-high-contrast a {
   color: #8ab4ff;
 }
 
