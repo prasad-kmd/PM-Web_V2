@@ -12,9 +12,11 @@ export type AccentColor = {
   dark: AccentModeValues;
 };
 
+/** Must name an entry in ACCENT_COLORS. The first entry is the default. */
+export const DEFAULT_ACCENT_ID = "violet";
+
 export const ACCENT_STORAGE_KEY = "pm-accent-color";
 export const ACCENT_CHANGE_EVENT = "pm-accent-color-change";
-export const DEFAULT_ACCENT_ID = "blue";
 
 export const ACCENT_COLORS: AccentColor[] = [
   {

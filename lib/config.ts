@@ -8,6 +8,7 @@ export const siteConfig = {
   revision: "v2.7.5",
   description:
     "Working archive of a mechanical + mechatronics engineer: robot builds, mechanism drawings, firmware notes, tutorials and the lessons learned between the CAD viewport and the workbench.",
+  email: "hello@prasadk.xyz",
   socialLinks: {
     github: "https://github.com/prasad-kmd",
     twitter: "https://x.com/prasad_kmd",
