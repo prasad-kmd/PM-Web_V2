@@ -32,6 +32,7 @@
     "@lottiefiles/dotlottie-web": "^0.80.0",
     "@marsidev/react-turnstile": "^1.6.1",
     "@notionhq/client": "^5.26.0",
+    "@react-three/fiber": "^9.8.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "fakeout": "^1.0.112",
@@ -52,6 +53,7 @@
     "shiki": "^4.4.3",
     "sonner": "^2.0.8",
     "tailwind-merge": "^3.7.0",
+    "three": "^0.186.1",
     "zod": "^4.6.5"
   },
   "devDependencies": {
@@ -61,6 +63,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/sanitize-html": "^2.16.1",
+    "@types/three": "^0.186.0",
     "eslint": "^9",
     "eslint-config-next": "16.3.5",
     "prettier": "^3.9.8",

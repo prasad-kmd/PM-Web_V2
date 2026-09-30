@@ -9,6 +9,8 @@ import {
   Boxes,
   FileText,
   FolderKanban,
+  Info,
+  Mail,
   Github,
   GraduationCap,
   Linkedin,
@@ -35,7 +37,11 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/animate-ui/components/radix/sidebar";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { AccentPicker } from "@/components/site/AccentPicker";
 import { siteConfig } from "@/lib/config";
 import { applyTheme, getDocumentTheme, subscribeTheme } from "@/lib/theme";
@@ -49,6 +55,8 @@ const NAV_ITEMS: { name: string; href: string; icon: LucideIcon }[] = [
   { name: "Tutorials", href: "/tutorials", icon: GraduationCap },
   { name: "Glossary", href: "/glossary", icon: BookOpen },
   { name: "Saved", href: "/bookmarks", icon: Bookmark },
+  { name: "About", href: "/about", icon: Info },
+  { name: "Contact", href: "/contact", icon: Mail },
 ];
 
 const SOCIALS = [
