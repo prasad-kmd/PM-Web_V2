@@ -17,7 +17,7 @@ import {
   PROFILE,
   PROFILE_STATS,
 } from "@/lib/profile-data";
-import { PROJECTS } from "@/lib/portfolio-data";
+import { getContentIndex } from "@/lib/notion-cms";
 
 export const metadata: Metadata = {
   title: "Portfolio",
@@ -35,18 +35,6 @@ const MARQUEE_ITEMS = [
   "Kandy, Sri Lanka",
 ];
 
-const CAROUSEL_ITEMS = PROJECTS.flatMap((project) =>
-  project.image
-    ? [
-        {
-          src: project.image.src,
-          title: `${project.ref} · ${project.name}`,
-          alt: project.image.alt,
-        },
-      ]
-    : [],
-);
-
 /**
  * The portfolio — the milestone CV direction. Ray animated backdrop behind
  * the profile banner (photo, not monogram), bending marquee under it, stats
@@ -54,7 +42,26 @@ const CAROUSEL_ITEMS = PROJECTS.flatMap((project) =>
  * milestones on a rail, and a card rail of personal details, education,
  * research interests and languages. Closes on a call to action.
  */
-export default function PortfolioPage() {
+export const revalidate = 3600;
+
+export default async function PortfolioPage() {
+  const { items: projects } = await getContentIndex("projects");
+  const carouselItems = projects
+    .flatMap((project) => {
+      const src = project.thumbnail ?? project.image;
+      return src
+        ? [
+            {
+              src,
+              title: project.title,
+              alt: project.title,
+              href: `/projects/${encodeURIComponent(project.slug)}`,
+            },
+          ]
+        : [];
+    })
+    .slice(0, 10);
+
   return (
     <div className="relative isolate">
       <div
@@ -67,7 +74,6 @@ export default function PortfolioPage() {
 
       <div className="mx-auto w-full max-w-7xl px-6 py-12 md:px-12 md:py-12">
         <header>
-
           <FadeContent duration={0.9} className="mt-6">
             <PointerGradientBorder>
               <div className="relative grid gap-6 p-6 md:grid-cols-[auto_1fr] md:items-center md:p-8">
@@ -145,17 +151,25 @@ export default function PortfolioPage() {
                 <h2 className="font-mono text-[12px] uppercase tracking-[0.2em] text-primary">
                   Featured projects
                 </h2>
-                <div className="mt-6 pb-2">
-                  <SkewedCarousel
-                    items={CAROUSEL_ITEMS}
-                    cardWidth={480}
-                    aspectRatio="16 / 10"
-                    rotation={45}
-                    borderRadius={12}
-                    loop
-                    className="py-4"
-                  />
-                </div>
+                {carouselItems.length ? (
+                  <div className="mt-6 pb-2">
+                    <SkewedCarousel
+                      items={carouselItems}
+                      cardWidth={480}
+                      aspectRatio="16 / 10"
+                      rotation={45}
+                      borderRadius={12}
+                      loop
+                      autoplay
+                      autoplayDelay={5000}
+                      className="py-4"
+                    />
+                  </div>
+                ) : (
+                  <p className="mt-6 text-sm text-ink-soft">
+                    Published projects with images will appear here.
+                  </p>
+                )}
               </section>
             </FadeContent>
 

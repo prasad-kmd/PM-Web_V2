@@ -4,37 +4,6 @@ import StaggeredText from "@/components/react-bits/staggered-text";
 import HeroCarousel, { type HeroSlide } from "@/components/home/HeroCarousel";
 import { siteConfig } from "@/lib/config";
 
-const SLIDES: HeroSlide[] = [
-  {
-    src: "/img/hero/robot-arm.jpg",
-    alt: "Six-axis industrial robot arm welding an engine block on a conveyor",
-    tag: "Robotics",
-    title: "Industrial robotics",
-    desc: "Six-axis manipulation cells: kinematics, trajectory planning and end-of-arm tooling built and commissioned on real lines.",
-  },
-  {
-    src: "/img/hero/pcb-macro.jpg",
-    alt: "Macro photograph of a microcontroller circuit board",
-    tag: "Embedded",
-    title: "Embedded systems",
-    desc: "STM32 + RTOS firmware, sensor fusion and field-oriented motor control running on custom four-layer PCBs.",
-  },
-  {
-    src: "/img/hero/cad-gearbox.jpg",
-    alt: "CAD wireframe of a planetary gearbox mechanism",
-    tag: "Mechanisms",
-    title: "Precision mechanisms",
-    desc: "Planetary gear trains and compliant mechanisms — modeled, simulated and drawn for manufacture down to the last tolerance.",
-  },
-  {
-    src: "/img/hero/drone-motor.jpg",
-    alt: "Carbon fiber drone with brushless motors on a workbench",
-    tag: "Autonomy",
-    title: "Autonomous systems",
-    desc: "Flight controllers, BLDC drives and perception loops for aerial platforms that hold position in Sri Lankan wind.",
-  },
-];
-
 const FOCUS_AREAS = [
   "Robotics",
   "Embedded systems",
@@ -45,14 +14,20 @@ const FOCUS_AREAS = [
   "PCB engineering",
 ];
 
-export default function HeroSection() {
+export default function HeroSection({ slides }: { slides: HeroSlide[] }) {
   return (
     <section
       id="hero"
       aria-label="Introduction"
-      className="snap-section relative min-h-dvh md:h-dvh md:overflow-hidden"
+      className="snap-section relative isolate min-h-dvh md:h-dvh md:overflow-hidden"
     >
-      <div className="mx-auto grid w-full max-w-7xl gap-12 px-6 py-14 md:h-full md:grid-cols-[48fr_52fr] md:items-center md:px-12">
+      <div
+        className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
+        aria-hidden
+      >
+        <div className="absolute inset-0 bg-paper/70 dark:bg-paper/80" />
+      </div>
+      <div className="relative mx-auto grid w-full max-w-7xl gap-12 px-6 py-14 md:h-full md:grid-cols-[48fr_52fr] md:items-center md:px-12">
         {/* Left column — identity */}
         <div className="flex flex-col justify-center">
           <p className="inline-flex w-fit items-center gap-2 rounded-full border border-border bg-card px-3.5 py-1.5 text-xs font-medium text-ink-soft shadow-sm">
@@ -74,8 +49,8 @@ export default function HeroSection() {
 
           <p className="mt-6 max-w-md font-body text-[15px] leading-relaxed text-ink-soft md:text-base">
             I design, model and build systems that move — robot arms, drive
-            trains, control loops. This site is my working archive: field
-            notes, builds, tutorials and the drawings behind them.
+            trains, control loops. This site is my working archive: field notes,
+            builds, tutorials and the drawings behind them.
           </p>
 
           <div className="mt-8 flex flex-wrap items-center gap-3">
@@ -108,7 +83,13 @@ export default function HeroSection() {
 
         {/* Right column — focus carousel */}
         <div className="h-[360px] overflow-hidden rounded-2xl border border-border bg-card shadow-sm md:h-[58dvh]">
-          <HeroCarousel slides={SLIDES} />
+          {slides.length ? (
+            <HeroCarousel slides={slides} />
+          ) : (
+            <div className="flex h-full items-center justify-center px-6 text-center text-sm text-ink-soft">
+              Latest writing and projects will appear here when published.
+            </div>
+          )}
         </div>
       </div>
     </section>

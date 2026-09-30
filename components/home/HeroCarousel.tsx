@@ -2,11 +2,13 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import { cn } from "@/lib/utils";
 
 export interface HeroSlide {
-  src: string;
+  src: string | null;
+  href: string;
   alt: string;
   tag: string;
   title: string;
@@ -35,7 +37,8 @@ export default function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight") setActive((c) => (c + 1) % slides.length);
-      if (e.key === "ArrowLeft") setActive((c) => (c - 1 + slides.length) % slides.length);
+      if (e.key === "ArrowLeft")
+        setActive((c) => (c - 1 + slides.length) % slides.length);
       if (e.key === " ") {
         e.preventDefault();
         setPaused((p) => !p);
@@ -51,7 +54,7 @@ export default function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
     <div
       role="group"
       aria-roledescription="carousel"
-      aria-label="Engineering focus areas"
+      aria-label="Latest writing and projects"
       className="group/carousel relative h-full overflow-hidden rounded-2xl border border-border bg-card shadow-sm"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
@@ -62,21 +65,31 @@ export default function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
       {/* Slides */}
       {slides.map((item, index) => (
         <div
-          key={item.src}
+          key={item.href}
           aria-hidden={index !== active}
           className={cn(
             "absolute inset-0 transition-[opacity,transform] duration-[900ms] ease-[cubic-bezier(0.22,1,0.36,1)]",
-            index === active ? "scale-100 opacity-100" : "scale-[1.03] opacity-0",
+            index === active
+              ? "scale-100 opacity-100"
+              : "scale-[1.03] opacity-0",
           )}
         >
-          <Image
-            src={item.src}
-            alt={item.alt}
-            fill
-            priority={index === 0}
-            sizes="(max-width: 768px) 100vw, 55vw"
-            className="object-cover"
-          />
+          {item.src ? (
+            <Image
+              src={item.src}
+              alt={item.alt}
+              fill
+              priority={index === 0}
+              unoptimized={item.src.startsWith("/api/notion-image")}
+              sizes="(max-width: 768px) 100vw, 55vw"
+              className="object-cover"
+            />
+          ) : (
+            <div
+              className="absolute inset-0 bg-linear-to-br from-primary/70 via-card to-primary/30"
+              aria-hidden
+            />
+          )}
         </div>
       ))}
 
@@ -120,7 +133,13 @@ export default function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/90 px-3 py-1 text-[11px] font-medium tracking-wide text-ink shadow-sm backdrop-blur-md dark:border-white/10 dark:bg-black/60 dark:text-white">
-                <span className={cn("h-1.5 w-1.5 rounded-full", paused ? "bg-amber-500" : "bg-emerald-500 animate-pulse")} aria-hidden />
+                <span
+                  className={cn(
+                    "h-1.5 w-1.5 rounded-full",
+                    paused ? "bg-amber-500" : "bg-emerald-500 animate-pulse",
+                  )}
+                  aria-hidden
+                />
                 {slide.tag}
               </span>
               <span className="hidden md:inline-flex items-center rounded-full bg-black/40 px-2.5 py-1 font-mono text-[10px] tracking-wide text-white/80 backdrop-blur-md dark:bg-white/10">
@@ -137,7 +156,9 @@ export default function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
                 transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
                 className="mt-3 max-w-[420px] font-display text-[22px] font-semibold leading-[0.95] tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.6),0_1px_2px_rgba(0,0,0,0.8)] md:text-[26px]"
               >
-                {slide.title}
+                <Link href={slide.href} className="focus-visible:underline">
+                  {slide.title}
+                </Link>
               </motion.h2>
             </AnimatePresence>
           </div>
@@ -158,7 +179,11 @@ export default function HeroCarousel({ slides }: { slides: HeroSlide[] }) {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.35, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
+              transition={{
+                duration: 0.35,
+                delay: 0.05,
+                ease: [0.22, 1, 0.36, 1],
+              }}
               className="max-w-[380px] text-[13px] leading-[1.6] text-white/85 drop-shadow-[0_1px_8px_rgba(0,0,0,0.6)] md:text-[14px]"
             >
               {slide.desc}

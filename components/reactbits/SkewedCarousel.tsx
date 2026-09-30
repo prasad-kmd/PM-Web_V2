@@ -18,6 +18,7 @@ import React, {
   useState,
 } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { motion, type PanInfo, type Transition } from "motion/react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -25,6 +26,8 @@ import { cn } from "@/lib/utils";
 export interface SkewedCarouselItem {
   /** Image source */
   src: string;
+  /** Optional destination for a selected slide */
+  href?: string;
   /** Caption rendered over the focused slide */
   title: string;
   /** Alt text, defaults to the title */
@@ -142,6 +145,7 @@ const Slide = ({
       >
         <Image
           src={item.src}
+          unoptimized={item.src.startsWith("/api/notion-image")}
           alt={item.alt ?? item.title}
           fill
           sizes={`${width}px`}
@@ -254,6 +258,7 @@ const SkewedCarousel: React.FC<SkewedCarouselProps> = ({
   onIndexChange,
 }) => {
   const count = items.length;
+  const router = useRouter();
   const token = useId();
   const [focused, setFocused] = useState(() =>
     settle(initialIndex, count, false),
@@ -352,7 +357,10 @@ const SkewedCarousel: React.FC<SkewedCarouselProps> = ({
               blur={titleBlur}
               captioned={showTitles}
               transition={motions.card}
-              onPick={() => focusSlide(index)}
+              onPick={() => {
+                if (index === focused && item.href) router.push(item.href);
+                else focusSlide(index);
+              }}
             />
           ))}
         </motion.div>
