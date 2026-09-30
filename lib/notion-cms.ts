@@ -334,7 +334,14 @@ function getApiVersion(): string {
   return process.env.NOTION_API_VERSION?.trim() || DEFAULT_API_VERSION;
 }
 
-function createNotionClient(cacheMode: CacheMode = "cache"): NotionClient {
+/**
+ * Builds a Notion client with the CMS fetch-caching policy applied.
+ * Exported for the comments API (`app/api/comments/route.ts`), which needs a
+ * `no-store` client so freshly posted comments are immediately visible.
+ */
+export function createNotionClient(
+  cacheMode: CacheMode = "cache",
+): NotionClient {
   const token = getToken();
   if (!token) throw new Error("Notion API credentials are not configured.");
 

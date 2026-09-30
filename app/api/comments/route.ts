@@ -1,210 +1,269 @@
-import { NextRequest, NextResponse } from "next/server";
-import { Client } from "@notionhq/client";
-import { isDisposableEmail } from "fakeout";
+import { headers } from "next/headers";
+import { NextResponse, type NextRequest } from "next/server";
+import { createNotionClient } from "@/lib/notion-cms";
+import { commentConfig } from "@/lib/comments/config";
+import { formatComment, MAX_COMMENT_LENGTH } from "@/lib/comments/format";
+import { identitySetCookie } from "@/lib/comments/identity-cookie";
+import { recordHit } from "@/lib/comments/rate-limit";
+import { getClientIp, getOriginHost } from "@/lib/comments/request-context";
+import { verifyTurnstile } from "@/lib/comments/turnstile";
 import {
-  RegExpMatcher,
-  englishDataset,
-  englishRecommendedTransformers,
-} from "obscenity";
-import {
-  CONTENT_TYPES,
-  getContentIndex,
-  type ContentType,
-} from "@/lib/notion-cms";
-import {
-  cleanHandle,
-  formatGuestComment,
-  validProfile,
-  type GuestProfile,
-} from "@/lib/guest-comments";
+  commentPayloadSchema,
+  storedEmail,
+  toFieldError,
+  validateCommentPayload,
+} from "@/lib/comments/validate";
+import { resolveCommenterAvatar } from "@/lib/comments/avatar";
+import type {
+  CommentError,
+  NotionComment,
+  ResolvedCommenter,
+} from "@/lib/comments/types";
+
+/**
+ * Guest comments backed by Notion's native comment API.
+ *
+ * Ported from PMEngineerLK-NextJS `app/api/comments/route.ts`, with the
+ * authentication requirement replaced by a guest identity (name + email +
+ * optional social handles) captured in the request body and cached in a cookie.
+ *
+ * GET  /api/comments?pageId=…&cursor=…   → list comments for a Notion page
+ * POST /api/comments                     → create one
+ */
 
 export const runtime = "nodejs";
-const matcher = new RegExpMatcher({
-  ...englishDataset.build(),
-  ...englishRecommendedTransformers,
-});
-const attempts = new Map<string, number[]>();
-const WINDOW = 60_000;
-const LIMIT = 3;
+export const dynamic = "force-dynamic";
 
-function notion() {
-  const auth = process.env.NOTION_API_KEY || process.env.NOTION_AUTH_TOKEN;
-  return auth
-    ? new Client({
-        auth,
-        notionVersion: process.env.NOTION_API_VERSION || "2026-03-11",
-      })
-    : null;
+const PAGE_SIZE = 25;
+
+type CommentListResponse = {
+  results: NotionComment[];
+  next_cursor: string | null;
+  has_more: boolean;
+};
+
+type RawNotionComment = {
+  id: string;
+  created_time: string;
+  rich_text?: Array<{ plain_text?: string }>;
+};
+
+function slim(comment: RawNotionComment): NotionComment {
+  return {
+    id: comment.id,
+    created_time: comment.created_time,
+    rich_text: (comment.rich_text ?? []).map((segment) => ({
+      plain_text: segment.plain_text ?? "",
+    })),
+  };
 }
 
-async function publishedPage(type: string | null, slug: string | null) {
-  if (
-    !type ||
-    !slug ||
-    !CONTENT_TYPES.includes(type as ContentType) ||
-    slug.length > 200
-  )
-    return null;
-  const { items } = await getContentIndex(type as ContentType);
-  return items.find((item) => item.slug === slug) ?? null;
-}
-
-function response(error: string, status: number) {
+function failure(
+  status: number,
+  error: CommentError,
+  headers?: Record<string, string>,
+): NextResponse {
   return NextResponse.json(
-    { error },
-    { status, headers: { "Cache-Control": "no-store" } },
+    { error: error.message, ...error },
+    { status, headers },
   );
 }
 
-export async function GET(req: NextRequest) {
-  const page = await publishedPage(
-    req.nextUrl.searchParams.get("type"),
-    req.nextUrl.searchParams.get("slug"),
-  );
-  if (!page) return response("Published page not found.", 404);
-  const client = notion();
-  if (!client) return response("Comments are not configured.", 503);
-  try {
-    const cursor = req.nextUrl.searchParams.get("cursor") || undefined;
-    if (cursor && (cursor.length > 300 || !/^[\w-]+$/.test(cursor)))
-      return response("Invalid cursor.", 400);
-    const list = await client.comments.list({
-      block_id: page.id,
-      start_cursor: cursor,
-      page_size: 20,
+/** Notion page ids are 32 hex chars, optionally dashed. */
+function isValidPageId(value: string | null): value is string {
+  return Boolean(value && /^[0-9a-f-]{32,36}$/i.test(value));
+}
+
+// ── GET ───────────────────────────────────────────────────────────────────────
+
+export async function GET(request: NextRequest): Promise<NextResponse> {
+  const { searchParams } = new URL(request.url);
+  const pageId = searchParams.get("pageId");
+  const cursor = searchParams.get("cursor") ?? undefined;
+
+  if (!isValidPageId(pageId)) {
+    return failure(400, {
+      type: "validation",
+      message: "Missing or invalid pageId.",
     });
-    return NextResponse.json(
-      {
-        results: list.results.map((entry) => ({
-          id: entry.id,
-          created_time: entry.created_time,
-          text: entry.rich_text.map((part) => part.plain_text).join(""),
-        })),
-        next_cursor: list.next_cursor,
-        has_more: list.has_more,
-      },
-      { headers: { "Cache-Control": "no-store" } },
+  }
+
+  const ip = await getClientIp();
+  const readLimit = recordHit("comments:read", ip, {
+    limit: 120,
+    window: 60_000,
+  });
+  if (readLimit.limited) {
+    return failure(
+      429,
+      { type: "rate_limit", message: "Too many requests. Try again shortly." },
+      { "Retry-After": String(Math.ceil(readLimit.retryAfterMs / 1000)) },
     );
+  }
+
+  try {
+    // no-store: a comment posted seconds ago must show up immediately.
+    const notion = createNotionClient("no-store");
+    const response = (await notion.comments.list({
+      block_id: pageId,
+      ...(cursor ? { start_cursor: cursor } : {}),
+      page_size: PAGE_SIZE,
+    })) as unknown as {
+      results: RawNotionComment[];
+      next_cursor: string | null;
+      has_more: boolean;
+    };
+
+    const payload: CommentListResponse = {
+      results: (response.results ?? []).map(slim),
+      next_cursor: response.next_cursor ?? null,
+      has_more: Boolean(response.has_more),
+    };
+
+    return NextResponse.json(payload, {
+      headers: {
+        // Fresh enough to survive a page refresh, short enough to feel live.
+        "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60",
+      },
+    });
   } catch (error) {
-    console.error("Unable to read Notion comments", error);
-    return response("Comments could not be loaded.", 502);
+    console.error("[comments] failed to list comments:", error);
+    return failure(502, {
+      type: "notion",
+      message: "Comments are unavailable right now. Please try again later.",
+    });
   }
 }
 
-export async function POST(req: NextRequest) {
-  const client = notion();
-  if (!client) return response("Comments are not configured.", 503);
-  const origin = req.headers.get("origin");
-  if (origin && origin !== req.nextUrl.origin)
-    return response("Invalid request origin.", 403);
-  if (Number(req.headers.get("content-length") || 0) > 10_000)
-    return response("Request is too large.", 413);
-  let payload: Record<string, unknown>;
-  try {
-    payload = await req.json();
-  } catch {
-    return response("Invalid request.", 400);
-  }
-  const { type, slug, content, turnstileToken } = payload;
-  const profile = payload.profile as GuestProfile | undefined;
-  if (
-    !profile ||
-    typeof profile !== "object" ||
-    !(["name", "email", "github", "linkedin", "twitter"] as const).every(
-      (key) => typeof profile[key] === "string",
-    ) ||
-    !validProfile(profile) ||
-    typeof content !== "string" ||
-    content.trim().length < 2 ||
-    content.length > 1500 ||
-    typeof turnstileToken !== "string" ||
-    turnstileToken.length > 2048
-  )
-    return response(
-      "Check your profile, comment, and security verification.",
-      400,
-    );
-  if (matcher.hasMatch(content) || matcher.hasMatch(profile.name))
-    return response("Inappropriate language detected.", 400);
-  if (isDisposableEmail(profile.email))
-    return response("Disposable email addresses are not accepted.", 400);
-  const page = await publishedPage(
-    typeof type === "string" ? type : null,
-    typeof slug === "string" ? slug : null,
-  );
-  if (!page) return response("Published page not found.", 404);
-  const secret = process.env.TURNSTILE_SECRET_KEY;
-  if (!secret || !turnstileToken)
-    return response("Security verification is unavailable.", 503);
-  try {
-    const verification = await fetch(
-      "https://challenges.cloudflare.com/turnstile/v0/siteverify",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-          secret,
-          response: turnstileToken,
-          remoteip: req.headers.get("x-real-ip") || "",
-        }),
-        cache: "no-store",
-      },
-    );
-    const result = (await verification.json()) as {
-      success?: boolean;
-      hostname?: string;
-    };
-    if (
-      !result.success ||
-      (process.env.TURNSTILE_HOSTNAME &&
-        result.hostname !== process.env.TURNSTILE_HOSTNAME)
-    )
-      return response("Security verification failed. Please retry.", 403);
-  } catch {
-    return response("Security verification failed. Please retry.", 502);
-  }
-  // Per-instance throttle, supplemented by mandatory single-use Turnstile tokens.
-  const ip =
-    req.headers.get("x-real-ip") ||
-    req.headers.get("x-forwarded-for")?.split(",")[0] ||
-    "unknown";
-  const now = Date.now();
-  const keys = [`ip:${ip}`, `email:${profile.email.toLowerCase()}`];
-  if (
-    keys.some(
-      (key) =>
-        (attempts.get(key) || []).filter((time) => now - time < WINDOW)
-          .length >= LIMIT,
-    )
-  )
-    return response("Too many comments. Please wait a minute.", 429);
-  for (const key of keys)
-    attempts.set(key, [
-      ...(attempts.get(key) || []).filter((time) => now - time < WINDOW),
-      now,
-    ]);
-  if (attempts.size > 5000)
-    for (const [entry, times] of attempts)
-      if (times.every((t) => now - t >= WINDOW)) attempts.delete(entry);
-  try {
-    const normalized = {
-      ...profile,
-      github: cleanHandle(profile.github),
-      linkedin: cleanHandle(profile.linkedin),
-      twitter: cleanHandle(profile.twitter),
-    };
-    const created = await client.comments.create({
-      parent: { page_id: page.id },
-      rich_text: [
-        { text: { content: formatGuestComment(normalized, content) } },
-      ],
+// ── POST ──────────────────────────────────────────────────────────────────────
+
+export async function POST(request: NextRequest): Promise<NextResponse> {
+  if (!commentConfig.enabled) {
+    return failure(403, {
+      type: "validation",
+      message: "Comments are temporarily closed.",
     });
+  }
+
+  // Cheap CSRF guard: a guest form has no token, so require a same-origin POST.
+  const origin = await getOriginHost();
+  const host = (await headers()).get("host");
+  if (origin && host && origin !== host) {
+    return failure(403, {
+      type: "validation",
+      message: "Cross-origin request blocked.",
+    });
+  }
+
+  const ip = await getClientIp();
+
+  const burst = recordHit("comments:burst", ip, commentConfig.burst);
+  if (burst.limited) {
+    return failure(
+      429,
+      {
+        type: "rate_limit",
+        message: "You are posting too quickly. Please wait a moment.",
+      },
+      { "Retry-After": String(Math.ceil(burst.retryAfterMs / 1000)) },
+    );
+  }
+
+  const daily = recordHit("comments:daily", ip, commentConfig.daily);
+  if (daily.limited) {
+    return failure(
+      429,
+      {
+        type: "rate_limit",
+        message: "Daily comment limit reached. Please come back tomorrow.",
+      },
+      { "Retry-After": String(Math.ceil(daily.retryAfterMs / 1000)) },
+    );
+  }
+
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return failure(400, {
+      type: "validation",
+      message: "Malformed request body.",
+    });
+  }
+
+  const parsed = commentPayloadSchema.safeParse(body);
+  if (!parsed.success) return failure(400, toFieldError(parsed.error));
+
+  const payload = parsed.data;
+
+  const token = (body as { turnstileToken?: unknown }).turnstileToken;
+  if (typeof token !== "string" || !token) {
+    return failure(400, {
+      type: "turnstile",
+      message: "Security verification missing. Please complete the check.",
+    });
+  }
+
+  if (!(await verifyTurnstile(token))) {
+    return failure(400, {
+      type: "turnstile",
+      message: "Security verification failed. Please try again.",
+    });
+  }
+
+  const validation = validateCommentPayload(payload);
+  if (!validation.success) {
+    // Log volume only — never the comment body.
+    console.warn(
+      `[comments] blocked (${validation.error.type}) ip=${ip} words=${
+        validation.error.blockedWords?.length ?? 0
+      }`,
+    );
+    return failure(400, validation.error);
+  }
+
+  const identity = validation.data;
+
+  const avatar = await resolveCommenterAvatar(identity);
+  const commenter: ResolvedCommenter = {
+    name: identity.name,
+    email: storedEmail(identity.email),
+    avatar: avatar.avatar,
+    avatarSource: avatar.avatar ? avatar.source : null,
+    handle: avatar.handle,
+  };
+
+  const content = formatComment(commenter, payload.content).slice(
+    0,
+    MAX_COMMENT_LENGTH + 400,
+  );
+
+  try {
+    const notion = createNotionClient("no-store");
+    const created = (await notion.comments.create({
+      parent: { page_id: payload.pageId },
+      rich_text: [{ text: { content } }],
+    })) as unknown as RawNotionComment;
+
     return NextResponse.json(
-      { id: created.id },
-      { status: 201, headers: { "Cache-Control": "no-store" } },
+      {
+        comment: slim(created),
+        // Echo the normalised identity so the form can update the cookie
+        // immediately instead of waiting for the next page load.
+        identity,
+        avatar,
+      },
+      { headers: { "Set-Cookie": identitySetCookie(identity) } },
     );
   } catch (error) {
-    console.error("Unable to create Notion comment", error);
-    return response("Your comment could not be saved.", 502);
+    console.error("[comments] failed to create comment:", error);
+
+    const code = (error as { code?: string })?.code;
+    const message =
+      code === "restricted_resource" || code === "unauthorized"
+        ? "Comments are not enabled for this integration. Grant it comment access in Notion."
+        : "Failed to post your comment. Please try again.";
+
+    return failure(502, { type: "notion", message });
   }
 }
