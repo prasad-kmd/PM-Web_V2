@@ -14,7 +14,9 @@ import {
 } from "@/lib/accent-colors";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://prasadm.vercel.app"),
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL || "https://prasadm.vercel.app",
+  ),
   alternates: { types: { "application/rss+xml": "/rss.xml" } },
   title: {
     default: "PrasadM - Mechatronics Engineering Undergraduate",
@@ -54,6 +56,7 @@ const THEME_BOOT_SCRIPT = `(function () {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
+      id="page-scroller"
       lang="en"
       data-scroll-behavior="smooth"
       suppressHydrationWarning

@@ -1,0 +1,110 @@
+.rail {
+  position: fixed;
+  z-index: 30;
+  top: 16dvh;
+  bottom: 16dvh;
+  right: clamp(14px, 2vw, 28px);
+  width: 28px;
+  border-radius: 16px;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(8px);
+  transition:
+    opacity 300ms ease,
+    transform 300ms ease;
+}
+
+.rail[data-visible="true"] {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(0);
+}
+
+.rail:focus-visible {
+  outline: 2px solid var(--pm-accent);
+  outline-offset: 3px;
+}
+
+.thread {
+  position: absolute;
+  inset: 16px auto;
+  left: 50%;
+  width: 3px;
+  transform: translateX(-50%);
+  border-radius: 6px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--pm-accent) 22%, var(--pm-paper)),
+    color-mix(in srgb, var(--pm-accent) 72%, var(--pm-card)) 55%,
+    color-mix(in srgb, var(--pm-accent) 25%, var(--pm-paper))
+  );
+  box-shadow:
+    inset 0 0 2px var(--pm-card),
+    0 0 7px color-mix(in srgb, var(--pm-accent) 30%, transparent);
+  opacity: 0.85;
+  transition:
+    opacity 200ms ease,
+    box-shadow 200ms ease;
+}
+
+.bead {
+  position: absolute;
+  left: 50%;
+  top: 16px;
+  width: 19px;
+  height: 33px;
+  border: 1px solid color-mix(in srgb, var(--pm-card) 85%, var(--pm-accent));
+  border-radius: 14px;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(
+    145deg,
+    var(--pm-card),
+    color-mix(in srgb, var(--pm-accent) 30%, var(--pm-card)) 47%,
+    var(--pm-accent) 75%,
+    color-mix(in srgb, var(--pm-accent) 12%, var(--pm-paper))
+  );
+  /* box-shadow:
+    0 3px 10px color-mix(in srgb, var(--pm-accent) 45%, transparent),
+    0 0 0 2px color-mix(in srgb, var(--pm-accent) 16%, transparent); */
+  transition:
+    top 180ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 220ms ease;
+  will-change: top;
+}
+
+.rail:hover .thread,
+.rail:focus-visible .thread {
+  opacity: 1;
+  box-shadow:
+    inset 0 0 2px var(--pm-card),
+    0 0 1px color-mix(in srgb, var(--pm-accent) 50%, transparent);
+}
+
+.rail:hover .bead,
+.rail:focus-visible .bead {
+  box-shadow:
+    0 4px 13px color-mix(in srgb, var(--pm-accent) 67%, transparent),
+    0 0 0 3px color-mix(in srgb, var(--pm-accent) 23%, transparent);
+}
+
+.rail[data-dragging="true"] .bead {
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rail,
+  .thread,
+  .bead {
+    transition: none;
+  }
+}
+
+/* The mobile dock and TOC already provide mobile navigation. */
+@media (max-width: 767px) {
+  .rail {
+    display: none;
+  }
+}

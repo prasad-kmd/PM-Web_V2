@@ -12,6 +12,7 @@ import { AppSidebar } from "@/components/site/AppSidebar";
 import { FloatingNavbar } from "@/components/site/FloatingNavbar";
 import { MobileBottomNav } from "@/components/site/MobileBottomNav";
 import { ScrollToTop } from "@/components/site/ScrollToTop";
+import { WisteriaScrollbar } from "@/components/site/WisteriaScrollbar";
 import { AccessibilityPanel } from "@/components/accessibility/AccessibilityPanel";
 import { AccessibilityProvider } from "@/contexts/AccessibilityContext";
 import { ContentBookmarksProvider } from "@/components/notion/ContentBookmarksProvider";
@@ -46,6 +47,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
               <MobileBottomNav />
             </AccessibilityPanel>
             <ScrollToTop />
+            <WisteriaScrollbar />
           </SidebarInset>
         </SidebarProvider>
       </ContentBookmarksProvider>
