@@ -1,0 +1,123 @@
+@property --pointer-angle {
+  syntax: "<angle>";
+  inherits: true;
+  initial-value: 160deg;
+}
+
+.card {
+  --pointer-angle: 160deg;
+  --pointer-palette: conic-gradient(
+    from var(--pointer-angle),
+    transparent 20%,
+    rgb(49 134 255 / 13%) 34%,
+    rgb(147 120 255 / 19%) 37%,
+    rgb(249 107 214 / 50%) 39%,
+    rgb(252 65 61 / 73%) 41%,
+    #fc413d 48%,
+    #ff6b2b 50%,
+    #fec700 52%,
+    #ffdb0f 56%,
+    #88de42 58%,
+    #0ebc5f 61%,
+    #2eaab2 70%,
+    rgb(49 134 255 / 73%) 73%,
+    transparent 95%
+  );
+  position: relative;
+  isolation: isolate;
+  border-radius: 1rem;
+  border: 1px solid var(--pm-border, var(--border));
+  background: var(--pm-card);
+}
+
+.border,
+.halo {
+  position: absolute;
+  inset: -1px;
+  z-index: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 900ms ease-out;
+  background: var(--pointer-palette);
+  /* Keep the center clear: the gradient lives on the thin perimeter only. */
+  padding: 2px;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+}
+
+/* Blur the already-cut-out ring, not the masked layer itself: filtering a
+   masked element clips away its glow outside the mask. */
+.halo {
+  inset: -4px;
+  padding: 0;
+  background: none;
+  -webkit-mask: none;
+  mask: none;
+  filter: blur(11px) saturate(1.5);
+}
+
+.halo::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--pointer-palette);
+  padding: 10px;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+}
+
+.card[data-hovered="true"] .border {
+  opacity: 1;
+}
+
+.card[data-hovered="true"] .halo {
+  opacity: 0.95;
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  border-radius: inherit;
+  /* An opaque card face covers the inward half of the blurred halo. */
+  background: var(--pm-card);
+}
+
+@keyframes borderArrival {
+  from { --pointer-angle: 160deg; }
+  to { --pointer-angle: 520deg; }
+}
+
+@keyframes borderFlash {
+  0%, 100% { opacity: 0; }
+  25%, 75% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .card:not([data-intro-done]) {
+    animation: borderArrival 2s cubic-bezier(0, 0, 0, 1) both;
+  }
+  .card:not([data-intro-done]) .border,
+  .card:not([data-intro-done]) .halo {
+    animation: borderFlash 2s ease both;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .border,
+  .halo {
+    transition: none;
+  }
+  .border {
+    opacity: 0.45;
+    background: var(--pm-accent);
+  }
+  .halo {
+    display: none;
+  }
+}

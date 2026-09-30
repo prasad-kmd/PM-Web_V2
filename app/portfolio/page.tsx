@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import FadeContent from "@/components/reactbits/FadeContent";
-import BorderGlow from "@/components/reactbits/BorderGlow";
+import PointerGradientBorder from "@/components/portfolio/PointerGradientBorder";
 import GlowCard from "@/components/reactbits/GlowCard";
 import BorderGlowTheme from "@/components/reactbits/BorderGlowTheme";
 import SkewedCarousel from "@/components/reactbits/SkewedCarousel";
@@ -69,17 +69,7 @@ export default function PortfolioPage() {
         <header>
 
           <FadeContent duration={0.9} className="mt-6">
-            <BorderGlow
-              colors={["#4285F4", "#EA4335", "#FBBC05", "#34A853"]}
-              glowColor="210 70 60"
-              borderRadius={16}
-              glowRadius={26}
-              glowIntensity={0.9}
-              edgeSensitivity={28}
-              coneSpread={30}
-              fillOpacity={0.28}
-              className="rounded-2xl"
-            >
+            <PointerGradientBorder>
               <div className="relative grid gap-6 p-6 md:grid-cols-[auto_1fr] md:items-center md:p-8">
                 <div className="relative size-50 overflow-hidden rounded-2xl border border-border shadow-sm md:size-50">
                   <Image
@@ -108,7 +98,7 @@ export default function PortfolioPage() {
                   <SocialLinks className="mt-4" />
                 </div>
               </div>
-            </BorderGlow>
+            </PointerGradientBorder>
           </FadeContent>
 
           <FadeContent delay={0.1} duration={0.9} className="mt-5">
