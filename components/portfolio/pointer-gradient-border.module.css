@@ -6,6 +6,7 @@
 
 .card {
   --pointer-angle: 160deg;
+  --glow-strength: 2;
   --pointer-palette: conic-gradient(
     from var(--pointer-angle),
     transparent 20%,
@@ -77,7 +78,7 @@
 }
 
 .card[data-hovered="true"] .halo {
-  opacity: 0.95;
+  opacity: calc(0.95 * var(--glow-strength));
 }
 
 .content {

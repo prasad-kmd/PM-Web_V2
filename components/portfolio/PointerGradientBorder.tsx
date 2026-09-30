@@ -25,6 +25,15 @@ export default function PointerGradientBorder({ children }: { children: ReactNod
     // gradient is centered around its 50% mark (opposite the start angle).
     const x = event.clientX - left - width / 2;
     const y = event.clientY - top - height / 2;
+    // React Bits BorderGlow's edge-proximity calculation, adapted for this
+    // palette: more bloom near the perimeter, without dimming the fine stroke.
+    const halfWidth = width / 2;
+    const halfHeight = height / 2;
+    const proximity = Math.min(
+      1,
+      Math.max(Math.abs(x) / halfWidth, Math.abs(y) / halfHeight),
+    );
+    card.style.setProperty("--glow-strength", String(0.55 + proximity * 0.45));
     const next = Math.atan2(y, x) * (180 / Math.PI) - 90;
     if (!card.dataset.hovered) {
       card.dataset.introDone = "true";
