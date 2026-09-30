@@ -3,7 +3,7 @@
 import { motion } from "motion/react";
 import {
   Boxes,
-  FolderKanban,
+  Info,
   House,
   Moon,
   Sun,
@@ -24,7 +24,7 @@ import { applyTheme, getDocumentTheme, subscribeTheme } from "@/lib/theme";
 
 const NAV_ITEMS: { label: string; href: string; icon: LucideIcon }[] = [
   { label: "Home", href: "/", icon: House },
-  { label: "Portfolio", href: "/portfolio", icon: FolderKanban },
+  { label: "About", href: "/about", icon: Info },
   { label: "Projects", href: "/projects", icon: Boxes },
   { label: "Tools", href: "/tools", icon: Wrench },
 ];

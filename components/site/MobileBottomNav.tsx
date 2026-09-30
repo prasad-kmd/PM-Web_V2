@@ -3,7 +3,7 @@
 import {
   Accessibility,
   Boxes,
-  FolderKanban,
+  Info,
   House,
   Menu,
   Moon,
@@ -40,11 +40,11 @@ export function MobileBottomNav() {
       icon: <House className="size-[18px]" strokeWidth={1.8} aria-hidden />,
     },
     {
-      label: "Portfolio",
-      href: "/portfolio",
-      active: pathname.startsWith("/portfolio"),
+      label: "About",
+      href: "/about",
+      active: pathname.startsWith("/about"),
       icon: (
-        <FolderKanban className="size-[18px]" strokeWidth={1.8} aria-hidden />
+        <Info className="size-[18px]" strokeWidth={1.8} aria-hidden />
       ),
     },
     {

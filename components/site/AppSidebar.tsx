@@ -47,6 +47,7 @@ import { siteConfig } from "@/lib/config";
 import { applyTheme, getDocumentTheme, subscribeTheme } from "@/lib/theme";
 
 const NAV_ITEMS: { name: string; href: string; icon: LucideIcon }[] = [
+  { name: "About", href: "/about", icon: Info },
   { name: "Portfolio", href: "/portfolio", icon: FolderKanban },
   { name: "Blog", href: "/blog", icon: Newspaper },
   { name: "Articles", href: "/articles", icon: FileText },
@@ -55,7 +56,6 @@ const NAV_ITEMS: { name: string; href: string; icon: LucideIcon }[] = [
   { name: "Tutorials", href: "/tutorials", icon: GraduationCap },
   { name: "Glossary", href: "/glossary", icon: BookOpen },
   { name: "Saved", href: "/bookmarks", icon: Bookmark },
-  { name: "About", href: "/about", icon: Info },
   { name: "Contact", href: "/contact", icon: Mail },
 ];
 
