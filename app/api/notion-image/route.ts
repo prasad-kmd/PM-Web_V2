@@ -7,16 +7,27 @@ export async function GET(request: Request) {
   const params = new URL(request.url).searchParams;
   const type = params.get("type");
   const id = params.get("id");
+  const source = params.get("source");
 
   const validId =
     typeof id === "string" &&
-    /^(?:[0-9a-f]{32}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i.test(id);
+    /^(?:[0-9a-f]{32}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i.test(
+      id,
+    );
   if ((type !== "page" && type !== "block") || !validId) {
     return new Response("Not found", { status: 404 });
   }
 
+  if (source !== null && (source !== "thumbnail" || type !== "page")) {
+    return new Response("Not found", { status: 404 });
+  }
+
   try {
-    const imageUrl = await getFreshNotionImageUrl(type, id);
+    const imageUrl = await getFreshNotionImageUrl(
+      type,
+      id,
+      source === "thumbnail" ? "thumbnail" : "default",
+    );
     if (!imageUrl) return new Response("Image not found", { status: 404 });
 
     return new Response(null, {

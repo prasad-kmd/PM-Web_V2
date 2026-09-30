@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="320" viewBox="0 0 800 320" fill="none">
+ <rect width="800" height="320" fill="#eaeaee"/>
+ <defs><pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0v32" stroke="#71717a" stroke-opacity=".09"/></pattern></defs>
+ <path fill="url(#grid)" d="M0 0h800v320H0z"/>
+ <g stroke="#71717a" stroke-width="1.5"><rect x="368" y="110" width="64" height="64" rx="8"/><path d="m380 158 13-14 10 10 8-7 10 11M382 128h9"/><circle cx="413" cy="128" r="5"/></g>
+ <text x="400" y="205" text-anchor="middle" font-family="monospace" font-size="11" letter-spacing="2" fill="#71717a">NO THUMBNAIL</text>
+ <path d="M24 40V24h16m720 0h16v16M24 280v16h16m720 0h16v-16" stroke="#a1a1aa"/>
+</svg>

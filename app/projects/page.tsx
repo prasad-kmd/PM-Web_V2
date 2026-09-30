@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { ContentIndexPage } from "@/components/notion/ContentIndexPage";
+import type { ListingSearchParams } from "@/lib/content-listing";
 
 export const revalidate = 3600;
 
 type PageProps = {
-  searchParams: Promise<{ q?: string | string[]; page?: string | string[] }>;
+  searchParams: Promise<ListingSearchParams>;
 };
 
 export const metadata: Metadata = {
@@ -14,17 +15,5 @@ export const metadata: Metadata = {
 };
 
 export default async function ProjectsPage({ searchParams }: PageProps) {
-  const params = await searchParams;
-  const query = Array.isArray(params.q) ? params.q[0] || "" : params.q || "";
-  const rawPage = Array.isArray(params.page)
-    ? params.page[0] || "1"
-    : params.page || "1";
-  const page = Number.parseInt(rawPage, 10);
-  return (
-    <ContentIndexPage
-      type="projects"
-      query={query}
-      page={Number.isFinite(page) ? page : 1}
-    />
-  );
+  return <ContentIndexPage type="projects" searchParams={await searchParams} />;
 }

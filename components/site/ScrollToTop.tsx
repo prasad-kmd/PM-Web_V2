@@ -65,7 +65,6 @@ export function ScrollToTop() {
       <button
         type="button"
         aria-label="Scroll to top"
-        title="Scroll to top"
         tabIndex={visible ? 0 : -1}
         onClick={() =>
           window.scrollTo({

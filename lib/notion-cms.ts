@@ -34,6 +34,8 @@ export type ContentItem = {
   categories: string[];
   technical: string[];
   image: string | null;
+  /** Listing-only image: never falls back to a cover or avatar. */
+  thumbnail: string | null;
   readTime: number | null;
   aiAssisted: boolean;
   author: AuthorSummary | null;
@@ -276,6 +278,9 @@ function normalizePage(
   const image = imageSource
     ? `/api/notion-image?type=page&id=${encodeURIComponent(page.id)}`
     : null;
+  const thumbnail = propertyImage(findProperty(properties, ["Thumbnail"]))
+    ? `/api/notion-image?type=page&source=thumbnail&id=${encodeURIComponent(page.id)}`
+    : null;
   const date = propertyDate(
     findProperty(properties, ["Date", "Published date", "Publication date"]),
   );
@@ -301,6 +306,7 @@ function normalizePage(
       findProperty(properties, ["Technical", "Technology"]),
     ),
     image,
+    thumbnail,
     readTime:
       configuredReadTime && configuredReadTime > 0
         ? Math.ceil(configuredReadTime)
@@ -582,6 +588,7 @@ export const getContentDetail = cache(
 export async function getFreshNotionImageUrl(
   resourceType: "block" | "page",
   id: string,
+  source: "default" | "thumbnail" = "default",
 ): Promise<string | null> {
   const notion = createNotionClient("no-store");
   const resource = (resourceType === "block"
@@ -593,6 +600,13 @@ export async function getFreshNotionImageUrl(
     string,
     unknown
   > | null;
+  if (source === "thumbnail") {
+    if (resourceType !== "page" || !pageProperties) return null;
+    const thumbnail = propertyImage(
+      findProperty(pageProperties, ["Thumbnail"]),
+    );
+    return thumbnail && /^https?:\/\//i.test(thumbnail) ? thumbnail : null;
+  }
   const pagePropertyImage = pageProperties
     ? propertyImage(
         findProperty(pageProperties, [
