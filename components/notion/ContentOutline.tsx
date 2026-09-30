@@ -307,7 +307,7 @@ export function ContentOutline({
       {mobileSections.length ? (
         <ScrollProgress
           sections={mobileSections}
-          className="bottom-[calc(env(safe-area-inset-bottom)_+_5.5rem)] z-30 lg:hidden"
+          className="bottom-[calc(env(safe-area-inset-bottom)_+_5.5rem)] left-1/2 w-[min(22rem,calc(100vw-2rem))] -translate-x-1/2 z-30 lg:hidden"
         />
       ) : null}
     </>

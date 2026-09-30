@@ -4,9 +4,9 @@ import {
   Accessibility,
   Boxes,
   FolderKanban,
+  House,
   Menu,
   Moon,
-  Newspaper,
   Sun,
   Wrench,
   X,
@@ -34,18 +34,18 @@ export function MobileBottomNav() {
 
   const items: DockItemData[] = [
     {
+      label: "Home",
+      href: "/",
+      active: pathname === "/",
+      icon: <House className="size-[18px]" strokeWidth={1.8} aria-hidden />,
+    },
+    {
       label: "Portfolio",
       href: "/portfolio",
       active: pathname.startsWith("/portfolio"),
       icon: (
         <FolderKanban className="size-[18px]" strokeWidth={1.8} aria-hidden />
       ),
-    },
-    {
-      label: "Blog",
-      href: "/blog",
-      active: pathname.startsWith("/blog"),
-      icon: <Newspaper className="size-[18px]" strokeWidth={1.8} aria-hidden />,
     },
     {
       label: "Projects",

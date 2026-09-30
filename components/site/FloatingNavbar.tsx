@@ -2,13 +2,10 @@
 
 import { motion } from "motion/react";
 import {
-  BookOpen,
   Boxes,
-  FileText,
   FolderKanban,
-  GraduationCap,
+  House,
   Moon,
-  Newspaper,
   Sun,
   Wrench,
   type LucideIcon,
@@ -26,13 +23,10 @@ import { cn } from "@/lib/utils";
 import { applyTheme, getDocumentTheme, subscribeTheme } from "@/lib/theme";
 
 const NAV_ITEMS: { label: string; href: string; icon: LucideIcon }[] = [
+  { label: "Home", href: "/", icon: House },
   { label: "Portfolio", href: "/portfolio", icon: FolderKanban },
-  { label: "Blog", href: "/blog", icon: Newspaper },
-  { label: "Articles", href: "/articles", icon: FileText },
   { label: "Projects", href: "/projects", icon: Boxes },
   { label: "Tools", href: "/tools", icon: Wrench },
-  { label: "Tutorials", href: "/tutorials", icon: GraduationCap },
-  { label: "Glossary", href: "/glossary", icon: BookOpen },
 ];
 
 export function FloatingNavbar() {
@@ -48,12 +42,14 @@ export function FloatingNavbar() {
   return (
     <nav
       aria-label="Floating navigation"
-      className="fixed right-6 top-5 z-50 hidden items-center gap-1 rounded-full border border-border/80 bg-background/80 p-1.5 shadow-[0_10px_36px_-14px_color-mix(in_srgb,var(--pm-ink)_30%,transparent)] backdrop-blur-2xl md:flex"
+      className="fixed right-6 top-5 z-50 hidden items-center gap-1 rounded-full border border-border/80 bg-background/80 p-1.5 shadow-[0_0_30px_-7px_color-mix(in_srgb,var(--pm-ink)_26%,transparent)] backdrop-blur-2xl md:flex"
     >
       {NAV_ITEMS.map((item) => {
         const Icon = item.icon;
         const active =
-          pathname === item.href || pathname.startsWith(`${item.href}/`);
+          item.href === "/"
+            ? pathname === "/"
+            : pathname === item.href || pathname.startsWith(`${item.href}/`);
 
         return (
           <Tooltip key={item.href}>
