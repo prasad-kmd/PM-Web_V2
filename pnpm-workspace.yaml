@@ -2,3 +2,5 @@ allowBuilds:
   core-js: true
   sharp: false
   unrs-resolver: false
+minimumReleaseAgeExclude:
+  - fakeout@1.0.112

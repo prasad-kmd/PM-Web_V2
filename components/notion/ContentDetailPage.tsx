@@ -7,6 +7,7 @@ import { ReaderExperience } from "@/components/notion/ReaderExperience";
 import { BookmarkToggle } from "@/components/notion/BookmarkToggle";
 import { ContentOutline } from "@/components/notion/ContentOutline";
 import { RelatedContent } from "@/components/notion/RelatedContent";
+import { CommentsPanel } from "@/components/comments/CommentsPanel";
 import {
   CONTENT_META,
   estimateReadingTime,
@@ -18,7 +19,7 @@ import {
 } from "@/lib/notion-cms";
 import { SITE_URL } from "@/lib/content-metadata";
 
-function SetupState({ }: { type: ContentType }) {
+function SetupState({}: { type: ContentType }) {
   return (
     <section
       className="mt-8 rounded-xl border border-border bg-card p-6 md:p-8"
@@ -267,6 +268,7 @@ export async function ContentDetailPage({
           ) : null}
 
           <RelatedContent type={type} current={item} />
+          <CommentsPanel type={type} slug={item.slug} />
         </article>
 
         <ContentOutline
