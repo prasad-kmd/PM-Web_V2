@@ -108,7 +108,7 @@ export function ContentBookmarksProvider({ children }: { children: ReactNode }) 
       ? current.filter((saved) => !(saved.type === item.type && saved.slug === item.slug))
       : [item, ...current];
     saveSnapshot(next);
-    toast.success(exists ? "Removed from saved items" : "Saved for later");
+    toast.success(exists ? "Removed from Bookmarks" : "Added to Bookmarks");
   }, []);
 
   const removeBookmark = useCallback((type: ContentType, slug: string) => {

@@ -1,7 +1,15 @@
 "use client";
 
 import { MessageSquare } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import { Button } from "@/components/ui/button";
 import {
   Drawer,
@@ -28,22 +36,42 @@ import { CommentList } from "./comment-list";
 /**
  * The comments surface.
  *
- * One trigger, two presentations:
+ * One overlay, two presentations:
  *   - desktop (≥768px) → coss `Sheet`, sliding in from the right
  *   - mobile  (<768px) → coss `Drawer`, sliding up from the bottom
  *
- * Both render the same `CommentsPanelBody`, so behaviour and state are
- * identical; only the container differs. The panel is mounted on every
- * `articles|blog|tutorials|projects|glossary/[slug]` page through
- * `components/notion/ContentDetailPage.tsx`.
+ * `CommentsProvider` owns the open state and renders the overlay, so any
+ * descendant can open it — that is what lets the article header carry a
+ * Comments button without the trigger having to live next to the panel.
+ * This is coss's documented "detached trigger via controlled state" pattern.
+ *
+ * Both containers render the same `CommentsPanelBody`, so behaviour and state
+ * are identical; only the shell differs.
  */
 
-type CommentsPanelProps = {
-  /** Notion page id the comments are attached to. */
-  pageId: string;
-  /** Human-readable title used in the overlay header. */
+type CommentsPanelContextValue = {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  openPanel: () => void;
+  /** Comment count, or `null` until the panel has been opened once. */
+  count: number | null;
   contentTitle: string;
 };
+
+const CommentsPanelContext = createContext<CommentsPanelContextValue | null>(
+  null,
+);
+
+/** Reads the panel controls. Must be called inside `<CommentsProvider>`. */
+export function useCommentsPanel(): CommentsPanelContextValue {
+  const context = useContext(CommentsPanelContext);
+  if (!context) {
+    throw new Error(
+      "useCommentsPanel must be used within a <CommentsProvider>.",
+    );
+  }
+  return context;
+}
 
 type BodyProps = {
   pageId: string;
@@ -105,12 +133,110 @@ function CommentsPanelBody({ pageId, open, onCountChange }: BodyProps) {
   );
 }
 
-export function CommentsPanel({ pageId, contentTitle }: CommentsPanelProps) {
+type CommentsProviderProps = {
+  /** Notion page id the comments are attached to. */
+  pageId: string;
+  /** Human-readable title used in the overlay header. */
+  contentTitle: string;
+  children: ReactNode;
+};
+
+/**
+ * Owns the overlay and exposes the controls to everything it wraps.
+ * Render it high enough in the tree that both the header button and the
+ * end-of-article call to action are descendants.
+ */
+export function CommentsProvider({
+  pageId,
+  contentTitle,
+  children,
+}: CommentsProviderProps) {
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
   const [count, setCount] = useState<number | null>(null);
 
-  const trigger = (
+  const openPanel = useCallback(() => setOpen(true), []);
+
+  const value = useMemo<CommentsPanelContextValue>(
+    () => ({ open, setOpen, openPanel, count, contentTitle }),
+    [open, openPanel, count, contentTitle],
+  );
+
+  const body = (
+    <CommentsPanelBody pageId={pageId} open={open} onCountChange={setCount} />
+  );
+
+  return (
+    <CommentsPanelContext.Provider value={value}>
+      {children}
+
+      {isMobile ? (
+        <Drawer open={open} onOpenChange={setOpen} position="bottom">
+          <DrawerPopup showBar showCloseButton className="max-h-[88vh]">
+            <DrawerHeader className="pt-8">
+              <DrawerTitle className="text-lg">Discussion</DrawerTitle>
+              <DrawerDescription>
+                Comments on “{contentTitle}”
+              </DrawerDescription>
+            </DrawerHeader>
+            <DrawerPanel>{body}</DrawerPanel>
+          </DrawerPopup>
+        </Drawer>
+      ) : (
+        <Sheet open={open} onOpenChange={setOpen}>
+          <SheetPopup side="right" className="max-w-lg">
+            <SheetHeader className="pe-12">
+              <SheetTitle className="text-lg">Discussion</SheetTitle>
+              <SheetDescription>Comments on “{contentTitle}”</SheetDescription>
+            </SheetHeader>
+            <SheetPanel>{body}</SheetPanel>
+          </SheetPopup>
+        </Sheet>
+      )}
+    </CommentsPanelContext.Provider>
+  );
+}
+
+type CommentsTriggerProps = {
+  children?: ReactNode;
+  variant?: "default" | "outline" | "secondary" | "ghost";
+  size?: "default" | "sm" | "lg" | "icon";
+  className?: string;
+  /** Append the comment count once it is known. */
+  showCount?: boolean;
+};
+
+/** A button that opens the comments overlay from anywhere under the provider. */
+export function CommentsTrigger({
+  children = "Comments",
+  variant = "outline",
+  size = "default",
+  className,
+  showCount = true,
+}: CommentsTriggerProps) {
+  const { openPanel, count } = useCommentsPanel();
+  const label =
+    showCount && count !== null ? `${children} (${count})` : children;
+
+  return (
+    <Button
+      type="button"
+      variant={variant}
+      size={size}
+      className={className}
+      onClick={openPanel}
+    >
+      <MessageSquare aria-hidden="true" />
+      {label}
+    </Button>
+  );
+}
+
+/** The end-of-article "Join the discussion" block. */
+export function CommentsInlineCta() {
+  const { openPanel, count } = useCommentsPanel();
+
+  return (
     <section
       id="comments"
       className="mt-10 flex flex-col gap-3 rounded-xl border border-border/70 bg-muted/25 p-5 sm:flex-row sm:items-center sm:justify-between"
@@ -126,56 +252,27 @@ export function CommentsPanel({ pageId, contentTitle }: CommentsPanelProps) {
           </p>
         </div>
       </div>
-      <Button type="button" variant="outline" onClick={() => setOpen(true)}>
-        <MessageSquare />
+      <Button type="button" variant="outline" onClick={openPanel}>
+        <MessageSquare aria-hidden="true" />
         {count === null ? "Comments" : `Comments (${count})`}
       </Button>
     </section>
   );
+}
 
-  if (isMobile) {
-    return (
-      <>
-        {trigger}
-        <Drawer open={open} onOpenChange={setOpen} position="bottom">
-          <DrawerPopup showBar showCloseButton className="max-h-[88vh]">
-            <DrawerHeader className="pt-8">
-              <DrawerTitle className="text-lg">Discussion</DrawerTitle>
-              <DrawerDescription>
-                Comments on “{contentTitle}”
-              </DrawerDescription>
-            </DrawerHeader>
-            <DrawerPanel>
-              <CommentsPanelBody
-                pageId={pageId}
-                open={open}
-                onCountChange={setCount}
-              />
-            </DrawerPanel>
-          </DrawerPopup>
-        </Drawer>
-      </>
-    );
-  }
+type CommentsPanelProps = {
+  pageId: string;
+  contentTitle: string;
+};
 
+/**
+ * Self-contained variant: provider + the inline call to action.
+ * Use this when nothing else on the page needs to open the panel.
+ */
+export function CommentsPanel({ pageId, contentTitle }: CommentsPanelProps) {
   return (
-    <>
-      {trigger}
-      <Sheet open={open} onOpenChange={setOpen}>
-        <SheetPopup side="right" className="max-w-lg">
-          <SheetHeader className="pe-12">
-            <SheetTitle className="text-lg">Discussion</SheetTitle>
-            <SheetDescription>Comments on “{contentTitle}”</SheetDescription>
-          </SheetHeader>
-          <SheetPanel>
-            <CommentsPanelBody
-              pageId={pageId}
-              open={open}
-              onCountChange={setCount}
-            />
-          </SheetPanel>
-        </SheetPopup>
-      </Sheet>
-    </>
+    <CommentsProvider pageId={pageId} contentTitle={contentTitle}>
+      <CommentsInlineCta />
+    </CommentsProvider>
   );
 }

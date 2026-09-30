@@ -22,7 +22,7 @@ export function SavedItemsPage() {
         <section className="mt-8 flex flex-col items-center rounded-xl border border-dashed border-border px-6 py-14 text-center" role="status">
           <Bookmark aria-hidden="true" className="size-7 text-primary/70" />
           <h2 className="mt-4 font-display text-xl font-medium text-ink">Nothing saved yet</h2>
-          <p className="mt-2 max-w-md text-sm leading-6 text-ink-soft">Use “Save for later” on any project, article, post, tutorial, or glossary entry to keep it here.</p>
+          <p className="mt-2 max-w-md text-sm leading-6 text-ink-soft">Use “Save” on any project, article, post, tutorial, or glossary entry to keep it here.</p>
         </section>
       ) : null}
 

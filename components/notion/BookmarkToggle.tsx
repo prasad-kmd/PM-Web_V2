@@ -23,7 +23,7 @@ export function BookmarkToggle({ item }: { item: Pick<ContentItem, "type" | "slu
       className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-xs font-medium text-ink-soft transition-colors hover:border-primary/40 hover:text-primary disabled:cursor-wait disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
     >
       <Bookmark aria-hidden="true" className={`size-4 ${saved ? "fill-current text-primary" : ""}`} />
-      {saved ? "Saved" : "Save for later"}
+      {saved ? "Saved" : "Save"}
     </button>
   );
 }
