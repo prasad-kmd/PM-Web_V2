@@ -1,6 +1,6 @@
 "use client";
 
-import { MessageSquare, UserRoundX } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -52,7 +52,7 @@ type BodyProps = {
 };
 
 function CommentsPanelBody({ pageId, open, onCountChange }: BodyProps) {
-  const { identity, hydrate, save, clear } = useCommenterIdentity();
+  const { identity, hydrate, save } = useCommenterIdentity();
   const [pending, setPending] = useState<NotionComment[]>([]);
   const [fetchedCount, setFetchedCount] = useState(0);
 
@@ -101,28 +101,6 @@ function CommentsPanelBody({ pageId, open, onCountChange }: BodyProps) {
         pending={pending}
         onCountChange={handleCount}
       />
-
-      {identity ? (
-        <div className="flex items-start justify-between gap-3 border-t border-border/60 pt-4">
-          <p className="text-xs leading-5 text-muted-foreground">
-            Remembered on this device as{" "}
-            <span className="font-medium text-foreground">{identity.name}</span>
-            .
-          </p>
-          <Button
-            type="button"
-            size="xs"
-            variant="ghost"
-            onClick={() => {
-              clear();
-              setPending([]);
-            }}
-          >
-            <UserRoundX />
-            Not you?
-          </Button>
-        </div>
-      ) : null}
     </div>
   );
 }

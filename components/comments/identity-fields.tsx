@@ -124,51 +124,54 @@ export function IdentityFields({
         ) : (
           !compact && (
             <p className="text-xs text-muted-foreground">
-              Not published. Disposable addresses are rejected.
+              Used for validation and stored with the comment. Disposable
+              addresses are rejected.
             </p>
           )
         )}
       </div>
 
-      <fieldset className="grid gap-3">
-        <legend className="mb-1.5 text-xs font-medium">
-          Profile link{" "}
+      <details className="group rounded-lg border border-border/70 bg-card/70">
+        <summary className="cursor-pointer px-3 py-2 text-xs font-medium text-foreground">
+          Social profiles {anyHandle ? "(saved) " : ""}
           <span className="font-normal text-muted-foreground">(optional)</span>
-        </legend>
-        {SOCIAL_FIELDS.map(({ key, label, placeholder, prefix, Icon }) => (
-          <div key={key} className="grid gap-1.5">
-            <Label
-              htmlFor={`commenter-${key}`}
-              className="flex items-center gap-1.5 text-xs font-medium"
-            >
-              <Icon className="size-3.5" />
-              {label}
-            </Label>
-            <div className="flex items-center gap-2">
-              <span
-                aria-hidden
-                className="hidden shrink-0 font-mono text-[11px] text-muted-foreground sm:inline"
+        </summary>
+        <div className="grid gap-3 border-t border-border/60 p-3">
+          {SOCIAL_FIELDS.map(({ key, label, placeholder, prefix, Icon }) => (
+            <div key={key} className="grid gap-1.5">
+              <Label
+                htmlFor={`commenter-${key}`}
+                className="flex items-center gap-1.5 text-xs font-medium"
               >
-                {prefix}
-              </span>
-              <Input
-                id={`commenter-${key}`}
-                value={value[key] ?? ""}
-                disabled={disabled}
-                placeholder={placeholder}
-                autoComplete="off"
-                spellCheck={false}
-                aria-invalid={Boolean(errorFor(key))}
-                onChange={(event) => update({ [key]: event.target.value })}
-              />
+                <Icon className="size-3.5" />
+                {label}
+              </Label>
+              <div className="flex items-center gap-2">
+                <span
+                  aria-hidden
+                  className="hidden shrink-0 font-mono text-[11px] text-muted-foreground sm:inline"
+                >
+                  {prefix}
+                </span>
+                <Input
+                  id={`commenter-${key}`}
+                  value={value[key] ?? ""}
+                  disabled={disabled}
+                  placeholder={placeholder}
+                  autoComplete="off"
+                  spellCheck={false}
+                  aria-invalid={Boolean(errorFor(key))}
+                  onChange={(event) => update({ [key]: event.target.value })}
+                />
+              </div>
             </div>
-          </div>
-        ))}
-        <p className="flex items-start gap-1.5 text-xs text-muted-foreground">
-          <UserRound className="mt-0.5 size-3.5 shrink-0" />
-          The first handle we can resolve supplies your avatar.
-        </p>
-      </fieldset>
+          ))}
+          <p className="flex items-start gap-1.5 text-xs text-muted-foreground">
+            <UserRound className="mt-0.5 size-3.5 shrink-0" />
+            The first handle we can resolve supplies your avatar.
+          </p>
+        </div>
+      </details>
     </div>
   );
 }
