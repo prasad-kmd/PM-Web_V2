@@ -47,7 +47,7 @@ const THEME_BOOT_SCRIPT = `(function () {
         root.style.setProperty(property, accent[property]);
       });
     }
-    if (location.pathname !== "/") root.dataset.snap = "off";
+    if (location.pathname === "/") root.dataset.snap = "home";
   } catch (error) {}
 })();`;
 

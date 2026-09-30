@@ -99,14 +99,13 @@ export default function Loading() {
     const previousSnap = root.style.scrollSnapType;
     root.dataset.loading = "on";
     root.style.scrollSnapType = "none";
-    const park = () => window.scrollTo(0, 0);
+    const park = () => window.scrollTo({ top: 0, behavior: "instant" });
     park();
     window.addEventListener("scroll", park, { passive: true });
     return () => {
       window.removeEventListener("scroll", park);
       delete root.dataset.loading;
       root.style.scrollSnapType = previousSnap;
-      window.scrollTo(0, 0);
     };
   }, []);
 

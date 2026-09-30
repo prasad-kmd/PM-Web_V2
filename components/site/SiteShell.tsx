@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 import { usePathname } from "next/navigation";
 import {
   SidebarInset,
@@ -21,18 +21,15 @@ import { ContentBookmarksProvider } from "@/components/notion/ContentBookmarksPr
  * The rail starts collapsed (icon mode) on desktop. Homepage chapter snap
  * stays on the document scroller — this shell must not become its own
  * scroll container, or the section jump stops working. Interior routes set
- * data-snap="off" so they scroll normally.
+ * data-snap="home" is enabled only on the homepage.
  */
 export function SiteShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const root = document.documentElement;
-    if (pathname === "/") delete root.dataset.snap;
-    else root.dataset.snap = "off";
-    return () => {
-      delete root.dataset.snap;
-    };
+    if (pathname === "/") root.dataset.snap = "home";
+    else delete root.dataset.snap;
   }, [pathname]);
 
   return (
