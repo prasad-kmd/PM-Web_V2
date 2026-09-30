@@ -368,7 +368,7 @@
 }
 .metadata dt {
   font:
-    8px/12px var(--font-jetbrains-mono),
+    10px/12px var(--font-qtype-cond),
     monospace;
   color: var(--pm-ink-soft);
   text-transform: uppercase;
@@ -382,7 +382,7 @@
   gap: 4px;
   margin: 0;
   font:
-    10px/16px var(--font-jetbrains-mono),
+    12px/16px var(--font-body),
     monospace;
 }
 .metadata dd svg {
@@ -477,7 +477,7 @@
 .feed[data-view="list"] .metadata > div {
   padding: 3px 0;
   display: grid;
-  grid-template-columns: 42px minmax(0, 1fr);
+  grid-template-columns: 70px minmax(0, 1fr);
   align-items: center;
 }
 .feed[data-view="list"] .metadata dt {

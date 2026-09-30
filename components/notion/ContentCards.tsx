@@ -80,7 +80,7 @@ function Metadata({ item }: { item: ContentItem }) {
         </dd>
       </div>
       <div>
-        <dt>Read</dt>
+        <dt>Reading Time</dt>
         <dd>
           <Clock3 aria-hidden="true" />
           <span>{item.readTime ? `${item.readTime} min read` : "—"}</span>

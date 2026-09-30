@@ -13,41 +13,20 @@ import {
   formatContentDate,
   getContentDetail,
   getContentHeadings,
-  getConfiguredContentEnv,
   type ContentItem,
   type ContentType,
 } from "@/lib/notion-cms";
 import { SITE_URL } from "@/lib/content-metadata";
 
-function SetupState({ type }: { type: ContentType }) {
+function SetupState({ }: { type: ContentType }) {
   return (
     <section
       className="mt-8 rounded-xl border border-border bg-card p-6 md:p-8"
       role="status"
     >
       <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary">
-        Notion connection needed
+        Page isn't ready to serve. Coma back later.
       </p>
-      <h1 className="mt-3 font-display text-2xl font-semibold tracking-tight text-ink">
-        Connect this collection
-      </h1>
-      <p className="mt-2 text-sm leading-6 text-ink-soft">
-        Set the server-side values below and follow{" "}
-        <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">
-          docs/notion-cms-setup.md
-        </code>
-        .
-      </p>
-      <ul className="mt-4 flex flex-wrap gap-2">
-        {getConfiguredContentEnv(type).map((name) => (
-          <li
-            key={name}
-            className="rounded-md border border-border bg-muted/50 px-2.5 py-1 font-mono text-[11px] text-ink-soft"
-          >
-            {name}
-          </li>
-        ))}
-      </ul>
     </section>
   );
 }
@@ -147,10 +126,6 @@ export async function ContentDetailPage({
             <h1 className="font-display text-2xl font-semibold text-ink">
               Content is temporarily unavailable
             </h1>
-            <p className="mt-2 text-sm leading-6 text-ink-soft">
-              The Notion source could not be loaded. Check the integration
-              connection and server environment settings.
-            </p>
           </section>
         )}
       </main>
@@ -259,7 +234,7 @@ export async function ContentDetailPage({
           </header>
 
           {item.image ? (
-            <figure className="relative mt-6 aspect-[16/8] overflow-hidden rounded-xl border border-border bg-muted/40">
+            <figure className="relative mt-6 aspect-16/8 overflow-hidden rounded-xl border border-border bg-muted/40">
               <Image
                 src={item.image}
                 alt={item.title}

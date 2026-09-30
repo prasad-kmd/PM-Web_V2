@@ -22,7 +22,7 @@ import { PROJECTS } from "@/lib/portfolio-data";
 export const metadata: Metadata = {
   title: "Portfolio",
   description:
-    "The working record of Prasad Madhuranga — mechanical + mechatronics engineer in Kandy: personal details, education, experience, research interests and featured projects.",
+    "The working record of Prasad Madhuranga - Mechanical + Mechatronics engineer in Kandy: personal details, education, experience, research interests and featured projects.",
 };
 
 const MARQUEE_ITEMS = [

@@ -11,7 +11,7 @@ type PageProps = {
 export const metadata: Metadata = {
   title: "Glossary",
   description:
-    "Glossary from Notion — engineering notes, research, and practical work.",
+    "Glossary from PrasadM - Engineering notes, research and practical work.",
 };
 
 export default async function GlossaryPage({ searchParams }: PageProps) {

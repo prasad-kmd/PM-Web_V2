@@ -17,8 +17,8 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://prasadm.vercel.app"),
   alternates: { types: { "application/rss+xml": "/rss.xml" } },
   title: {
-    default: "PrasadM — Mechanical + Mechatronics Engineer",
-    template: "%s — PrasadM",
+    default: "PrasadM - Mechatronics Engineering Undergraduate",
+    template: "%s - PrasadM",
   },
   description:
     "Working archive of a mechanical + mechatronics engineer: robot builds, mechanism drawings, firmware notes, tutorials and field lessons.",

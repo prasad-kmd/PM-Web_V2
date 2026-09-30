@@ -69,27 +69,27 @@ export const CONTENT_META: Record<
     eyebrow: "Selected work",
     singular: "Project",
     description:
-      "Engineering work, experiments, and things built along the way.",
+      "Engineering work, experiments and things built along the way.",
   },
   blog: {
     label: "Blog",
     eyebrow: "Field notes",
     singular: "Post",
-    description: "Ideas, observations, and notes from the workbench.",
+    description: "Ideas, observations and notes from the experience.",
   },
   articles: {
     label: "Articles",
     eyebrow: "Long-form writing",
     singular: "Article",
     description:
-      "Deeper explorations of engineering, technology, and research.",
+      "Useful insights and writing into engineering, technology and research.",
   },
   tutorials: {
     label: "Tutorials",
     eyebrow: "Learn by doing",
     singular: "Tutorial",
     description:
-      "Practical guides, worked examples, and technical walkthroughs.",
+      "Practical guides, worked examples and technical walkthroughs.",
   },
   glossary: {
     label: "Glossary",
