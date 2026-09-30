@@ -260,11 +260,22 @@ body::-webkit-scrollbar {
 }
 
 /* Desktop: each chapter is one viewport, and a scroll jumps to the next.
-   Only the homepage opts in with data-snap="home"; interior routes never snap.
+   The homepage (data-snap="home") and /about (data-snap="about") opt in;
+   every other interior route never snaps.
    Mobile: sections stack vertically, grow to fit content, scroll normally. */
 @media (min-width: 768px) {
-  html[data-snap="home"] {
+  html[data-snap="home"],
+  html[data-snap="about"] {
     scroll-snap-type: y mandatory;
+  }
+}
+
+/* The About timeline chapter is taller than one screen by design (its stage
+   is pinned while cards advance). Short displays and reduced-motion readers
+   read the whole page as a plain document instead. */
+@media (max-height: 639px), (prefers-reduced-motion: reduce) {
+  html[data-snap="about"] {
+    scroll-snap-type: none;
   }
 }
 

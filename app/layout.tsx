@@ -50,6 +50,7 @@ const THEME_BOOT_SCRIPT = `(function () {
       });
     }
     if (location.pathname === "/") root.dataset.snap = "home";
+    else if (location.pathname === "/about") root.dataset.snap = "about";
   } catch (error) {}
 })();`;
 

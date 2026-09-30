@@ -29,7 +29,10 @@ export function SiteShell({ children }: { children: ReactNode }) {
 
   useLayoutEffect(() => {
     const root = document.documentElement;
+    // Chapter-snap routes: the homepage and /about are both read as a
+    // sequence of viewport-tall chapters.
     if (pathname === "/") root.dataset.snap = "home";
+    else if (pathname === "/about") root.dataset.snap = "about";
     else delete root.dataset.snap;
   }, [pathname]);
 

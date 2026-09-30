@@ -71,6 +71,9 @@ importers:
       obscenity:
         specifier: ^0.4.6
         version: 0.4.6
+      ogl:
+        specifier: ^1.0.11
+        version: 1.0.11
       posthog-js:
         specifier: ^1.434.15
         version: 1.434.15(@types/react@19.3.0)(react@19.2.8)
@@ -3237,6 +3240,9 @@ packages:
   obscenity@0.4.6:
     resolution: {integrity: sha512-pHk7kNN7j3L3zGhhGnwxjvXIGsPpLrcZl2r58fqWh/V/rH6b/dafscj2sMmAY+A/9/wPsocLmimgGk2DKeKsFQ==}
     engines: {node: '>=18.0.0'}
+
+  ogl@1.0.11:
+    resolution: {integrity: sha512-kUpC154AFfxi16pmZUK4jk3J+8zxwTWGPo03EoYA8QPbzikHoaC82n6pNTbd+oEaJonaE8aPWBlX7ad9zrqLsA==}
 
   oniguruma-parser@0.12.2:
     resolution: {integrity: sha512-6HVa5oIrgMC6aA6WF6XyyqbhRPJrKR02L20+2+zpDtO5QAzGHAUGw5TKQvwi5vctNnRHkJYmjAhRVQF2EKdTQw==}
@@ -7180,6 +7186,8 @@ snapshots:
       es-object-atoms: 1.1.2
 
   obscenity@0.4.6: {}
+
+  ogl@1.0.11: {}
 
   oniguruma-parser@0.12.2: {}
 

@@ -1,0 +1,56 @@
+.stage {
+  position: relative;
+  width: 100%;
+  perspective: 1100px;
+  overflow: visible;
+}
+
+.card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border-radius: 1rem;
+  border: 1px solid var(--pm-border);
+  background: var(--pm-card);
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
+.cardContent {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+}
+
+.stage[data-static="true"] {
+  display: grid;
+  gap: 1rem;
+  height: auto;
+  perspective: none;
+}
+
+.stage[data-static="true"] .card {
+  position: relative;
+  top: auto;
+  left: auto;
+  width: 100%;
+  height: auto;
+}
+
+@media (max-width: 767px),
+  (max-height: 639px),
+  (prefers-reduced-motion: reduce) {
+  .stage {
+    display: grid;
+    gap: 1rem;
+    height: auto !important;
+    perspective: none;
+  }
+  .card {
+    position: relative;
+    top: auto;
+    left: auto;
+    height: auto !important;
+    transform: none !important;
+  }
+}
