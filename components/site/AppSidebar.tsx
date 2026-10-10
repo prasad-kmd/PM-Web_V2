@@ -20,6 +20,9 @@ import {
   Sun,
   Twitter,
   Wrench,
+  User,
+  Shield,
+  LogIn,
   type LucideIcon,
 } from "lucide-react";
 import {
@@ -45,6 +48,7 @@ import {
 import { AccentPicker } from "@/components/site/AccentPicker";
 import { siteConfig } from "@/lib/config";
 import { applyTheme, getDocumentTheme, subscribeTheme } from "@/lib/theme";
+import { authClient } from "@/lib/auth-client";
 
 const NAV_ITEMS: { name: string; href: string; icon: LucideIcon }[] = [
   { name: "About", href: "/about", icon: Info },
@@ -90,6 +94,58 @@ function SidebarNavLink({
         >
           <Icon />
           <span>{name}</span>
+        </Link>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
+  );
+}
+
+function UserAuthSidebarButton() {
+  const pathname = usePathname();
+  const { isMobile, setOpenMobile } = useSidebar();
+  const { data: session } = authClient.useSession();
+
+  const user = session?.user;
+  const userRole = (user as { role?: string })?.role;
+  const href = user
+    ? userRole === "admin"
+      ? "/admin"
+      : "/dashboard"
+    : `/auth/signin?callbackUrl=${encodeURIComponent(pathname)}`;
+
+  const active =
+    pathname === "/dashboard" ||
+    pathname === "/admin" ||
+    pathname.startsWith("/auth");
+  const label = user
+    ? userRole === "admin"
+      ? "Admin Console"
+      : user.name || "User Dashboard"
+    : "Sign In / Register";
+
+  return (
+    <SidebarMenuItem>
+      <SidebarMenuButton asChild isActive={active} tooltip={label}>
+        <Link
+          href={href}
+          onClick={() => {
+            if (isMobile) setOpenMobile(false);
+          }}
+        >
+          {user?.image ? (
+            <img
+              src={user.image}
+              alt={user.name || "User Avatar"}
+              className="size-4 rounded-full object-cover"
+            />
+          ) : userRole === "admin" ? (
+            <Shield className="size-4 text-amber-500" />
+          ) : user ? (
+            <User className="size-4" />
+          ) : (
+            <LogIn className="size-4 text-primary" />
+          )}
+          <span className="truncate font-medium">{label}</span>
         </Link>
       </SidebarMenuButton>
     </SidebarMenuItem>
@@ -192,6 +248,7 @@ export function AppSidebar() {
       <SidebarFooter>
         <SidebarSeparator />
         <SidebarMenu>
+          <UserAuthSidebarButton />
           <SidebarMenuItem>
             <AccentPicker placement="sidebar" side="top" />
           </SidebarMenuItem>

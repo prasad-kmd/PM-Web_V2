@@ -10,6 +10,8 @@ import {
   Sun,
   Wrench,
   X,
+  User,
+  Shield,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useSyncExternalStore } from "react";
@@ -19,11 +21,13 @@ import { useAccessibility } from "@/contexts/AccessibilityContext";
 import Dock, { type DockItemData } from "@/components/reactbits/Dock";
 import { useSidebar } from "@/components/animate-ui/components/radix/sidebar";
 import { applyTheme, getDocumentTheme, subscribeTheme } from "@/lib/theme";
+import { authClient } from "@/lib/auth-client";
 
 export function MobileBottomNav() {
   const pathname = usePathname();
   const { isPanelOpen } = useAccessibility();
   const { openMobile, setOpenMobile } = useSidebar();
+  const { data: session } = authClient.useSession();
   const theme = useSyncExternalStore(
     subscribeTheme,
     getDocumentTheme,
@@ -31,6 +35,14 @@ export function MobileBottomNav() {
   );
   const isDark = theme === "dark";
   const ThemeIcon = isDark ? Sun : Moon;
+
+  const user = session?.user;
+  const userRole = (user as { role?: string })?.role;
+  const authHref = user
+    ? userRole === "admin"
+      ? "/admin"
+      : "/dashboard"
+    : `/auth/signin?callbackUrl=${encodeURIComponent(pathname)}`;
 
   const items: DockItemData[] = [
     {
@@ -43,9 +55,7 @@ export function MobileBottomNav() {
       label: "About",
       href: "/about",
       active: pathname.startsWith("/about"),
-      icon: (
-        <Info className="size-[18px]" strokeWidth={1.8} aria-hidden />
-      ),
+      icon: <Info className="size-[18px]" strokeWidth={1.8} aria-hidden />,
     },
     {
       label: "Projects",
@@ -58,6 +68,29 @@ export function MobileBottomNav() {
       href: "/tools",
       active: pathname.startsWith("/tools"),
       icon: <Wrench className="size-[18px]" strokeWidth={1.8} aria-hidden />,
+    },
+    {
+      label: user ? (userRole === "admin" ? "Admin" : "Account") : "Sign In",
+      href: authHref,
+      active:
+        pathname === "/dashboard" ||
+        pathname === "/admin" ||
+        pathname.startsWith("/auth"),
+      icon: user?.image ? (
+        <img
+          src={user.image}
+          alt={user.name || "User Avatar"}
+          className="size-5 rounded-full object-cover ring-1 ring-border"
+        />
+      ) : userRole === "admin" ? (
+        <Shield
+          className="size-[18px] text-amber-500"
+          strokeWidth={1.8}
+          aria-hidden
+        />
+      ) : (
+        <User className="size-[18px]" strokeWidth={1.8} aria-hidden />
+      ),
     },
     {
       label: isDark ? "Light theme" : "Dark theme",
