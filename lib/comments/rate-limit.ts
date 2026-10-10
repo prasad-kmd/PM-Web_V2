@@ -1,9 +1,9 @@
 /**
  * In-memory sliding-window rate limiter.
  *
- * Ported from PMEngineerLK-NextJS (`lib/rate-limit.ts`). The guest-comment
- * route keys its buckets by client IP; the signed-in member-comment route also
- * applies user-id buckets while reusing this in-memory limiter.
+ * Ported from PMEngineerLK-NextJS (`lib/rate-limit.ts`) and extended: the
+ * reference keyed buckets by authenticated user id, but PM-Web_V2 has no
+ * accounts, so callers key on the client IP and the submitted email instead.
  *
  * ⚠️  Scope: the map lives in the serverless instance, so limits are
  * per-instance and reset on cold start. That is deliberate — it keeps the

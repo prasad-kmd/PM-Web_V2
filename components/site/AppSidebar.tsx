@@ -19,7 +19,6 @@ import {
   PanelLeftIcon,
   Sun,
   Twitter,
-  UserRound,
   Wrench,
   type LucideIcon,
 } from "lucide-react";
@@ -45,7 +44,6 @@ import {
 } from "@/components/ui/tooltip";
 import { AccentPicker } from "@/components/site/AccentPicker";
 import { siteConfig } from "@/lib/config";
-import { accountGatewayHref } from "@/lib/auth/redirect";
 import { applyTheme, getDocumentTheme, subscribeTheme } from "@/lib/theme";
 
 const NAV_ITEMS: { name: string; href: string; icon: LucideIcon }[] = [
@@ -117,30 +115,6 @@ function ThemeRailButton() {
       <Icon />
       <span>{label}</span>
     </SidebarMenuButton>
-  );
-}
-
-function AccountSidebarLink() {
-  const pathname = usePathname();
-  const { isMobile, setOpenMobile } = useSidebar();
-  const active =
-    pathname.startsWith("/dashboard") || pathname.startsWith("/admin");
-
-  return (
-    <SidebarMenuItem>
-      <SidebarMenuButton asChild isActive={active} tooltip="Account">
-        <Link
-          href={accountGatewayHref(pathname || "/")}
-          aria-label="Account"
-          onClick={() => {
-            if (isMobile) setOpenMobile(false);
-          }}
-        >
-          <UserRound />
-          <span>Account</span>
-        </Link>
-      </SidebarMenuButton>
-    </SidebarMenuItem>
   );
 }
 
@@ -221,7 +195,6 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <AccentPicker placement="sidebar" side="top" />
           </SidebarMenuItem>
-          <AccountSidebarLink />
           <SidebarMenuItem>
             <ThemeRailButton />
           </SidebarMenuItem>

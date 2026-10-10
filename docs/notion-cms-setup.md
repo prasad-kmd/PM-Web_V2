@@ -2,13 +2,13 @@
 
 The routes `/projects`, `/blog`, `/articles`, `/tutorials`, and `/glossary` read published content from Notion on the server. Every item has a canonical `/{collection}/{slug}` detail page. The site uses Notion for content and metadata only; its own archive/detail design is intentionally independent of the reference project.
 
-For CMS rendering, the integration reads published content and does not create or edit Notion pages. Drafts stay private, Notion credentials remain server-side, and saved items are stored only in each reader's browser. If you enable guest comments, grant the separate **Insert comments** capability on the pages intended for comments; see [Comments system](comments-system.md).
+The integration is read-only. Drafts stay private, Notion credentials remain server-side, and saved items are stored only in each reader's browser.
 
 ## 1. Create a read-only Notion integration
 
 1. Open [Notion integrations](https://www.notion.so/my-integrations) and create an internal integration in the workspace that owns your content.
 2. Copy its internal integration token.
-3. Give it **Read content** capability for the CMS. The site does not create or edit Notion pages. If using guest comments, also enable **Insert comments** and share only the relevant comment pages as described in [Comments system](comments-system.md).
+3. Give it **Read content** capability only. This site never creates or edits Notion pages.
 4. Open each collection database and use **Connections** / **Connect to** to share it with the integration. Repeat for all five collections. If using an Authors database, share that too.
 
 Keep the token private. Never use a `NEXT_PUBLIC_` prefix for the Notion token or expose it to browser code.

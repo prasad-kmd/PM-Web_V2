@@ -32,7 +32,6 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import type { NotionComment } from "@/lib/comments/types";
 import { CommentForm } from "./comment-form";
 import { CommentList } from "./comment-list";
-import { MemberCommentFeed } from "./member-comment-feed";
 
 /**
  * The comments surface.
@@ -84,8 +83,6 @@ function CommentsPanelBody({ pageId, open, onCountChange }: BodyProps) {
   const { identity, hydrate, save } = useCommenterIdentity();
   const [pending, setPending] = useState<NotionComment[]>([]);
   const [fetchedCount, setFetchedCount] = useState(0);
-  const [memberCount, setMemberCount] = useState(0);
-  const [channel, setChannel] = useState<"guest" | "member">("guest");
 
   // Read the `pm_commenter` cookie once the component is on the client.
   useEffect(() => {
@@ -95,88 +92,43 @@ function CommentsPanelBody({ pageId, open, onCountChange }: BodyProps) {
   const handleCount = useCallback(
     (count: number) => {
       setFetchedCount(count);
-      onCountChange(count + pending.length + memberCount);
+      onCountChange(count + pending.length);
     },
-    [memberCount, onCountChange, pending.length],
-  );
-
-  const handleMemberCount = useCallback(
-    (count: number) => {
-      setMemberCount(count);
-      onCountChange(fetchedCount + pending.length + count);
-    },
-    [fetchedCount, onCountChange, pending.length],
+    [onCountChange, pending.length],
   );
 
   const handlePosted = useCallback(
     (comment: NotionComment) => {
       const next = [comment, ...pending];
       setPending(next);
-      onCountChange(fetchedCount + next.length + memberCount);
+      onCountChange(fetchedCount + next.length);
     },
-    [fetchedCount, memberCount, onCountChange, pending],
+    [fetchedCount, onCountChange, pending],
   );
 
   return (
-    <div className="grid gap-5">
-      <div
-        role="group"
-        aria-label="Choose comment feed"
-        className="grid grid-cols-2 rounded-xl border border-border/70 bg-muted/30 p-1"
-      >
-        <button
-          type="button"
-          aria-pressed={channel === "guest"}
-          onClick={() => setChannel("guest")}
-          className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring ${channel === "guest" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
-        >
-          Guest comments ({fetchedCount + pending.length})
-        </button>
-        <button
-          type="button"
-          aria-pressed={channel === "member"}
-          onClick={() => setChannel("member")}
-          className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring ${channel === "member" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
-        >
-          Member comments ({memberCount})
-        </button>
+    <div className="grid gap-6">
+      <CommentForm
+        pageId={pageId}
+        identity={identity}
+        onIdentitySave={save}
+        onPosted={handlePosted}
+      />
+
+      <div className="flex items-center gap-3" aria-hidden>
+        <span className="h-px flex-1 bg-border/60" />
+        <span className="text-[10px] font-semibold tracking-[0.18em] text-muted-foreground/70 uppercase">
+          Discussion
+        </span>
+        <span className="h-px flex-1 bg-border/60" />
       </div>
 
-      <section
-        aria-label="Guest comments"
-        hidden={channel !== "guest"}
-        className={channel === "guest" ? "grid gap-6" : ""}
-      >
-        <CommentForm
-          pageId={pageId}
-          identity={identity}
-          onIdentitySave={save}
-          onPosted={handlePosted}
-        />
-
-        <div className="flex items-center gap-3" aria-hidden>
-          <span className="h-px flex-1 bg-border/60" />
-          <span className="text-[10px] font-semibold tracking-[0.18em] text-muted-foreground/70 uppercase">
-            Guest discussion
-          </span>
-          <span className="h-px flex-1 bg-border/60" />
-        </div>
-
-        <CommentList
-          pageId={pageId}
-          active={open && channel === "guest"}
-          pending={pending}
-          onCountChange={handleCount}
-        />
-      </section>
-
-      <section aria-label="Member comments" hidden={channel !== "member"}>
-        <MemberCommentFeed
-          pageId={pageId}
-          active={open}
-          onCountChange={handleMemberCount}
-        />
-      </section>
+      <CommentList
+        pageId={pageId}
+        active={open}
+        pending={pending}
+        onCountChange={handleCount}
+      />
     </div>
   );
 }
@@ -296,7 +248,7 @@ export function CommentsInlineCta() {
         <div>
           <h2 className="text-sm font-semibold">Join the discussion</h2>
           <p className="text-xs text-muted-foreground">
-            Join as a guest or open the separate signed-in member discussion.
+            No account needed — a name and an email are enough.
           </p>
         </div>
       </div>
