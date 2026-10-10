@@ -9,6 +9,7 @@ import {
   Moon,
   Sun,
   Wrench,
+  UserRound,
   X,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
@@ -18,6 +19,7 @@ import { isReaderRoute } from "@/lib/accessibility/content-routes";
 import { useAccessibility } from "@/contexts/AccessibilityContext";
 import Dock, { type DockItemData } from "@/components/reactbits/Dock";
 import { useSidebar } from "@/components/animate-ui/components/radix/sidebar";
+import { accountGatewayHref } from "@/lib/auth/redirect";
 import { applyTheme, getDocumentTheme, subscribeTheme } from "@/lib/theme";
 
 export function MobileBottomNav() {
@@ -43,9 +45,7 @@ export function MobileBottomNav() {
       label: "About",
       href: "/about",
       active: pathname.startsWith("/about"),
-      icon: (
-        <Info className="size-[18px]" strokeWidth={1.8} aria-hidden />
-      ),
+      icon: <Info className="size-[18px]" strokeWidth={1.8} aria-hidden />,
     },
     {
       label: "Projects",
@@ -58,6 +58,13 @@ export function MobileBottomNav() {
       href: "/tools",
       active: pathname.startsWith("/tools"),
       icon: <Wrench className="size-[18px]" strokeWidth={1.8} aria-hidden />,
+    },
+    {
+      label: "Account",
+      href: accountGatewayHref(pathname || "/"),
+      active:
+        pathname.startsWith("/dashboard") || pathname.startsWith("/admin"),
+      icon: <UserRound className="size-[18px]" strokeWidth={1.8} aria-hidden />,
     },
     {
       label: isDark ? "Light theme" : "Dark theme",

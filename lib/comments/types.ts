@@ -1,9 +1,7 @@
 /**
- * Shared types for the comments subsystem.
- *
- * The comments feature is a guest system: PM-Web_V2 has no sign-in, so the
- * commenter supplies a name, an email and (optionally) one or more social
- * handles. That tuple is the "identity" everywhere below.
+ * Shared types for the guest-comment subsystem. Member comments use a distinct
+ * Postgres model and API so their authenticated identities never mix with the
+ * Notion-backed guest-comment format.
  */
 
 /** Platforms we can resolve a profile image from. Order matters — see

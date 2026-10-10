@@ -8,6 +8,7 @@ import {
   Moon,
   Sun,
   Wrench,
+  UserRound,
   type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -20,6 +21,7 @@ import {
 } from "@/components/ui/tooltip";
 import { AccentPicker } from "@/components/site/AccentPicker";
 import { cn } from "@/lib/utils";
+import { accountGatewayHref } from "@/lib/auth/redirect";
 import { applyTheme, getDocumentTheme, subscribeTheme } from "@/lib/theme";
 
 const NAV_ITEMS: { label: string; href: string; icon: LucideIcon }[] = [
@@ -38,6 +40,9 @@ export function FloatingNavbar() {
   );
   const isDark = theme === "dark";
   const ThemeIcon = isDark ? Sun : Moon;
+  const accountActive =
+    pathname.startsWith("/dashboard") || pathname.startsWith("/admin");
+  const accountHref = accountGatewayHref(pathname || "/");
 
   return (
     <nav
@@ -73,7 +78,11 @@ export function FloatingNavbar() {
                     aria-hidden
                   />
                 ) : null}
-                <Icon className="relative size-[18px]" strokeWidth={1.8} aria-hidden />
+                <Icon
+                  className="relative size-[18px]"
+                  strokeWidth={1.8}
+                  aria-hidden
+                />
               </Link>
             </TooltipTrigger>
             <TooltipContent side="bottom" sideOffset={9}>
@@ -85,6 +94,38 @@ export function FloatingNavbar() {
 
       <span className="mx-1 h-5 w-px bg-border" aria-hidden />
       <AccentPicker placement="floating" side="bottom" />
+
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Link
+            href={accountHref}
+            aria-label="Account"
+            className={cn(
+              "relative flex size-10 items-center justify-center overflow-hidden rounded-full transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+              accountActive
+                ? "text-primary-foreground"
+                : "text-ink-soft hover:bg-muted hover:text-ink",
+            )}
+          >
+            {accountActive ? (
+              <motion.span
+                layoutId="floating-navbar-active"
+                className="absolute inset-0 rounded-full bg-primary"
+                transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                aria-hidden
+              />
+            ) : null}
+            <UserRound
+              className="relative size-[18px]"
+              strokeWidth={1.8}
+              aria-hidden
+            />
+          </Link>
+        </TooltipTrigger>
+        <TooltipContent side="bottom" sideOffset={9}>
+          Account
+        </TooltipContent>
+      </Tooltip>
 
       <Tooltip>
         <TooltipTrigger asChild>

@@ -1,5 +1,6 @@
 allowBuilds:
   core-js: true
+  esbuild: true
   sharp: false
   unrs-resolver: false
 minimumReleaseAgeExclude:

@@ -1,11 +1,11 @@
 # Comments System
 
 Guest comments on Notion-backed content pages, ported from
-[PMEngineerLK-NextJS](https://github.com/prasad-kmd/PMEngineerLK-NextJS) and
-adapted for a site with **no sign-in**.
-
-Comments are stored as native Notion comments on the page itself — no database,
-no new infrastructure.
+[PMEngineerLK-NextJS](https://github.com/prasad-kmd/PMEngineerLK-NextJS). Guest
+comments remain available without sign-in and are stored as native Notion
+comments. Signed-in member comments are a separate Postgres-backed feed in the
+same discussion panel; they are never mixed with the guest comments. See
+[Member comments](./member-comments.md) for that feature's data model and API.
 
 ---
 
@@ -24,8 +24,9 @@ Both containers render the same `CommentsPanelBody`, so state and behaviour are
 identical; only the shell differs. The switch is driven by the existing
 `hooks/use-mobile.ts`.
 
-To comment, a visitor supplies **name**, **email**, and optionally a
-**GitHub / LinkedIn / X** handle. No account is created.
+To add a **guest comment**, a visitor supplies **name**, **email**, and
+optionally a **GitHub / LinkedIn / X** handle. No account is created. The
+separate **member comments** tab requires GitHub sign-in to post.
 
 ---
 
@@ -117,7 +118,11 @@ with **Not you?** (`DELETE /api/comments/identity`).
 ```
 GET    /api/comments?pageId=…&cursor=…   list comments (paginated, 25/page)
 POST   /api/comments                     create a comment
-DELETE /api/comments/identity            clear the identity cookie
+DELETE /api/comments/identity            clear the guest identity cookie
+
+GET    /api/member-comments?pageId=…     list the separate Postgres member feed
+POST   /api/member-comments              authenticated member comment
+DELETE /api/member-comments?id=…        delete only the signed-in owner's comment
 ```
 
 `POST` body:
@@ -154,9 +159,11 @@ lib/comments/avatar.ts               platform avatar resolution
 lib/comments/validate.ts             zod schema + orchestration
 lib/comments/identity-cookie.ts      cookie helpers (server + client)
 lib/comments/request-context.ts      client IP / origin
-app/api/comments/route.ts            GET + POST
-app/api/comments/identity/route.ts   DELETE
-scripts/test-comments.mts            runtime smoke test (22 checks)
+app/api/comments/route.ts                 guest GET + POST
+app/api/comments/identity/route.ts        guest identity DELETE
+app/api/member-comments/route.ts         separate member GET/POST/owner DELETE
+lib/db/schema.ts                         member_comment table definition
+drizzle/0002_member-comments.sql         member-comment migration + RLS
 ```
 
 **New — client**
@@ -169,8 +176,9 @@ components/ui/spinner.tsx            coss (unmodified)
 components/comments/comments-panel.tsx   Sheet/Drawer switch + trigger
 components/comments/comment-form.tsx     composer
 components/comments/comment-list.tsx     feed + infinite scroll
-components/comments/comment-item.tsx     one comment
-components/comments/identity-fields.tsx  name/email/handles
+components/comments/comment-item.tsx     one guest comment
+components/comments/member-comment-feed.tsx signed-in feed, composer, owner delete
+components/comments/identity-fields.tsx  guest name/email/handles
 components/comments/comment-avatar.tsx   avatar + initials fallback
 components/comments/turnstile-widget.tsx Turnstile
 hooks/use-commenter-identity.ts          cookie-backed identity state
@@ -216,11 +224,11 @@ button, so the files work unmodified.
 3. In Notion, invite the integration behind `NOTION_API_KEY` to each page that
    should accept comments, with **Read content** + **Insert comments**.
 
-4. Smoke test:
-
-   ```bash
-   pnpm test:comments
-   ```
+4. After deployment, manually verify both channels: a signed-out visitor can
+   browse and post in the guest tab after the Turnstile check; a signed-out
+   visitor can read but not post to the member tab; a signed-in user can post
+   and delete their own member comment. Confirm that an account cannot delete
+   another account's comment through the API.
 
 ---
 
@@ -228,8 +236,9 @@ button, so the files work unmodified.
 
 - **Rate limits are per-instance** (see above).
 - **LinkedIn avatars rarely resolve** — LinkedIn blocks anonymous lookups.
-- **No edit/delete for visitors.** Moderation happens in Notion, where comments
-  can be deleted directly; the site reflects that on the next fetch.
+- **Guest comments cannot be edited or deleted from the site.** Moderation
+  happens in Notion. Signed-in members can delete only their own separate
+  Postgres-backed member comments.
 - **No nested replies.** Notion comments are flat.
 - **Comment counts are lazy.** The trigger shows a count only after the panel
   has been opened once, to avoid a Notion API call on every page view.
