@@ -83,20 +83,72 @@ Notion has no author metadata for integration-created comments, so attribution
 is folded into the text:
 
 ```
-[PMc1|Prasad K|hello@prasadk.xyz|github:prasad-kmd|https://avatars.githubusercontent.com/u/102537177]: Great write-up.
+PMc2:  [PMc2|Prasad K|hello@prasadk.xyz|github:prasad-kmd|https://avatars.githubusercontent.com/u/102537177|owner]: Great write-up.
+PMc1:  [PMc1|Prasad K|hello@prasadk.xyz|github:prasad-kmd|https://avatars.githubusercontent.com/u/102537177]: Great write-up.
 ```
 
-`parseComment()` recognises three shapes:
+The trailing segment is new in v2.9.0 and is the only difference between the two
+revisions: `owner`, `member`, or empty. **The change is additive.** Nothing
+already in Notion is rewritten, and every `PMc1` comment renders exactly as it did
+before — no badge, and no guessing at one from the name or the email.
 
-1. **`PMc1|…`** — this system.
-2. **`Name|userId|avatar`** — legacy PMEngineerLK-NextJS comments, still render.
-3. **Anything else** — written directly in Notion; rendered as "via Notion".
+`parseComment()` recognises four shapes:
 
-Pipe, bracket and newline characters in names are escaped. Bodies are
-truncated so meta + body always fit Notion's 2000-character cap.
+1. **`PMc2|…`** — this system, v2.9.0 onward. `owner` gets the badge.
+2. **`PMc1|…`** — this system before v2.9.0, and still the shape of every comment
+   written as a guest today.
+3. **`Name|userId|avatar`** — legacy PMEngineerLK-NextJS comments, still render.
+4. **Anything else** — written directly in Notion; rendered as "via Notion".
+
+Pipe, bracket and newline characters in names are escaped. Bodies are truncated
+so meta + body always fit Notion's 2000-character cap — the budget is computed
+from the assembled meta, so the sixth segment shortens the body by exactly its
+own length and needs no arithmetic anywhere else.
 
 Set `COMMENTS_STORE_EMAIL=false` to store `sha256:<16 hex chars>` instead of
 the raw address.
+
+---
+
+## Signed-in comments
+
+A visitor who is signed in gets the same form with the identity row prefilled
+from their session and locked, plus a line offering to sign out and comment as a
+guest instead. Their comment is stored as `PMc2` with a role segment, and an
+**Owner** badge renders beside their name.
+
+The lock is a courtesy. **The guarantee is server-side**: `POST /api/comments`
+calls `getSession()`, and when a session exists it builds the author from the
+session — name, email, avatar and role — ignoring whatever the request body
+claimed. A client that posts `role=owner` is not rejected; it is ignored, which
+is the behaviour that needs no explanation to a confused user and no error path
+to get wrong.
+
+Everything else applies unchanged: Turnstile, the honeypot, the rate limits, the
+disposable-email check and the profanity filter all run for a signed-in commenter
+exactly as they do for a guest. **Being the site owner is not a bypass.** The
+only thing signing in changes is who the comment is attributed to.
+
+### What the badge does and does not prove
+
+It proves the comment was written through a session whose account had
+`role = 'admin'`. It does **not** prove nobody else could have written it,
+because attribution lives in the comment *text* — anyone who can edit a comment
+inside Notion can type the segment by hand. Notion gives an integration no author
+metadata to check it against.
+
+On a site whose Notion workspace has one member, those are the same person, so
+the badge is useful. If the workspace ever gains editors, the badge stops being a
+statement about who wrote something and becomes a statement about who *could*
+have — at which point it should be removed rather than trusted.
+
+### Why there is no `@handle`
+
+The affordance shows the name and the GitHub avatar. The login is not stored
+anywhere: `account.account_id` holds GitHub's numeric user id, not the username,
+and adding a column to display `@prasad-kmd` on one line is not worth a
+migration on its own. The name Better Auth records comes from the GitHub profile,
+which is the part a reader recognises anyway.
 
 ---
 
@@ -136,6 +188,11 @@ DELETE /api/comments/identity            clear the identity cookie
 }
 ```
 
+When a session cookie is present, `name`, `email`, `github`, `linkedin` and
+`twitter` are all **ignored** and the author is taken from the session. There is
+deliberately no `role` field in this body: the schema strips unknown keys, and the
+role is assigned from the session and nowhere else.
+
 ---
 
 ## Files
@@ -154,7 +211,8 @@ lib/comments/avatar.ts               platform avatar resolution
 lib/comments/validate.ts             zod schema + orchestration
 lib/comments/identity-cookie.ts      cookie helpers (server + client)
 lib/comments/request-context.ts      client IP / origin
-app/api/comments/route.ts            GET + POST
+app/api/comments/route.ts            GET + POST (guest and signed-in paths)
+lib/comments/viewer.ts               session → viewer, and the role mapping
 app/api/comments/identity/route.ts   DELETE
 scripts/test-comments.mts            runtime smoke test (22 checks)
 ```
@@ -179,7 +237,7 @@ hooks/use-commenter-identity.ts          cookie-backed identity state
 **Modified**
 
 ```
-components/notion/ContentDetailPage.tsx   mounts <CommentsPanel/>
+components/notion/ContentDetailPage.tsx   reads the session, mounts <CommentsProvider viewer={…}/>
 lib/notion-cms.ts                         exports createNotionClient()
 app/globals.css                           --destructive-foreground tokens (coss)
 next.config.mjs                           img-src CSP for avatar hosts

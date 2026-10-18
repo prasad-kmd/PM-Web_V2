@@ -17,9 +17,16 @@ export function useControlledState<T, Rest extends any[] = []>(
     value !== undefined ? value : (defaultValue as T),
   );
 
-  React.useEffect(() => {
+  // Keep the internal state in sync with a later `value` change. This is React's
+  // documented "adjusting state when a prop changes" pattern, done during render:
+  // an effect would paint the stale value first and then re-render, which is what
+  // react-hooks/set-state-in-effect flags.
+  // See https://react.dev/reference/react/useState#storing-information-from-previous-renders
+  const [prevValue, setPrevValue] = React.useState(value);
+  if (value !== prevValue) {
+    setPrevValue(value);
     if (value !== undefined) setInternalState(value);
-  }, [value]);
+  }
 
   const setState = React.useCallback(
     (next: T, ...args: Rest) => {

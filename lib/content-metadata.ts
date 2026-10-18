@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
 import { CONTENT_META, type ContentItem, type ContentType } from "@/lib/notion-cms";
 
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://prasadm.vercel.app").replace(/\/$/, "");
+// Defined once, in the env module. Previously this defaulted to the *previous*
+// site's domain (prasadm.vercel.app), which is neither ours nor deployed.
+// Imported (not just re-exported) because this file uses it below.
+import { SITE_URL } from "@/lib/env";
+
+export { SITE_URL };
 
 const FALLBACK_OG: Record<ContentType, string> = {
   projects: "/img/projects/cnc-lathe.jpg",

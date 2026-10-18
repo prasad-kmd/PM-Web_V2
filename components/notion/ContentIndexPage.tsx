@@ -18,7 +18,7 @@ import {
 } from "@/lib/content-listing";
 import styles from "@/components/notion/content-listing.module.css";
 
-function SourceMessage({ type }: { type: ContentType }) {
+function SourceMessage() {
   return (
     <section
       className="mt-8 rounded-xl border border-border bg-card p-6 md:p-8"
@@ -203,7 +203,7 @@ export async function ContentIndexPage({
           ) : null}
         </>
       ) : null}
-      {!result.configured ? <SourceMessage type={type} /> : null}
+      {!result.configured ? <SourceMessage /> : null}
       {result.configured && result.error ? (
         <section className={styles.empty} role="status">
           <h2>Content is temporarily unavailable</h2>

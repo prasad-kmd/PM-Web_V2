@@ -6,6 +6,13 @@ import { cn } from '@/lib/utils';
 
 type AnyProps = Record<string, unknown>;
 
+/**
+ * See the same alias in `effects/highlight.tsx`: `@react-three/fiber` augments
+ * the global JSX intrinsics, which collapses the `React.ElementType` union, so
+ * dynamically created tags are pinned to an explicit component type.
+ */
+type DynamicTag = React.ComponentType<Record<string, unknown>>;
+
 type DOMMotionProps<T extends HTMLElement = HTMLElement> = Omit<
   HTMLMotionProps<keyof HTMLElementTagNameMap>,
   'ref'
@@ -60,7 +67,6 @@ function mergeProps<T extends HTMLElement>(
 
 // The child element type is only known at render, so the motion wrapper cannot
 // be declared as a static component.
-/* eslint-disable react-hooks/static-components */
 function Slot<T extends HTMLElement = HTMLElement>({
   children,
   ref,
@@ -71,11 +77,15 @@ function Slot<T extends HTMLElement = HTMLElement>({
     children.type !== null &&
     isMotionComponent(children.type);
 
+  // The wrapped element is only known at render time, so `motion.create` has
+  // nothing concrete to infer from, and the global JSX augmentation above pushes
+  // the wrapper's props towards `never`. Pinning it keeps the JSX checkable;
+  // type-only change, no runtime effect.
   const Base = React.useMemo(
     () =>
-      isAlreadyMotion
-        ? (children.type as React.ElementType)
-        : motion.create(children.type as React.ElementType),
+      (isAlreadyMotion
+        ? children.type
+        : motion.create(children.type as React.ElementType)) as DynamicTag,
     [isAlreadyMotion, children.type],
   );
 
@@ -90,7 +100,6 @@ function Slot<T extends HTMLElement = HTMLElement>({
   );
 }
 
-/* eslint-enable react-hooks/static-components */
 
 export {
   Slot,

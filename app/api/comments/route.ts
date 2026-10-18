@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import { NextResponse, type NextRequest } from "next/server";
+import { getSession } from "@/lib/auth/server";
 import { createNotionClient } from "@/lib/notion-cms";
 import { commentConfig } from "@/lib/comments/config";
 import { formatComment, MAX_COMMENT_LENGTH } from "@/lib/comments/format";
@@ -14,6 +15,7 @@ import {
   validateCommentPayload,
 } from "@/lib/comments/validate";
 import { resolveCommenterAvatar } from "@/lib/comments/avatar";
+import { toCommentViewer } from "@/lib/comments/viewer";
 import type {
   CommentError,
   NotionComment,
@@ -29,6 +31,12 @@ import type {
  *
  * GET  /api/comments?pageId=…&cursor=…   → list comments for a Notion page
  * POST /api/comments                     → create one
+ *
+ * Since v2.9.0 a POST may also come from a signed-in visitor. The guest path is
+ * untouched; the signed-in path takes name, email, avatar and the `role` segment
+ * that drives the Owner badge **from the session**, never from the request body.
+ * Rate limits, Turnstile, the honeypot and the profanity filter apply to both —
+ * being the site owner is not a bypass.
  */
 
 export const runtime = "nodejs";
@@ -224,14 +232,44 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   const identity = validation.data;
 
-  const avatar = await resolveCommenterAvatar(identity);
-  const commenter: ResolvedCommenter = {
-    name: identity.name,
-    email: storedEmail(identity.email),
-    avatar: avatar.avatar,
-    avatarSource: avatar.avatar ? avatar.source : null,
-    handle: avatar.handle,
-  };
+  /**
+   * Who the comment is attributed to.
+   *
+   * A signed-in visitor's details come from the **session** and replace whatever
+   * the request body claimed — name, email, avatar and role alike. That is the
+   * whole guarantee behind the Owner badge: the body is untrusted input, so the
+   * only thing it may influence is the text of the comment.
+   *
+   * Guests take the path they always have, so nothing changes for a visitor who
+   * is not signed in.
+   */
+  const session = await getSession();
+  const viewer = toCommentViewer(session?.user);
+  const isGuest = viewer === null;
+
+  const avatar = isGuest ? await resolveCommenterAvatar(identity) : null;
+
+  const commenter: ResolvedCommenter = viewer
+    ? {
+        name: viewer.name,
+        email: storedEmail(viewer.email),
+        // The OAuth profile image, straight from the session: no GitHub
+        // round-trip here, and no handle to resolve one from — GitHub's numeric
+        // id is what `account.account_id` holds, not the login. The platform
+        // icon is therefore omitted rather than guessed at.
+        avatar: viewer.image,
+        avatarSource: null,
+        handle: null,
+        role: viewer.role,
+      }
+    : {
+        name: identity.name,
+        email: storedEmail(identity.email),
+        avatar: avatar?.avatar ?? null,
+        avatarSource: avatar?.avatar ? avatar.source : null,
+        handle: avatar?.handle ?? null,
+        role: null,
+      };
 
   const content = formatComment(commenter, payload.content).slice(
     0,
@@ -249,11 +287,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       {
         comment: slim(created),
         // Echo the normalised identity so the form can update the cookie
-        // immediately instead of waiting for the next page load.
-        identity,
+        // immediately instead of waiting for the next page load. Signed-in
+        // visitors have no cookie to update — their identity is the session.
+        identity: isGuest ? identity : null,
         avatar,
       },
-      { headers: { "Set-Cookie": identitySetCookie(identity) } },
+      isGuest ? { headers: { "Set-Cookie": identitySetCookie(identity) } } : {},
     );
   } catch (error) {
     console.error("[comments] failed to create comment:", error);

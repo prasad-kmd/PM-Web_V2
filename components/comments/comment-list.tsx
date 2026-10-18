@@ -15,6 +15,17 @@ import { CommentItem } from "./comment-item";
  * they appear instantly instead of waiting for the next fetch.
  */
 
+/**
+ * A message this codebase wrote, as opposed to one the browser wrote.
+ *
+ * `fetch` rejects with a `TypeError` whose `message` is "Failed to fetch" — a
+ * developer string, and not something to put in front of a reader. Printing
+ * `cause.message` unconditionally meant a dropped connection produced browser
+ * copy in our own layout. Only messages carried by this class are rendered;
+ * everything else gets our own sentence.
+ */
+class ApiMessage extends Error {}
+
 type CommentListProps = {
   pageId: string;
   /** True while the enclosing sheet/drawer is open — gates fetching. */
@@ -65,7 +76,7 @@ export function CommentList({
         };
 
         if (!response.ok)
-          throw new Error(data.error ?? "Could not load comments");
+          throw new ApiMessage(data.error ?? "Could not load comments");
 
         setComments((previous) =>
           nextCursor ? [...previous, ...data.results] : data.results,
@@ -76,7 +87,9 @@ export function CommentList({
         if (!nextCursor) onCountChange?.(data.results.length);
       } catch (cause) {
         setError(
-          cause instanceof Error ? cause.message : "Could not load comments",
+          cause instanceof ApiMessage
+            ? cause.message
+            : "Comments could not be loaded. Check your connection and try again.",
         );
         setLoaded(true);
       } finally {

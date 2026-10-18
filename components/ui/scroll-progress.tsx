@@ -239,6 +239,12 @@ const ScrollProgress = ({
                         type="button"
                         title={s.label}
                         aria-current={isActive ? "location" : undefined}
+                        /* Justified `autoFocus`: this list is a disclosure that
+                           mounts when opened, so without it a keyboard user who
+                           expands the table of contents is left outside the
+                           content they just revealed. Focus lands on the section
+                           they are currently reading, which is the one they were
+                           almost certainly reaching for. */
                         autoFocus={isActive}
                         onClick={() => selectSection(s.id)}
                         className={cn(

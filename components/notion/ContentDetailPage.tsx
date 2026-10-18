@@ -11,6 +11,8 @@ import {
   CommentsProvider,
 } from "@/components/comments/comments-panel";
 import { ContentDetailHeader } from "@/components/notion/ContentDetailHeader";
+import { getSession } from "@/lib/auth/server";
+import { toCommentViewer } from "@/lib/comments/viewer";
 import {
   CONTENT_META,
   estimateReadingTime,
@@ -138,6 +140,16 @@ export async function ContentDetailPage({
 
   const item = result.item;
   if (!item) notFound();
+
+  /**
+   * Who is reading, if anyone.
+   *
+   * `getSession()` is memoised per request, so this costs nothing when a layout
+   * has already looked — and it is read here, on the server, so the comment form
+   * never has to ask the client who it is. A guest gets `null` and the form they
+   * have always had.
+   */
+  const viewer = toCommentViewer((await getSession())?.user);
   const headings = getContentHeadings(result.blocks);
   const readingTime = item.readTime || estimateReadingTime(result.blocks);
   const formattedDate = formatContentDate(item.date);
@@ -172,7 +184,11 @@ export async function ContentDetailPage({
       </nav>
 
       <div className="mt-6 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_18rem] lg:gap-10 xl:gap-12">
-        <CommentsProvider pageId={item.id} contentTitle={item.title}>
+        <CommentsProvider
+          pageId={item.id}
+          contentTitle={item.title}
+          viewer={viewer}
+        >
           <article className="min-w-0">
             <ContentDetailHeader
               item={item}

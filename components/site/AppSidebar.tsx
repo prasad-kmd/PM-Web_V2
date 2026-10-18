@@ -43,21 +43,34 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { AccentPicker } from "@/components/site/AccentPicker";
+import { UserMenu } from "@/components/auth/UserMenu";
 import { siteConfig } from "@/lib/config";
+import { SIDEBAR_NAV } from "@/lib/nav";
 import { applyTheme, getDocumentTheme, subscribeTheme } from "@/lib/theme";
 
-const NAV_ITEMS: { name: string; href: string; icon: LucideIcon }[] = [
-  { name: "About", href: "/about", icon: Info },
-  { name: "Portfolio", href: "/portfolio", icon: FolderKanban },
-  { name: "Blog", href: "/blog", icon: Newspaper },
-  { name: "Articles", href: "/articles", icon: FileText },
-  { name: "Projects", href: "/projects", icon: Boxes },
-  { name: "Tools", href: "/tools", icon: Wrench },
-  { name: "Tutorials", href: "/tutorials", icon: GraduationCap },
-  { name: "Glossary", href: "/glossary", icon: BookOpen },
-  { name: "Saved", href: "/bookmarks", icon: Bookmark },
-  { name: "Contact", href: "/contact", icon: Mail },
-];
+/**
+ * Path → icon. The labels and paths themselves live in `lib/nav.ts` so that all
+ * four navigation surfaces read the same list; see the note in
+ * `FloatingNavbar.tsx` for why the icons stay behind.
+ */
+const NAV_ICONS: Record<string, LucideIcon> = {
+  "/about": Info,
+  "/portfolio": FolderKanban,
+  "/blog": Newspaper,
+  "/articles": FileText,
+  "/projects": Boxes,
+  "/tools": Wrench,
+  "/tutorials": GraduationCap,
+  "/glossary": BookOpen,
+  "/bookmarks": Bookmark,
+  "/contact": Mail,
+};
+
+const NAV_ITEMS = SIDEBAR_NAV.map((item) => ({
+  name: item.label,
+  href: item.href,
+  icon: NAV_ICONS[item.href] ?? Info,
+}));
 
 const SOCIALS = [
   { label: "GitHub", href: siteConfig.socialLinks.github, icon: Github },
@@ -192,6 +205,12 @@ export function AppSidebar() {
       <SidebarFooter>
         <SidebarSeparator />
         <SidebarMenu>
+          {/* The account entry point. Kept in the footer beside the other
+              personal controls (accent, theme) rather than in the link list,
+              which is about the site's content. */}
+          <SidebarMenuItem className="flex justify-center px-1 py-1 group-data-[collapsible=icon]:px-0">
+            <UserMenu surface="sidebar" />
+          </SidebarMenuItem>
           <SidebarMenuItem>
             <AccentPicker placement="sidebar" side="top" />
           </SidebarMenuItem>

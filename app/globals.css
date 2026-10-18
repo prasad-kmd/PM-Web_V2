@@ -369,3 +369,16 @@ html[data-loading="on"] #footer {
 .toc-scrollbar-hidden::-webkit-scrollbar {
   display: none;
 }
+
+/* Entrance used by /not-authorized. Declared here rather than pulled in from
+   the animation library so the page can stay a server component: a 403 needs no
+   JavaScript. Applied through Tailwind's `motion-safe:` variant, so it is
+   skipped entirely under `prefers-reduced-motion: reduce`. */
+@keyframes pm-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

@@ -1,0 +1,103 @@
+name: Bug report
+description: Something is broken, or does not do what the documentation says.
+title: "[bug] "
+labels: ["bug", "needs triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report this.
+
+        **Before you continue:** if this is a security problem, close this tab and
+        use [private vulnerability reporting](../../security/advisories/new) or
+        email the address in [SECURITY.md](../../blob/main/SECURITY.md). A public
+        issue is visible to everyone before there is a fix.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you saw, and what you expected instead.
+      placeholder: |
+        I opened /articles/some-slug and the table of contents was empty.
+        I expected it to list the headings.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: |
+        The smallest sequence that shows the problem. If it only happens sometimes,
+        say so — that is useful information, not an admission.
+      placeholder: |
+        1. pnpm dev
+        2. Open http://localhost:3000/articles/...
+        3. Scroll to the table of contents
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Where
+      description: Which part of the site.
+      options:
+        - Content pages (articles, blog, tutorials, projects, glossary)
+        - Reading experience (panel, bookmarks, outline)
+        - Comments
+        - Sign-in / sign-up / dashboard
+        - Admin
+        - Build, lint, typecheck or CI
+        - Documentation
+        - Not sure
+    validations:
+      required: true
+
+  - type: input
+    id: revision
+    attributes:
+      label: Revision
+      description: |
+        The version from `package.json`, or the commit you are on. The sidebar shows
+        it as a badge (`v2.9.0`).
+      placeholder: v2.9.0
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: |
+        Node version, pnpm version, browser and operating system. Because this project
+        is not deployed, "it does not work" almost always depends on one of these.
+      placeholder: |
+        Node 22.14.0, pnpm 11.9.0
+        Firefox 133 on macOS 15
+    validations:
+      required: true
+
+  - type: textarea
+    id: console
+    attributes:
+      label: Console or terminal output
+      description: |
+        Anything the browser console or the terminal printed. If there is a stack
+        trace, include all of it — the first line is usually the least informative part.
+      render: shell
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I have read [CONTRIBUTING.md](../../blob/main/CONTRIBUTING.md).
+          required: true
+        - label: This is not a security report (those go through SECURITY.md).
+          required: true
+        - label: I searched existing issues and this is not a duplicate.
+          required: true

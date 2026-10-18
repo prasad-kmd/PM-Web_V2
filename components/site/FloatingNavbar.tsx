@@ -19,15 +19,25 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { AccentPicker } from "@/components/site/AccentPicker";
+import { UserMenu } from "@/components/auth/UserMenu";
+import { PRIMARY_NAV } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 import { applyTheme, getDocumentTheme, subscribeTheme } from "@/lib/theme";
 
-const NAV_ITEMS: { label: string; href: string; icon: LucideIcon }[] = [
-  { label: "Home", href: "/", icon: House },
-  { label: "About", href: "/about", icon: Info },
-  { label: "Projects", href: "/projects", icon: Boxes },
-  { label: "Tools", href: "/tools", icon: Wrench },
-];
+/**
+ * Icons stay in the component, not in `lib/nav.ts`.
+ *
+ * That module holds plain data on purpose: `proxy.ts` imports it, the proxy runs
+ * in Next's edge runtime, and importing a component into that graph would drag
+ * the React tree along with it. So the shared list carries labels and paths, and
+ * each surface maps a path to the icon it wants.
+ */
+const NAV_ICONS: Record<string, LucideIcon> = {
+  "/": House,
+  "/about": Info,
+  "/projects": Boxes,
+  "/tools": Wrench,
+};
 
 export function FloatingNavbar() {
   const pathname = usePathname();
@@ -44,8 +54,8 @@ export function FloatingNavbar() {
       aria-label="Floating navigation"
       className="fixed right-6 top-5 z-50 hidden items-center gap-1 rounded-full border border-border/80 bg-background/80 p-1.5 shadow-[0_0_30px_-7px_color-mix(in_srgb,var(--pm-ink)_26%,transparent)] backdrop-blur-2xl md:flex"
     >
-      {NAV_ITEMS.map((item) => {
-        const Icon = item.icon;
+      {PRIMARY_NAV.map((item) => {
+        const Icon = NAV_ICONS[item.href] ?? House;
         const active =
           item.href === "/"
             ? pathname === "/"
@@ -85,6 +95,7 @@ export function FloatingNavbar() {
 
       <span className="mx-1 h-5 w-px bg-border" aria-hidden />
       <AccentPicker placement="floating" side="bottom" />
+      <UserMenu surface="floating" />
 
       <Tooltip>
         <TooltipTrigger asChild>

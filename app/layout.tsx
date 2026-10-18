@@ -12,11 +12,13 @@ import {
   ACCENT_STORAGE_KEY,
   getAccentCSSVariables,
 } from "@/lib/accent-colors";
+import { SITE_URL } from "@/lib/env";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL || "https://prasadm.vercel.app",
-  ),
+  // One definition of the site origin (lib/env.ts). It defaults to
+  // http://localhost:3000 — this repository is local-only, and the previous
+  // site's domain (prasadm.vercel.app) is neither deployed nor ours.
+  metadataBase: new URL(SITE_URL),
   alternates: { types: { "application/rss+xml": "/rss.xml" } },
   title: {
     default: "PrasadM - Mechatronics Engineering Undergraduate",

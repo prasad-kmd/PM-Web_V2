@@ -7,14 +7,17 @@ import {
   ShieldCheck,
   UserRoundPlus,
 } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { useSignOut } from "@/hooks/use-sign-out";
 import { MAX_COMMENT_LENGTH } from "@/lib/comments/format";
 import type {
   BlockedWord,
   CommenterIdentity,
+  CommentViewer,
   NotionComment,
 } from "@/lib/comments/types";
 import { CommentAvatar } from "./comment-avatar";
@@ -22,16 +25,22 @@ import { IdentityFields } from "./identity-fields";
 import { TurnstileWidget, type TurnstileWidgetRef } from "./turnstile-widget";
 
 /**
- * Guest comment composer.
+ * Comment composer.
  *
- * Two states:
- *  - identity known  → avatar + name row with an "Edit" affordance, then the
- *    textarea. This is the fast path for a returning visitor whose details are
- *    already in the `pm_commenter` cookie.
+ * Three states:
+ *  - signed in → the identity row is prefilled from the session and **locked**,
+ *    with a line offering to sign out. The lock is a courtesy, not the control:
+ *    `app/api/comments` rebuilds the author from the session and ignores whatever
+ *    the body claims, so an unlocked form would change nothing except the
+ *    visitor's expectations.
+ *  - identity known → avatar + name row with an "Edit" affordance, then the
+ *    textarea. The fast path for a returning guest whose details are already in
+ *    the `pm_commenter` cookie.
  *  - identity unknown → the full identity form above the textarea.
  *
  * A honeypot `website` field and the Turnstile challenge gate submission; the
- * server re-checks both, plus the disposable-email and profanity filters.
+ * server re-checks both, plus the disposable-email and profanity filters. All of
+ * it applies to a signed-in commenter too — being the owner is not a bypass.
  */
 
 const EMPTY_IDENTITY: CommenterIdentity = {
@@ -44,6 +53,8 @@ const EMPTY_IDENTITY: CommenterIdentity = {
 
 type CommentFormProps = {
   pageId: string;
+  /** Signed-in visitor, or null for a guest. Resolved on the server. */
+  viewer: CommentViewer | null;
   identity: CommenterIdentity | null;
   onIdentitySave: (identity: CommenterIdentity) => void;
   onPosted: (comment: NotionComment) => void;
@@ -51,10 +62,13 @@ type CommentFormProps = {
 
 export function CommentForm({
   pageId,
+  viewer,
   identity,
   onIdentitySave,
   onPosted,
 }: CommentFormProps) {
+  const { isPending: isSigningOut, signOutNow } = useSignOut();
+  const signedIn = viewer !== null;
   const [draft, setDraft] = useState<CommenterIdentity>(EMPTY_IDENTITY);
   const [editingIdentity, setEditingIdentity] = useState(!identity);
   const [content, setContent] = useState("");
@@ -76,7 +90,23 @@ export function CommentForm({
     setEditingIdentity(!identity);
   }
 
-  const active = editingIdentity ? draft : (identity ?? EMPTY_IDENTITY);
+  /**
+   * The identity that will actually be posted.
+   *
+   * Signed in, the cookie is irrelevant: the session wins, here and on the
+   * server. The viewer object is rebuilt each render from a prop, which is why
+   * it can be used during render without a `useMemo` — nothing depends on its
+   * reference staying stable.
+   */
+  const viewerIdentity: CommenterIdentity | null = viewer
+    ? { name: viewer.name, email: viewer.email }
+    : null;
+
+  const active = signedIn
+    ? (viewerIdentity ?? EMPTY_IDENTITY)
+    : editingIdentity
+      ? draft
+      : (identity ?? EMPTY_IDENTITY);
   const trimmedContent = content.trim();
   const overLimit = trimmedContent.length > MAX_COMMENT_LENGTH;
   const identityComplete =
@@ -87,8 +117,10 @@ export function CommentForm({
     trimmedContent.length >= 3 &&
     !overLimit &&
     identityComplete &&
+    !blockedWords.length &&
     Boolean(token) &&
-    !submitting;
+    !submitting &&
+    !isSigningOut;
 
   function saveDetails() {
     if (!identityComplete) return;
@@ -198,7 +230,9 @@ export function CommentForm({
           Add to the conversation
         </h3>
         <p className="mt-1 text-xs leading-5 text-muted-foreground">
-          A question, correction or field note — no account required.
+          {signedIn
+            ? "Your comment is attributed to your account and marked as the site owner."
+            : "A question, correction or field note — no account required."}
         </p>
       </div>
 
@@ -208,7 +242,7 @@ export function CommentForm({
             <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
               01 / Comment as
             </p>
-            {!editingIdentity && identity ? (
+            {!signedIn && !editingIdentity && identity ? (
               <Button
                 type="button"
                 size="xs"
@@ -223,7 +257,41 @@ export function CommentForm({
               </Button>
             ) : null}
           </div>
-          {editingIdentity || !identity ? (
+          {viewer ? (
+            /* Signed in. The fields are shown, not editable — see the component
+               docblock for why this is a courtesy rather than the guarantee. */
+            <div className="grid gap-2">
+              <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border/70 bg-background/70 p-3">
+                <CommentAvatar name={viewer.name} src={viewer.image} size={38} />
+                <div className="min-w-0 flex-1">
+                  <p className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                    <span className="truncate">{viewer.name}</span>
+                    {viewer.role === "owner" ? (
+                      <span className="shrink-0 rounded border border-primary/40 bg-primary/10 px-1.5 py-px text-[10px] font-semibold tracking-wide text-primary uppercase">
+                        Owner
+                      </span>
+                    ) : null}
+                  </p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {viewer.email}
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  size="xs"
+                  variant="ghost"
+                  disabled={submitting || isSigningOut}
+                  onClick={() => signOutNow()}
+                >
+                  <LogOut /> Sign out
+                </Button>
+              </div>
+              <p className="text-[11px] leading-4 text-muted-foreground">
+                Name, avatar and email come from your GitHub profile. Sign out to
+                comment as a guest instead.
+              </p>
+            </div>
+          ) : editingIdentity || !identity ? (
             <div className="grid gap-3 rounded-xl border border-border/70 bg-background/70 p-3 sm:p-4">
               <IdentityFields
                 value={draft}
@@ -303,7 +371,13 @@ export function CommentForm({
               maxLength={MAX_COMMENT_LENGTH + 50}
               placeholder="Share something useful — a correction, a question, a result you reproduced…"
               aria-invalid={overLimit || blockedWords.length > 0}
-              onChange={(event) => setContent(event.target.value)}
+              onChange={(event) => {
+                setContent(event.target.value);
+                // The block referred to the text that was submitted, not to the
+                // text on screen now. Without this the composer would stay
+                // disabled until the next failed attempt.
+                if (blockedWords.length) setBlockedWords([]);
+              }}
               className="w-full resize-y rounded-lg border border-input bg-card px-3 py-2 text-sm leading-6 text-foreground outline-none transition-shadow placeholder:text-muted-foreground/70 focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/25 disabled:opacity-60"
             />
             <div className="flex items-center justify-between text-xs">

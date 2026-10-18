@@ -9,12 +9,6 @@ import {
   Copy,
   ExternalLink,
   Link2,
-  Info,
-  Mail,
-  Github,
-  FileCode,
-  Moon,
-  Sun,
   Clipboard,
   Share2,
 } from "lucide-react";
@@ -30,14 +24,17 @@ import {
   ContextMenuGroup,
 } from "@/components/animate-ui/components/base/context-menu";
 import BorderGlowTheme from "@/components/reactbits/BorderGlowTheme";
-import { getDocumentTheme, subscribeTheme, applyTheme } from "@/lib/theme";
-import { siteConfig } from "@/lib/config";
+import { getDocumentTheme, subscribeTheme } from "@/lib/theme";
+import { useRouter } from "next/navigation";
 
 export function CustomContextMenu({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
   const [targetLink, setTargetLink] = useState<string | null>(null);
   const [targetImage, setTargetImage] = useState<string | null>(null);
   const [isSmall, setIsSmall] = useState(false);
-  const theme = useSyncExternalStore(subscribeTheme, getDocumentTheme, () => "light" as const);
+  // Subscribed for its re-render-on-theme-change side effect; the menu itself
+  // reads colours from CSS variables.
+  useSyncExternalStore(subscribeTheme, getDocumentTheme, () => "light" as const);
 
   React.useEffect(() => {
     const check = () => setIsSmall(window.innerWidth < 1024);
@@ -185,7 +182,7 @@ export function CustomContextMenu({ children }: { children: React.ReactNode }) {
 
             <ContextMenuGroup>
               <ContextMenuGroupLabel>Page</ContextMenuGroupLabel>
-              <ContextMenuItem onClick={() => (window.location.href = "/")}>
+              <ContextMenuItem onClick={() => router.push("/")}>
                 <Home className="size-4" />
                 Go to home
               </ContextMenuItem>
@@ -213,11 +210,11 @@ export function CustomContextMenu({ children }: { children: React.ReactNode }) {
 
             {/* <ContextMenuGroup>
               <ContextMenuGroupLabel>Explore</ContextMenuGroupLabel>
-              <ContextMenuItem onClick={() => (window.location.href = "/projects")}>
+              <ContextMenuItem onClick={() => router.push("/projects")}>
                 <FileCode className="size-4" />
                 View projects
               </ContextMenuItem>
-              <ContextMenuItem onClick={() => (window.location.href = "/blog")}>
+              <ContextMenuItem onClick={() => router.push("/blog")}>
                 <Copy className="size-4" />
                 Read blog
               </ContextMenuItem>
@@ -230,11 +227,11 @@ export function CustomContextMenu({ children }: { children: React.ReactNode }) {
             {/* <ContextMenuSeparator /> */}
 
             {/* <ContextMenuGroup>
-              <ContextMenuItem onClick={() => (window.location.href = "/about")}>
+              <ContextMenuItem onClick={() => router.push("/about")}>
                 <Info className="size-4" />
                 About site
               </ContextMenuItem>
-              <ContextMenuItem onClick={() => (window.location.href = "/contact")}>
+              <ContextMenuItem onClick={() => router.push("/contact")}>
                 <Mail className="size-4" />
                 Contact developer
               </ContextMenuItem>

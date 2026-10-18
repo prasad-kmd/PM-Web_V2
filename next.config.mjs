@@ -1,8 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   typescript: {
-    // Enable strict type checking during build
-    ignoreBuildErrors: true,
+    // Type checking is a required gate: `next build` no longer lints, and this
+    // project ships auth + database code where a silent type error is expensive.
+    // Run `pnpm typecheck` (tsc --noEmit) alongside `pnpm build` and `pnpm lint`.
+    ignoreBuildErrors: false,
   },
   /* Tree-shake the big barrel-export packages so a page only downloads the
      icons/components it actually uses instead of the whole entry point. */
@@ -24,30 +26,6 @@ const nextConfig = {
       process.env.NODE_ENV === "production"
         ? { exclude: ["error", "warn"] }
         : false,
-  },
-  async rewrites() {
-    const isEu = process.env.NEXT_PUBLIC_POSTHOG_HOST?.includes("eu");
-    const ingestHost = isEu
-      ? "https://eu.i.posthog.com"
-      : "https://us.i.posthog.com";
-    const assetsHost = isEu
-      ? "https://eu-assets.i.posthog.com"
-      : "https://us-assets.i.posthog.com";
-
-    return [
-      {
-        source: "/ingest/static/:path*",
-        destination: `${assetsHost}/static/:path*`,
-      },
-      {
-        source: "/ingest/:path*",
-        destination: `${ingestHost}/:path*`,
-      },
-      {
-        source: "/ingest/decide",
-        destination: `${ingestHost}/decide`,
-      },
-    ];
   },
   images: {
     // Enable Next.js image optimization
@@ -95,24 +73,32 @@ const nextConfig = {
       // (Optional) seen in CheapShark usage examples in the wild:
       { protocol: "https", hostname: "shared.fastly.steamstatic.com" },
       { protocol: "https", hostname: "image.tmdb.org" },
-      { protocol: "https", hostname: "prasadm.vercel.app" },
-      { protocol: "https", hostname: "ghchart.rshah.org/409ba5/prasad-kmd" },
       { protocol: "https", hostname: "images.unsplash.com" },
     ],
     formats: ["image/webp", "image/avif"],
     dangerouslyAllowSVG: true, // For LQIP shimmers
     contentDispositionType: "attachment", // Security for downloads
+    /**
+     * Required alongside `dangerouslyAllowSVG`, per Next's own documentation.
+     *
+     * An SVG is a document, not a bitmap: it can carry `<script>` and external
+     * references. Serving one from the image optimizer without this policy would
+     * hand back a file that runs in this site's origin. `sandbox` plus
+     * `script-src 'none'` makes even a hostile SVG inert — which is what turns
+     * "we allow SVG" from a convenience into a decision that was made.
+     */
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   // Add security headers including CSP
   async headers() {
     const cspHeader = `
       default-src 'self';
-      script-src 'self' 'unsafe-eval' 'wasm-unsafe-eval' 'unsafe-inline' blob: https://gist.github.com https://challenges.cloudflare.com https://turnstile.cloudflare.com https://va.vercel-scripts.com https://*.posthog.com;
+      script-src 'self' 'unsafe-eval' 'wasm-unsafe-eval' 'unsafe-inline' blob: https://gist.github.com https://challenges.cloudflare.com https://turnstile.cloudflare.com;
       style-src 'self' 'unsafe-inline' https://challenges.cloudflare.com;
-      img-src 'self' blob: data: https://github.com https://prasadm.vercel.app https://*.notion.so https://*.amazonaws.com https://i.pravatar.cc https://placehold.co https://images.unsplash.com https://*.unsplash.com https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://avatar.vercel.sh https://*.githubusercontent.com https://*.googleusercontent.com https://challenges.cloudflare.com https://*.posthog.com https://image.tmdb.org https://ghchart.rshah.org/409ba5/prasad-kmd https://pbs.twimg.com https://abs.twimg.com https://unavatar.io https://media.licdn.com;
+      img-src 'self' blob: data: https://github.com https://*.notion.so https://*.amazonaws.com https://i.pravatar.cc https://placehold.co https://images.unsplash.com https://*.unsplash.com https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://avatar.vercel.sh https://*.githubusercontent.com https://*.googleusercontent.com https://challenges.cloudflare.com https://image.tmdb.org https://ghchart.rshah.org/409ba5/prasad-kmd https://pbs.twimg.com https://abs.twimg.com https://unavatar.io https://media.licdn.com;
       font-src 'self' data:;
       media-src 'self' blob: data: https://*.notion.so https://*.amazonaws.com;
-      connect-src 'self' blob: data: https://api.notion.com https://api.telegram.org https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://*.googleusercontent.com https://*.githubusercontent.com https://*.amazonaws.com https://i.pravatar.cc https://placehold.co https://images.unsplash.com https://*.unsplash.com https://challenges.cloudflare.com https://turnstile.cloudflare.com https://vitals.vercel-analytics.com https://api.vercel.com https://*.posthog.com http://localhost:3000 https://localhost:3000 ws://localhost:3000 wss://localhost:3000 https://cheapshark.com https://openlibrary.org https://api.codetabs.com https://export.arxiv.org;
+      connect-src 'self' blob: data: https://api.notion.com https://api.telegram.org https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://*.googleusercontent.com https://*.githubusercontent.com https://*.amazonaws.com https://i.pravatar.cc https://placehold.co https://images.unsplash.com https://*.unsplash.com https://challenges.cloudflare.com https://turnstile.cloudflare.com http://localhost:3000 https://localhost:3000 ws://localhost:3000 wss://localhost:3000 https://cheapshark.com https://openlibrary.org https://api.codetabs.com https://export.arxiv.org;
       frame-src 'self' https://www.youtube.com https://challenges.cloudflare.com https://turnstile.cloudflare.com;
       worker-src 'self' blob: https://challenges.cloudflare.com;
       ${process.env.NODE_ENV === "production" ? "upgrade-insecure-requests;" : ""}

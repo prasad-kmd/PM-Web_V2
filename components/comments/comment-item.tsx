@@ -5,7 +5,21 @@ import { parseComment } from "@/lib/comments/format";
 import type { NotionComment, SocialPlatform } from "@/lib/comments/types";
 import { CommentAvatar } from "./comment-avatar";
 
-/** Renders one decoded Notion comment. */
+/**
+ * Renders one decoded Notion comment.
+ *
+ * The **Owner** badge is driven by `author.role`, decoded from the `PMc2` role
+ * segment. That segment is written by `app/api/comments` from the session and
+ * never from a request body, so a commenter cannot award themselves the badge
+ * through the comment form.
+ *
+ * Worth being precise about what it does *not* prove: anyone able to edit the
+ * comment inside Notion can type the segment by hand, because Notion offers no
+ * author metadata to check it against. The badge therefore means "written
+ * through the owner's signed-in session, or by someone who already has write
+ * access to this Notion workspace" — which, on a site with one workspace member,
+ * is the same person. Documented in `docs/comments-system.md`.
+ */
 
 const PROFILE_BASE: Record<SocialPlatform, string> = {
   github: "https://github.com/",
@@ -85,6 +99,12 @@ export function CommentItem({ comment }: { comment: NotionComment }) {
               {relativeTime(comment.created_time)}
             </time>
           </span>
+
+          {author.role === "owner" ? (
+            <span className="rounded border border-primary/40 bg-primary/10 px-1.5 py-px text-[10px] font-semibold tracking-wide text-primary uppercase">
+              Owner
+            </span>
+          ) : null}
 
           {parsed.isExternal ? (
             <span className="rounded border border-border/70 px-1.5 py-px text-[10px] font-medium uppercase tracking-wide text-muted-foreground">

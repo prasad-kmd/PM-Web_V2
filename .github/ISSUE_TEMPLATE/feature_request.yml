@@ -1,0 +1,71 @@
+name: Feature request
+description: Suggest an improvement, or a page that does not exist yet.
+title: "[feat] "
+labels: ["enhancement", "needs triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before you write: this is a **personal engineering archive** with a single
+        maintainer, built in phases. A good idea can still be one that does not fit
+        the current phase — that is a scheduling answer, not a rejection. The plan is
+        in [`docs/planning/`](../../tree/main/docs/planning).
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: |
+        Describe the problem rather than the solution. A request for "a dark-mode
+        toggle" is really a request for something the reader cannot currently do —
+        saying what that is often reveals a simpler answer.
+      placeholder: |
+        I read long articles on a phone and there is no way to tell how much is left
+        before I reach the end of a section.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you would like to happen
+      description: Your suggested approach, if you have one. Sketches and rough ideas are welcome.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Other ways to solve it, and why you think this one is better.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Where
+      options:
+        - Content pages
+        - Reading experience
+        - Comments
+        - Auth
+        - Admin
+        - Accessibility
+        - Performance
+        - Documentation
+        - Tooling and developer experience
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I have read [CONTRIBUTING.md](../../blob/main/CONTRIBUTING.md) and [`docs/planning/`](../../tree/main/docs/planning).
+          required: true
+        - label: I have searched existing issues and this is not a duplicate.
+          required: true
+        - label: I understand a good idea may be deferred to a later phase rather than rejected.
+          required: true

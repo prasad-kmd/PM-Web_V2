@@ -53,7 +53,7 @@ NOTION_PUBLISHED_STATUS=Published
 
 # Optional:
 NOTION_AUTHORS_ID=your_authors_database_or_data_source_id
-NEXT_PUBLIC_SITE_URL=https://prasadm.vercel.app
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
 `NOTION_AUTH_TOKEN` is accepted instead of `NOTION_API_KEY`. `NOTION_WIKI_ID` is accepted as a compatibility alias for `NOTION_GLOSSARY_ID`. `NOTION_API_VERSION` can override the default. You can provide a database ID copied from its URL or a data source ID; when a database has multiple data sources, use the one containing the intended collection.

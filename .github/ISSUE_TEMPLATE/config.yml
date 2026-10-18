@@ -1,0 +1,20 @@
+# The chooser shown when someone clicks "New issue".
+# Each entry here is a decision that does not belong in the issue tracker.
+blank_issues_enabled: false
+
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/prasad-kmd/PM-Web_V2/security/advisories/new
+    about: Private reporting, described in SECURITY.md. Please do not open a public issue for a security problem.
+
+  - name: Accessibility barrier
+    url: mailto:hello@prasadk.xyz?subject=Accessibility%20barrier
+    about: Tell me the page, your browser and what happened. See ACCESSIBILITY.md.
+
+  - name: Setup help — database, OAuth, Notion
+    url: https://github.com/prasad-kmd/PM-Web_V2/tree/main/docs
+    about: The guides in /docs cover the three setups people get stuck on.
+
+  - name: Why is the project shaped this way?
+    url: https://github.com/prasad-kmd/PM-Web_V2/blob/main/docs/planning/02-implementation-roadmap.md
+    about: The audit and phased plan behind v2.9.0, including what was deliberately not built.

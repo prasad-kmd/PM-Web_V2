@@ -1,0 +1,64 @@
+name: CI
+
+# Next.js 16 no longer lints or typechecks during `next build`, and this repo is
+# not deployed yet — so these three gates are the only automated check a change
+# gets. Keep them green before merging.
+#
+# Runs on every push to a feature branch and on every pull request.
+
+on:
+  push:
+    branches-ignore:
+      # Nothing to verify on docs-only mirror branches; main is covered by PRs.
+      - "gh-pages"
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Lint, typecheck & build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Reads the pinned version from `packageManager` in package.json
+      # (pnpm@11.9.0) — do not pass `version:` here or it can drift.
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+
+      # pnpm 11 requires Node >= 22.13.
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      # The Notion CMS degrades gracefully when no token is present (empty
+      # listings, `missing-config` on detail pages), so the build needs no real
+      # secrets. The values below are placeholders that only satisfy
+      # "variable exists" checks — no database is contacted during `next build`.
+      - name: Build
+        run: pnpm build
+        env:
+          NEXT_PUBLIC_SITE_URL: http://localhost:3000
+          BETTER_AUTH_URL: http://localhost:3000
+          BETTER_AUTH_SECRET: ci-placeholder-secret-not-used-at-build-time
+          DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/postgres

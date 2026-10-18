@@ -32,6 +32,9 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# …but the documented template is committed on purpose: it is the single place
+# that lists every variable the project needs (see docs/env-variables.md).
+!.env.local.example
 
 # vercel
 .vercel

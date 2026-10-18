@@ -5,6 +5,18 @@ import { AnimatePresence, motion, type Transition } from 'motion/react';
 
 import { cn } from '@/lib/utils';
 
+/**
+ * Dynamic polymorphic tag.
+ *
+ * `as` arrives as the generic parameter `T`, which is still unresolved when JSX
+ * is type-checked, and `@react-three/fiber` additionally augments the global JSX
+ * intrinsics used by this project — together those collapse the
+ * `React.ElementType` union to `never`, failing every attribute on the element.
+ * Pinning the tag to an explicit component type with an index-signature prop
+ * record keeps the render checkable. Type-only: the runtime value is unchanged.
+ */
+type DynamicTag = React.ComponentType<Record<string, unknown>>;
+
 type HighlightMode = 'children' | 'parent';
 
 type Bounds = {
@@ -122,7 +134,7 @@ function Highlight<T extends React.ElementType = 'div'>({
   ...props
 }: HighlightProps<T>) {
   const {
-    as: Component = 'div',
+    as,
     children,
     value,
     defaultValue,
@@ -138,6 +150,8 @@ function Highlight<T extends React.ElementType = 'div'>({
     exitDelay = 200,
     mode = 'children',
   } = props;
+
+  const Component = (as ?? 'div') as DynamicTag;
 
   const localRef = React.useRef<HTMLDivElement>(null);
   React.useImperativeHandle(ref, () => localRef.current as HTMLDivElement);
@@ -227,10 +241,17 @@ function Highlight<T extends React.ElementType = 'div'>({
     setBoundsState((prev) => (prev === null ? prev : null));
   }, []);
 
-  React.useEffect(() => {
-    if (value !== undefined) setActiveValue(value);
-    else if (defaultValue !== undefined) setActiveValue(defaultValue);
-  }, [value, defaultValue]);
+  // Keep the uncontrolled state in sync with a later `value` / `defaultValue`
+  // change. Done during render (React's "adjusting state when a prop changes"
+  // pattern) rather than in an effect: an effect would paint a stale highlight
+  // and then re-render, and react-hooks/set-state-in-effect flags it.
+  // See https://react.dev/reference/react/useState#storing-information-from-previous-renders
+  const [syncedFrom, setSyncedFrom] = React.useState(value ?? defaultValue);
+  const incomingValue = value ?? defaultValue;
+  if (incomingValue !== syncedFrom) {
+    setSyncedFrom(incomingValue);
+    if (incomingValue !== undefined) setActiveValue(incomingValue);
+  }
 
   const id = React.useId();
 
@@ -415,7 +436,7 @@ function HighlightItem<T extends React.ElementType>({
     setActiveClassName,
   } = useHighlight();
 
-  const Component = as ?? 'div';
+  const Component = (as ?? 'div') as DynamicTag;
   const element = children as React.ReactElement<ExtendedChildProps>;
   const childValue =
     id ?? value ?? element.props?.['data-value'] ?? element.props?.id ?? itemId;

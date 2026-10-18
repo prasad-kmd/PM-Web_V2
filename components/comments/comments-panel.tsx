@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/sheet";
 import { useCommenterIdentity } from "@/hooks/use-commenter-identity";
 import { useIsMobile } from "@/hooks/use-mobile";
-import type { NotionComment } from "@/lib/comments/types";
+import type { CommentViewer, NotionComment } from "@/lib/comments/types";
 import { CommentForm } from "./comment-form";
 import { CommentList } from "./comment-list";
 
@@ -56,6 +56,8 @@ type CommentsPanelContextValue = {
   /** Comment count, or `null` until the panel has been opened once. */
   count: number | null;
   contentTitle: string;
+  /** Signed-in visitor, or null for a guest. */
+  viewer: CommentViewer | null;
 };
 
 const CommentsPanelContext = createContext<CommentsPanelContextValue | null>(
@@ -76,10 +78,16 @@ export function useCommentsPanel(): CommentsPanelContextValue {
 type BodyProps = {
   pageId: string;
   open: boolean;
+  viewer: CommentViewer | null;
   onCountChange: (count: number) => void;
 };
 
-function CommentsPanelBody({ pageId, open, onCountChange }: BodyProps) {
+function CommentsPanelBody({
+  pageId,
+  open,
+  viewer,
+  onCountChange,
+}: BodyProps) {
   const { identity, hydrate, save } = useCommenterIdentity();
   const [pending, setPending] = useState<NotionComment[]>([]);
   const [fetchedCount, setFetchedCount] = useState(0);
@@ -110,6 +118,7 @@ function CommentsPanelBody({ pageId, open, onCountChange }: BodyProps) {
     <div className="grid gap-6">
       <CommentForm
         pageId={pageId}
+        viewer={viewer}
         identity={identity}
         onIdentitySave={save}
         onPosted={handlePosted}
@@ -138,6 +147,11 @@ type CommentsProviderProps = {
   pageId: string;
   /** Human-readable title used in the overlay header. */
   contentTitle: string;
+  /**
+   * The signed-in visitor, resolved on the server. `null` for a guest, which is
+   * the path every visitor took before v2.9.0.
+   */
+  viewer: CommentViewer | null;
   children: ReactNode;
 };
 
@@ -149,6 +163,7 @@ type CommentsProviderProps = {
 export function CommentsProvider({
   pageId,
   contentTitle,
+  viewer,
   children,
 }: CommentsProviderProps) {
   const isMobile = useIsMobile();
@@ -158,12 +173,17 @@ export function CommentsProvider({
   const openPanel = useCallback(() => setOpen(true), []);
 
   const value = useMemo<CommentsPanelContextValue>(
-    () => ({ open, setOpen, openPanel, count, contentTitle }),
-    [open, openPanel, count, contentTitle],
+    () => ({ open, setOpen, openPanel, count, contentTitle, viewer }),
+    [open, openPanel, count, contentTitle, viewer],
   );
 
   const body = (
-    <CommentsPanelBody pageId={pageId} open={open} onCountChange={setCount} />
+    <CommentsPanelBody
+      pageId={pageId}
+      open={open}
+      viewer={viewer}
+      onCountChange={setCount}
+    />
   );
 
   return (
@@ -263,15 +283,28 @@ export function CommentsInlineCta() {
 type CommentsPanelProps = {
   pageId: string;
   contentTitle: string;
+  viewer: CommentViewer | null;
 };
 
 /**
  * Self-contained variant: provider + the inline call to action.
  * Use this when nothing else on the page needs to open the panel.
+ *
+ * `viewer` is required here for the same reason it is on the provider: a caller
+ * that forgets it would produce a panel where the site owner is silently
+ * treated as a guest, and silence is exactly what makes that bug survive.
  */
-export function CommentsPanel({ pageId, contentTitle }: CommentsPanelProps) {
+export function CommentsPanel({
+  pageId,
+  contentTitle,
+  viewer,
+}: CommentsPanelProps) {
   return (
-    <CommentsProvider pageId={pageId} contentTitle={contentTitle}>
+    <CommentsProvider
+      pageId={pageId}
+      contentTitle={contentTitle}
+      viewer={viewer}
+    >
       <CommentsInlineCta />
     </CommentsProvider>
   );
